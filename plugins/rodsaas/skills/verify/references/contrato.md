@@ -125,5 +125,6 @@ Quando `rodsaas.json → presets` tem um preset listado em `contract.json → pr
 |---|---|---|
 | `crm` | `skills/crm/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `skills/crm/references/03-api.md` e `06-captura-e-importacao.md` | `suite/tests/09-crm.spec.ts` |
 | `forms` | `skills/forms/references/04-construtor.md` (seção "Contrato testável"), `05-formulario-publico.md` (acessibilidade e testids do público) e os formatos ★ de `03-api.md` | `suite/tests/11-forms.spec.ts` |
+| `agenda` | `skills/agenda/references/05-app-interno.md` (seção "Contrato testável"), `04-pagina-publica.md` (rótulos e testids da página pública) e os formatos ★ de `03-api.md` | `suite/tests/12-agenda.spec.ts` |
 
 Rotas dinâmicas do contrato (`/crm/negocios/[id]`) aceitam qualquer nome de parâmetro na pasta (`[dealId]`).

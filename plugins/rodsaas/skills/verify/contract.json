@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -577,6 +577,183 @@
           "path": "/v1/public/forms/{slug}/responses",
           "body": [
             "answers"
+          ]
+        }
+      ]
+    },
+    "agenda": {
+      "when": "rodsaas.json → presets inclui \"agenda\"",
+      "routes": [
+        "/agenda",
+        "/agenda/agendamentos",
+        "/agenda/tipos",
+        "/agenda/tipos/[id]",
+        "/agenda/disponibilidade",
+        "/agenda/clientes",
+        "/agenda/clientes/[id]",
+        "/agenda/relatorios",
+        "/agenda/compartilhar",
+        "/agenda/configuracoes",
+        "/agendar/[pagina]",
+        "/agendar/[pagina]/[tipo]",
+        "/agendar/[pagina]/p/[pessoa]",
+        "/agendamento/[token]"
+      ],
+      "testids": [
+        "agenda-calendar",
+        "agenda-event",
+        "agenda-appointment-panel",
+        "agenda-confirm",
+        "agenda-decline",
+        "agenda-cancel",
+        "agenda-mark-attended",
+        "agenda-mark-noshow",
+        "agenda-appointment-row",
+        "agenda-type-new",
+        "agenda-type-row",
+        "agenda-type-link",
+        "agenda-schedule-day",
+        "agenda-public-page",
+        "agenda-public-type",
+        "agenda-public-host",
+        "agenda-public-calendar",
+        "agenda-public-day",
+        "agenda-public-slot",
+        "agenda-public-form",
+        "agenda-public-confirm",
+        "agenda-public-confirmed",
+        "agenda-public-unavailable",
+        "agenda-manage",
+        "agenda-manage-reschedule",
+        "agenda-manage-cancel",
+        "agenda-manage-cancel-confirm",
+        "agenda-manage-canceled"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/agenda/settings"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/schedules"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/schedules/{id}",
+          "body": [
+            "timeZone",
+            "weekly"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/event-types"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/event-types",
+          "body": [
+            "name",
+            "durations",
+            "slotIntervalMin",
+            "minNoticeMin",
+            "maxDaysAhead",
+            "requiresApproval",
+            "active"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/event-types/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/event-types/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/appointments"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments",
+          "body": [
+            "eventTypeId",
+            "start",
+            "client"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/appointments/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/appointments/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/confirm"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/decline"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/cancel"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/attendance",
+          "body": [
+            "attendance"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/agenda/{page}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/agenda/{page}/types/{type}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/agenda/{page}/types/{type}/slots"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/{page}/types/{type}/holds",
+          "body": [
+            "start"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/{page}/types/{type}/bookings",
+          "body": [
+            "start",
+            "holdId",
+            "name",
+            "email",
+            "timeZone"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/agenda/manage/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/manage/{token}/cancel"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/manage/{token}/reschedule",
+          "body": [
+            "start"
           ]
         }
       ]

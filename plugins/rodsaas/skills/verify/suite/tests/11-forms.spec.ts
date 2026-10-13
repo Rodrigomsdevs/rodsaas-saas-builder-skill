@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext, type APIResponse } from "@playwright/test";
+import { test, expect, type APIRequestContext, type APIResponse, type Page } from "@playwright/test";
 import { billingMode, call, items, me, newUser, ok, plansFromApi, register, uniq } from "../support/api";
 import { cfg } from "../support/config.mjs";
 import { newContext, ownerWithMember, signUp } from "../support/ui";
@@ -76,6 +76,8 @@ async function anon(playwright: any) {
   return { ctx, get, submit };
 }
 const labels = async (res: APIResponse) => ((await res.json()).schema?.fields ?? []).map((f: any) => f.label);
+/** Envio feito rápido demais é tratado como robô (`_ts`); a tela espera o mesmo que uma pessoa levaria. */
+const humanPause = (page: Page) => page.waitForTimeout(2_500);
 const responsesOf = async (req: APIRequestContext, id: string) => items<any>(await ok(await call(req, "GET", `/v1/forms/${id}/responses`), "respostas"));
 
 test.describe("Forms", () => {
@@ -242,6 +244,7 @@ test.describe("Forms", () => {
     const name = `Davi ${uniq()}`;
     await pub.getByLabel("Seu nome").fill(name);
     await pub.getByLabel("Seu e-mail").fill(`davi.${uniq()}@example.com`);
+    await humanPause(pub);
     await pub.getByTestId("public-form-submit").click();
     await expect(pub.getByTestId("public-form-thanks"), "tela de agradecimento").toBeVisible();
     await visitor.close();
@@ -263,6 +266,7 @@ test.describe("Forms", () => {
     await pub.getByLabel("Seu nome").press("Enter");
     await expect(pub.getByLabel("Seu e-mail"), "Enter avança").toBeVisible();
     await pub.getByLabel("Seu e-mail").fill(`eva.${uniq()}@example.com`);
+    await humanPause(pub);
     await pub.getByTestId("public-form-submit").click();
     await expect(pub.getByTestId("public-form-thanks")).toBeVisible();
     await visitor.close();

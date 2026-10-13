@@ -144,3 +144,23 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | uma pergunta por vez | Enter não avança; mostra todas as perguntas |
 | lógica ao vivo | condição calculada só no envio; opções sem `<input type="radio">` acessível |
 | encerrado | tela branca ou formulário aberto em formulário encerrado |
+
+## Agenda (`12-agenda.spec.ts`, preset `agenda`)
+
+| Teste | Causas comuns |
+|---|---|
+| horários dentro da disponibilidade | motor próprio em vez do `computeSlots` do `agenda-lib`; fuso da agenda ignorado (horários 3 h deslocados); `days` agrupado em UTC e não no `timeZone` pedido; `PATCH /schedules` sem gravar `weekly`/`timeZone` |
+| sem login e sem Origin | checagem de Origin/CSRF da base aplicada às rotas `/v1/public/agenda/*`; página pública exigindo cookie |
+| nunca marcar duas vezes | sem a restrição `EXCLUDE` (ou sem `btree_gist`); checar e gravar fora da mesma transação; `23P01` virando 500 em vez de 409 `SLOT_TAKEN`; horário ocupado continuando na página (busy sem os agendamentos) |
+| reserva temporária | reserva não entra no `busy` do motor; reserva sem validade; quem reservou também barrado (o próprio `holdId` não é descontado) |
+| remarcar e cancelar pelo link | token comparado em texto puro ou sem `AgendaTokenLookup`; cancelar sem tirar o `active` do `AppointmentHost` (horário continua preso); remarcar gerando token novo; cancelar duas vezes sem `CHANGE_NOT_ALLOWED` |
+| antecedência e janela | regras só no front (a API aceita qualquer horário); `isSlotAvailable` não chamado no agendar |
+| aprovação manual | pendente fora do `busy` (dois pedidos no mesmo horário); recusar sem liberar; link de videochamada enviado antes de aprovar; `requiresApproval` sem a feature `agenda_team` no plano |
+| campo isca | isca ignorada ou respondendo erro (o robô aprende) |
+| tipo desligado | tipo inativo respondendo 200 ou 404 em vez de 410 `AGENDA_UNAVAILABLE`; tipo inativo ainda listado na página |
+| outra empresa | consulta sem `withTenant`/RLS; 403 em vez de 404; página pública devolvendo e-mail da equipe ou dados de clientes |
+| página pública | dias sem horário clicáveis; `data-start` ausente; `<label>` sem ligação com o campo ou com outro texto (use **Nome**, **E-mail**, **WhatsApp**); envio rápido demais tratado como robô mesmo depois de 2 s (`_ts` medido errado) |
+| calendário e painel | `?data=` ignorado (abre na semana atual); evento sem `data-appointment-id`; painel sem o nome do cliente |
+| aprovar e cancelar pelo painel | botão só muda a tela sem chamar a API; cancelar sem `confirm-dialog` |
+| cliente cancela pelo link | falta o passo de confirmação `agenda-manage-cancel-confirm`; tela de cancelado aparece mesmo com erro da API |
+| criar tipo pela tela | `FormSheet` sem `field-name`/`form-submit`; tipo criado sem a pessoa que criou como quem atende; cartão sem o link público |
