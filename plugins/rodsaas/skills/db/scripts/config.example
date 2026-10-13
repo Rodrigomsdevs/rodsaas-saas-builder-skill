@@ -1,0 +1,41 @@
+# Configuração do provision.sh — copie para um arquivo temporário (mktemp, chmod 600).
+# Este arquivo contém senhas: apague logo depois de rodar o script.
+
+# Como o script vira administrador do PostgreSQL:
+#   sudo   → PostgreSQL instalado nesta máquina Linux (usa o usuário de sistema `postgres`)
+#   docker → serviço do docker compose do projeto
+#   url    → servidor existente/remoto, com um usuário admin (ADMIN_*)
+ADMIN_MODE=sudo
+
+# Projeto
+DB_NAME=meusaas
+OWNER_USER=meusaas_owner        # dono das tabelas, roda as migrations
+OWNER_PASSWORD=                 # vazio = gerar uma senha forte (recomendado)
+APP_USER=meusaas_app            # usado pela aplicação, sem privilégios
+APP_PASSWORD=                   # vazio = gerar uma senha forte (recomendado)
+
+# Dev x produção
+OWNER_CREATEDB=true             # true em dev (shadow database do prisma migrate dev); false em produção
+CREATE_TEST_DB=true             # cria também meusaas_test; false em produção
+# TEST_DB_NAME=meusaas_test
+
+# Como a APLICAÇÃO conecta (vai para as URLs do .env)
+DB_HOST=localhost
+DB_PORT=5432
+# DB_SSLMODE=require            # servidor remoto
+
+# Onde gravar as URLs (relativo ao diretório atual)
+ENV_FILE=api/.env
+ENV_TEST_FILE=api/.env.test
+
+# Modo docker
+# DOCKER_COMPOSE_FILE=api/docker-compose.yml
+# DOCKER_SERVICE=postgres
+# DOCKER_SUPERUSER=postgres
+
+# Modo url (servidor existente)
+# ADMIN_HOST=db.exemplo.com
+# ADMIN_PORT=5432
+# ADMIN_USER=postgres
+# ADMIN_PASSWORD=
+# ADMIN_SSLMODE=require

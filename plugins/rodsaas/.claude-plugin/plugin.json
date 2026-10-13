@@ -1,0 +1,17 @@
+{
+  "name": "rodsaas",
+  "version": "0.1.0",
+  "description": "Kit para iniciar SaaS B2B multi-tenant: provisionamento de Postgres, backend Fastify + Prisma + Stripe; frontend Next.js em breve.",
+  "author": {
+    "name": "Rodrigo"
+  },
+  "keywords": [
+    "saas",
+    "multi-tenant",
+    "fastify",
+    "prisma",
+    "postgres",
+    "stripe",
+    "nextjs"
+  ]
+}

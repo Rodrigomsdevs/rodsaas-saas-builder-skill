@@ -1,0 +1,14 @@
+{
+  "name": "rodsaas",
+  "description": "Plugins do Rodrigo para criar SaaS B2B multi-tenant no padrão rodsaas",
+  "owner": {
+    "name": "Rodrigo"
+  },
+  "plugins": [
+    {
+      "name": "rodsaas",
+      "source": "./plugins/rodsaas",
+      "description": "Backend Fastify + Prisma + Postgres + Stripe e provisionamento de banco; frontend Next.js em breve"
+    }
+  ]
+}
