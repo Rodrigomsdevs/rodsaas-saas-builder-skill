@@ -11,7 +11,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white" alt="Claude Code plugin" />
-  <img src="https://img.shields.io/badge/versão-0.5-7C3AED?style=for-the-badge" alt="versão 0.5" />
+  <img src="https://img.shields.io/badge/versão-0.6-7C3AED?style=for-the-badge" alt="versão 0.6" />
   <img src="https://img.shields.io/badge/status-rascunho-F59E0B?style=for-the-badge" alt="status rascunho" />
 </p>
 
@@ -64,12 +64,14 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 2️⃣ | **`/rodsaas:frontend`** | Cria o painel na pasta `web/`, com a sua cor, logo e estilo |
 | 3️⃣ | **`/rodsaas:domain`** | Coloca no ar no seu domínio, com nginx e HTTPS |
 | 🧩 | **`/rodsaas:module`** | Cria (ou altera) uma funcionalidade nova na API e no painel: *"cria um cadastro de clientes com nome, CPF, telefone e endereço"* |
+| ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
+| 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` já instala sozinho |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
 | 🗄️ | **`/rodsaas:db`** | Cria o banco e os usuários do Postgres (o backend já chama; use sozinho para o banco de produção) |
 
 > [!TIP]
 > Não precisa decorar nada. Pedir em português também funciona:
-> *"quero começar um SaaS com login e planos"*, *"cria o painel com a cor do meu logo"*, *"cria um módulo de agendamentos ligado a clientes"*, *"coloca no ar em app.meusaas.com.br"*.
+> *"quero começar um SaaS com login e planos"*, *"cria o painel com a cor do meu logo"*, *"cria um módulo de agendamentos ligado a clientes"*, *"adiciona gestão de tarefas com sprints"*, *"coloca no ar em app.meusaas.com.br"*.
 
 ### 🚀 Do zero ao ar
 
@@ -79,7 +81,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   (/rodsaas:notion)   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   (/rodsaas:notion · /rodsaas:tarefas)   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -101,6 +103,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
 | 🧪 | **Testado** | Testes automáticos de login, permissões, cobrança e isolamento entre clientes |
+| ✅ | **Gestor de tarefas** *(opcional)* | Projetos com código (MKT-123), quadro, lista, calendário, sprints com burndown, subtarefas, comentários com menções, anexos, cronômetro de horas e adição rápida (*"Revisar contrato @ana !alta amanhã"*) |
 | 📝 | **Réplica do Notion** *(opcional)* | Páginas aninhadas, editor com "/", autosave, favoritos, lixeira, busca, databases em tabela e quadro e página pública |
 | 🧩 | **Módulos em minutos** | Descreva o cadastro em português e o `/rodsaas:module` cria API, telas, filtros, quadro, permissões e testes — com campos brasileiros (CPF, CNPJ, CEP, telefone, R$) |
 
@@ -151,6 +154,8 @@ plugins/rodsaas/skills/
 ├── frontend/   SKILL.md + references/ + scripts/brand.mjs
 ├── module/     SKILL.md + references/ + scripts/validate-spec.mjs
 ├── notion/     SKILL.md + references/       → preset réplica do Notion
+├── tarefas/    SKILL.md + references/ + scripts/parsers.mjs (+ testes)
+├── uploads/    SKILL.md + references/       → add-on de arquivos
 └── domain/     SKILL.md + scripts/          → domain.sh + template do nginx
 ```
 
