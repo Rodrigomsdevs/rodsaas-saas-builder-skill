@@ -11,6 +11,8 @@ Os dois tokens vão em **cookies httpOnly**, nunca no body para o front guardar.
 
 Atributos dos cookies: `httpOnly`, `secure` (em produção), `sameSite: 'lax'`, `domain` do env, cookies assinados com `COOKIE_SECRET`. Em dev (`localhost`), **não** defina `domain`: o cookie fica no host `localhost` e vale para as portas 3000 e 3333 (cookie não separa por porta), enquanto `domain=localhost` tem comportamento inconsistente entre navegadores.
 
+**Validade do cookie ≠ validade do token.** O JWT vence em 15 min, mas o cookie `access_token` deve ter `Max-Age` igual ao do refresh (30 dias). Se o cookie sumisse junto com o token, a API receberia uma request **sem** token e responderia `UNAUTHORIZED` em vez de `TOKEN_EXPIRED`, e o front nunca tentaria renovar (o usuário seria jogado para o login a cada 15 min). Com o cookie durando mais, a API vê o JWT vencido e responde `TOKEN_EXPIRED`, que dispara o refresh.
+
 ### `session_hint` (para o front)
 
 Além dos dois tokens, grave um terceiro cookie **sem segredo nenhum**: `session_hint=1`, **não** httpOnly, path `/`, mesmo domínio e mesma validade do refresh. Grave em login, cadastro e refresh; apague em logout, logout-all e quando o refresh falhar. O guard de rota do Next usa a presença dele só para decidir redirecionamentos rápidos (o servidor do Next não consegue validar o access token). Ele não autoriza nada: quem autoriza é a API.
@@ -73,11 +75,21 @@ model VerificationToken {
 | `POST /v1/auth/forgot-password` | sim | **sempre 204**, existindo ou não o e-mail |
 | `POST /v1/auth/reset-password` | sim | consome `PASSWORD_RESET`, troca a senha e **revoga todos os refresh** |
 | `POST /v1/auth/switch-organization` | não | valida membership e emite novo access token |
-| `GET /v1/me` | não · `tenant: false` | usuário (com `emailVerified`) + organização ativa + papel + lista de organizações (com o papel em cada) + **plano efetivo da organização ativa** (`plan`, `features`, `limits`, `usage`, `status`, `paymentIssue`). Todo membro precisa disso para a interface saber o que mostrar; só owner/admin acessam os detalhes de cobrança em `/v1/billing/subscription` |
+| `GET /v1/me` | não · `tenant: false` | usuário (com `emailVerified`) + organização ativa + papel + lista de organizações (com o papel em cada) + **plano efetivo da organização ativa** (`plan`, `features`, `limits`, `usage`, `status`, `paymentIssue`). Todo membro precisa disso para a interface saber o que mostrar; só owner/admin acessam os detalhes de cobrança em `/v1/billing/subscription`. **A organização ativa e o papel vêm do banco, não do token**: se a membership da organização do token não existe mais (pessoa removida), `organization` volta `null` e o front leva para `/sem-empresa` na hora, sem esperar os 15 min do token |
 | `PATCH /v1/users/me` | não · `tenant: false` | atualiza nome (e-mail não muda na v1) |
 | `POST /v1/users/me/password` | não · `tenant: false` | `{ currentPassword, newPassword }`; confere a atual; revoga os **outros** refresh do usuário (mantém a sessão atual) |
 
 Organização ativa no login: a última usada (`User.lastOrganizationId`) se ainda for membro; senão a primeira membership; senão `null`.
+
+### Formatos fixos (contrato do `/rodsaas:verify`)
+
+Os nomes de campos abaixo são fixos, porque a bateria de testes do `/rodsaas:verify` (e o front) dependem deles. A tabela completa está em `skills/verify/references/contrato.md`.
+
+- `POST /v1/auth/register`: `{ name, email, password, organizationName }`, ou `{ name, email, password, invitationToken }` — com convite, `organizationName` não é exigido e **nenhuma** empresa nova é criada: a pessoa entra só na empresa do convite.
+- `POST /v1/auth/login`: `{ email, password }` · `POST /v1/auth/switch-organization`: `{ organizationId }` · `POST /v1/organizations`: `{ name }` (a nova vira a ativa e um access token novo é emitido).
+- `GET /v1/me`: `{ user: { id, name, email, emailVerified }, organization: { id, name, role } | null, organizations: [{ id, name, role }], plan: { id, name, limits, features, usage } }`.
+- `GET /v1/members`: `{ data: [{ id, role, user: { id, name, email } }], meta }` · `PATCH /v1/members/:id`: `{ role }` · `POST /v1/invitations`: `{ email, role }`.
+- `GET /v1/billing/plans`: `[{ id, name, limits, features }]` (limite ilimitado = `null`).
 
 ## Rotação do refresh (o coração da segurança)
 

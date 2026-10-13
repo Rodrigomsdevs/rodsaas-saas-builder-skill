@@ -37,7 +37,7 @@ return <ProjectsTable data={query.data} isFetching={query.isFetching} />
 
 ## Ações e botões
 
-- **`LoadingButton`** em toda ação assíncrona: mostra spinner, fica desabilitado e **mantém a largura** (o texto troca para "Salvando…", "Excluindo…" sem o botão pular). Usa `mutation.isPending`.
+- **`LoadingButton`** em toda ação assíncrona: mostra spinner, fica `disabled` com `aria-busy="true"` e **mantém a largura** (o texto troca para "Salvando…", "Excluindo…" sem o botão pular). Usa `mutation.isPending`. (Os testes do `/rodsaas:verify` conferem `disabled` e que o clique duplo não manda duas requests.)
 - Desabilitado durante o envio = sem clique duplo. Em criação, a `Idempotency-Key` cobre o caso de rede lenta.
 - **Toast de sucesso** curto e específico: "Projeto criado", "Convite enviado para ana@…". Nada de "Operação realizada com sucesso".
 - **Toast de erro** com a mensagem do `ApiError`. Erro de validação vai **nos campos**, não em toast (ver formulários).

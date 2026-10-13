@@ -44,11 +44,16 @@ function refreshSession(): Promise<boolean> {
   return refreshing
 }
 
-async function isTokenExpired(res: Response) {
+const hasSessionHint = () => typeof document !== 'undefined' && /(?:^|;\s*)session_hint=/.test(document.cookie)
+
+// Renova quando o token venceu (TOKEN_EXPIRED) OU quando o access token sumiu
+// (UNAUTHORIZED) mas ainda existe sessão (cookie session_hint). O segundo caso
+// acontece se o cookie do access token expirar antes do refresh, ou for apagado.
+async function shouldRefresh(res: Response) {
   if (res.status !== 401) return false
   try {
-    const body = await res.clone().json()
-    return body?.code === 'TOKEN_EXPIRED'
+    const code = (await res.clone().json())?.code
+    return code === 'TOKEN_EXPIRED' || (code === 'UNAUTHORIZED' && hasSessionHint())
   } catch {
     return false
   }
@@ -60,7 +65,7 @@ async function fetchWithRefresh(request: Request): Promise<Response> {
   const retry = request.clone() // o body só pode ser lido uma vez
   const res = await fetch(request)
   const path = new URL(request.url).pathname
-  if (NO_REFRESH.includes(path) || !(await isTokenExpired(res))) return res
+  if (NO_REFRESH.includes(path) || !(await shouldRefresh(res))) return res
 
   if (await refreshSession()) return fetch(retry)
 
@@ -220,7 +225,7 @@ A validação real é a API: se o cookie mentir, a primeira request devolve 401 
 ### Layout `(app)`
 
 - Enquanto `useSession` carrega: skeleton da casca (não tela branca).
-- Sem empresa ativa → `/sem-empresa`.
+- Sem empresa ativa (`me.organization === null`, inclusive quando a pessoa acabou de ser removida) → `/sem-empresa`.
 - E-mail não verificado ou `paymentIssue` → banners (ver estados).
 
 ### Trocar de empresa

@@ -95,8 +95,8 @@ Audit log, pg-boss (envio de e-mail, limpeza de tokens expirados), provider de e
 Um CRUD completo (`projects`) usando todos os padrões: tenant, RLS, paginação, erros, guard de limite de plano, OpenAPI, audit, testes. Ele é o **molde** que a skill de módulos copia, então capriche e mantenha simples.
 → Leia `references/08-modulos.md`.
 
-### Fase 8 — Fechamento
-Rode a checklist de `references/09-testes-e-checklist.md` item por item, gere `openapi.json` (script `openapi:export`, usado depois pelo front para gerar o client tipado) e escreva o README do projeto.
+### Fase 8 — Fechamento e verificação
+Rode a checklist de `references/09-testes-e-checklist.md` item por item, gere `openapi.json` (script `openapi:export`, usado depois pelo front para gerar o client tipado) e escreva o README do projeto. Depois, com a API e o Mailpit rodando, rode a parte de API do **`/rodsaas:verify`** (`--project=api`): ela confere o contrato (formatos de erro, CSRF, cookies, sessão, troca de empresa, isolamento, reuso de refresh). Os formatos de entrada e saída que ela usa são fixos — veja "Formatos fixos" em `references/04-auth.md`. Só termine com ela verde.
 
 ## Princípios que guiam as decisões
 

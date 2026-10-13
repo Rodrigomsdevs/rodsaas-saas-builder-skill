@@ -2,6 +2,9 @@
 
 Confira item por item antes do relatório. Para os itens de interface, **abra a tela** (com a API rodando) — não marque pelo código.
 
+## Verificação automática (obrigatória)
+- [ ] `/rodsaas:verify`: auditoria do contrato sem pendências e bateria completa verde (relatório em `rodsaas-verify-report/`)
+
 ## Build e qualidade
 - [ ] `npm run typecheck`, `npm run lint`, `npm run build` sem erros nem warnings novos
 - [ ] `npm test` verde (máscaras CPF/CNPJ/telefone/CEP, `applyApiErrors`, `messageFor`, formatadores)

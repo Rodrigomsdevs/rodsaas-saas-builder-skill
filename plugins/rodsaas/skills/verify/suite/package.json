@@ -1,0 +1,16 @@
+{
+  "name": "rodsaas-verify",
+  "private": true,
+  "type": "module",
+  "description": "Bateria de testes ponta a ponta para projetos rodsaas (copiada para um cache pelo run.sh; não entra no projeto)",
+  "scripts": {
+    "test": "playwright test",
+    "list": "playwright test --list",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "typescript": "latest"
+  }
+}

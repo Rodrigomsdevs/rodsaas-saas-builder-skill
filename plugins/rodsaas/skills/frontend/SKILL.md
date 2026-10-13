@@ -75,8 +75,12 @@ Home com dados reais (primeiros passos, uso do plano, atividade recente), config
 Telas do `projects` (lista, detalhe, criar/editar em drawer, excluir com confirmação, limite de plano → upgrade). É o **molde** que a skill de módulos vai copiar: simples, completo, sem atalhos.
 → `references/09-telas.md`, `references/07-tabelas.md`
 
-### Fase 8 — Fechamento
-Checklist de `references/10-checklist.md` item a item, testes Playwright dos fluxos principais contra a API real, README do `web/`.
+### Fase 8 — Fechamento e verificação
+Checklist de `references/10-checklist.md` item a item, README do `web/`, e então **a verificação obrigatória**: com API, front e Mailpit rodando, siga a skill **`/rodsaas:verify`** (leia o `SKILL.md` dela). Ela audita o contrato e roda a bateria de testes no navegador (cadastro, login, sessão, criar e trocar de empresa, convites, papéis, estados, plano, celular). **O frontend só está pronto com a bateria 100% verde**; falhou, corrija o projeto e rode de novo.
+
+## Contrato testável (desde a Fase 4)
+
+Todo elemento-chave recebe o `data-testid` definido em `skills/verify/references/contrato.md` (lista em `skills/verify/contract.json`): campos e botões de login/cadastro/convite, casca (`app-shell`, `org-switcher`, `org-switcher-current`, `user-menu`…), estados (`page-not-found`, `error-state`, `empty-state`, `skeleton`…), membros, plano e o módulo de exemplo. As rotas e os formatos da API do contrato também são fixos. Coloque os testids **ao criar** cada componente, não no fim. `LoadingButton` fica `disabled` + `aria-busy="true"` durante a ação; `ErrorState` mostra o `requestId` em `error-request-id`.
 
 ## Princípios
 
@@ -106,3 +110,4 @@ Mensagem curta com: como subir (`npm run dev` no `web/` com a API rodando), URL 
 | `references/08-overlays.md` | Fase 4 — dialog, drawer, confirmação, upgrade |
 | `references/09-telas.md` | Fases 5 a 7 — o que cada tela tem |
 | `references/10-checklist.md` | Fase 8 |
+| `skills/verify/references/contrato.md` | desde a Fase 4 — data-testid, rotas e formatos fixos |
