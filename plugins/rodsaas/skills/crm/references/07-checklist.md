@@ -20,6 +20,10 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER e uma se
 - [ ] quadro: arrastar entre etapas e na etapa, totais das colunas e do funil corretos, áreas Ganho/Perdido/Excluir, teclado, "Mover para…" no celular
 - [ ] selo da próxima atividade (atrasada, hoje, futura, sem) e "parado há X dias"
 - [ ] negócio: barra de etapas, ganhar (comemoração + desfazer), perder com motivo obrigatório, reabrir
+- [ ] **+ Negócio** com pessoa e empresa (busca e "Criar «texto»"); pessoa com empresa principal preenche a empresa
+- [ ] página do negócio com as quatro partes do `04-telas.md`: cabeçalho (valor, responsável, ganhar/perder) · barra de etapas · coluna de detalhes (**Resumo, Pessoa com Ligar/WhatsApp, Empresa, Produtos, campos, lead de origem**) · compositor, planejado e histórico
+- [ ] vincular, trocar e remover pessoa e empresa no negócio; o card do quadro mostra empresa ou pessoa
+- [ ] contato e empresa com a aba Negócios e "+ Negócio" já preenchido
 - [ ] produtos no negócio: soma vira o valor, desconto, voltar para manual (Pro)
 - [ ] lista com filtros, colunas, massa com desfazer; filtros na URL
 - [ ] vários funis (Pro), excluir etapa/funil com destino, não deixa ficar sem funil/etapa
@@ -52,3 +56,4 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER e uma se
 - [ ] claro/escuro, 360 px de largura, navegação por teclado
 - [ ] `/rodsaas:verify` verde, incluindo a parte do CRM (`-g "CRM"` roda só ela)
 - [ ] README do projeto atualizado (o que o CRM faz, decisões de visibilidade e da tabela sem RLS da captura, fora da v1)
+- [ ] **conferência final**: tabela item a item de `04-telas.md` (cada tela e cada marcador) com ✅/❌; nenhum ❌ sem pendência registrada no relatório

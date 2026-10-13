@@ -30,6 +30,7 @@ Filtros, ordenação, aba e visão ficam na URL (nuqs); voltar do navegador func
 - Uma coluna por etapa (`crm-stage-column` com `data-stage-id`), na ordem: nome, probabilidade discreta (50%), quantidade e **total em R$** (`crm-stage-total`) e o ponderado no tooltip.
 - Card (`crm-deal-card` com `data-deal-id`): título (2 linhas), empresa ou contato, valor, avatar do responsável, etiquetas (até 2), até 2 campos personalizados marcados "mostrar no card", previsão (vermelha se vencida) e o **selo da próxima atividade** (`crm-next-activity` com `data-state="overdue|today|future|none"`): ícone do tipo + "Hoje 14:00" / "Atrasada há 2 dias" / ⚠ "Sem atividade agendada". Parado: borda/fundo de alerta e "Parado há 12 dias".
 - Clique abre o negócio; o ícone de relógio no card abre direto o "Agendar atividade".
+- **+ Negócio** (`crm-deal-new`) abre o `FormSheet` com: **título** (`field-title`, obrigatório), **valor** (`field-value`, máscara R$), **pessoa** (`field-contact`) e **empresa** (`field-company`) — ambos `RelationSelect` com busca e "Criar «texto»" —, funil e etapa (padrão: o funil aberto e a primeira etapa), responsável (padrão: quem cria), previsão de fechamento, origem e etiquetas. Escolher uma pessoa que tem empresa principal preenche a empresa; escolher uma empresa sugere os contatos dela. O título sugere "Negócio com {empresa ou pessoa}" quando vazio.
 - Arrastar entre colunas muda a etapa; dentro da coluna, a ordem. Ao arrastar aparecem, no rodapé fixo, as áreas **Ganho** · **Perdido** · **Excluir** (soltar em Perdido abre o diálogo do motivo; em Excluir, confirmação).
 - "+ Adicionar" no fim de cada coluna: adição rápida com título e valor (Enter cria e mantém aberto).
 - Colunas com muitas cartas: 50 por vez, "Carregar mais" no fim da coluna.
@@ -40,15 +41,15 @@ Tabela com colunas configuráveis (título, valor, etapa, status, empresa, conta
 
 ## Negócio (`/crm/negocios/[id]`)
 
-1. **Cabeçalho**: título editável no lugar (`crm-deal-title`), valor (clique edita; com produtos mostra "soma dos produtos"), responsável, selo de status (`crm-deal-status` com `data-status="OPEN|WON|LOST"`), botões **Ganho** (`crm-deal-won`) e **Perdido** (`crm-deal-lost`) em verde/vermelho; fechado mostra "Ganho em 12/10" ou "Perdido: Preço" + **Reabrir** (`crm-deal-reopen`). ⋯: duplicar, mudar de funil, copiar link, excluir.
+1. **Cabeçalho**: título editável no lugar (`crm-deal-title`), valor (`crm-deal-value`, formatado em R$; clique edita; com produtos mostra "soma dos produtos" e não edita), responsável, selo de status (`crm-deal-status` com `data-status="OPEN|WON|LOST"`), botões **Ganho** (`crm-deal-won`) e **Perdido** (`crm-deal-lost`) em verde/vermelho; fechado mostra "Ganho em 12/10" ou "Perdido: Preço" + **Reabrir** (`crm-deal-reopen`). ⋯: duplicar, mudar de funil, copiar link, excluir.
 2. **Barra de etapas**: uma etapa após a outra (`crm-stage-step` com `data-stage-id` e `aria-current="step"` na atual), as anteriores preenchidas; clicar numa etapa move para ela (otimista); tooltip com "3 dias nesta etapa" e o histórico de passagem.
 3. **Coluna de detalhes** (esquerda; no celular, acima):
    - **Resumo**: valor, probabilidade (da etapa ou própria, editável), ponderado, previsão de fechamento, origem, etiquetas, criado por/em.
-   - **Pessoa**: contato com cargo, telefone (botões **Ligar** `tel:` e **WhatsApp** `wa.me`), e-mail (`mailto:`); trocar/remover; "+ Vincular contato" (busca com criar novo).
-   - **Empresa**: nome, CNPJ, cidade/UF; trocar/remover.
-   - **Produtos** (feature Pro): tabela de itens (produto/descrição, qtd, preço, desconto %, total), "+ Adicionar produto" (busca no catálogo ou item avulso), subtotal, descontos e total; aviso "O valor do negócio é a soma dos produtos" com opção de voltar para valor manual. Sem a feature: `PlanGate` compacto.
+   - **Pessoa** (`crm-deal-contact`, com `data-contact-id` quando há contato): nome (link para o contato), cargo, telefone com **Ligar** (`crm-deal-call`, `tel:`) e **WhatsApp** (`crm-deal-whatsapp`, `wa.me` com a mensagem padrão do CRM), e-mail (`mailto:`); **trocar** (`crm-deal-contact-link`) e **remover** (`crm-deal-contact-unlink`). Sem contato: "+ Vincular contato" (o mesmo `crm-deal-contact-link`). Vincular abre o seletor (`crm-relation-search` para digitar, `crm-relation-option` com `data-id` para cada resultado, `crm-relation-create` "Criar «Ana Souza»" quando não achar) e grava na hora (otimista).
+   - **Empresa** (`crm-deal-company`, com `data-company-id`): nome (link), CNPJ, cidade/UF, telefone; trocar (`crm-deal-company-link`, mesmo seletor) e remover (`crm-deal-company-unlink`). Vincular uma pessoa sem empresa oferece "Vincular também Acme Ltda?" quando ela tem empresa principal.
+   - **Produtos** (feature Pro, `crm-deal-items`): tabela de itens (`crm-deal-item-row`: produto/descrição, qtd, preço, desconto %, total), **+ Adicionar produto** (`crm-deal-item-add`: abre o `FormSheet` com o seletor de produto do catálogo — `crm-relation-search`/`crm-relation-option`, que preenche o preço — ou nome livre para item avulso, `field-quantity`, `field-unit-price`, `field-discount`, `form-submit`), editar e remover itens, subtotal, descontos e total; aviso "O valor do negócio é a soma dos produtos" com opção de voltar para valor manual. O valor do cabeçalho (`crm-deal-value`) acompanha a resposta da API. Sem a feature: `PlanGate` compacto.
    - **Campos personalizados**: em grupo, editáveis no lugar.
-   - **Lead de origem** (se veio de conversão): link + UTM.
+   - **Lead de origem** (`crm-deal-lead-origin`, se veio de conversão): link para o lead + origem e UTM.
 4. **Área principal** (direita):
    - **Compositor** em abas: **Anotação** (`crm-note-input` + `crm-note-submit`, `@` menciona, Ctrl+Enter salva) · **Atividade** (`crm-activity-new`: tipo em botões com ícone, assunto sugerido pelo tipo — "Ligar para Ana" —, data com atalhos Hoje/Amanhã/Próx. semana, hora opcional, duração, responsável, anotação; "Marcar como feita" para registrar o que já aconteceu) · **Arquivo** (Dropzone).
    - **Planejado**: atividades pendentes deste negócio (concluir com um clique, editar, reagendar).
@@ -60,7 +61,7 @@ Tabela com colunas configuráveis (título, valor, etapa, status, empresa, conta
 - Linhas (`crm-lead-row`): bolinha de "novo" (não visto), título, pessoa, empresa, e-mail/telefone (botão WhatsApp), origem e via (ícone de API/formulário/importação), responsável, recebido há X, próxima atividade, selo "Já é contato" quando houver correspondência.
 - Ações na linha e em massa: **Converter** (`crm-lead-convert`), atribuir, etiquetar, descartar.
 - **Painel do lead** (`?lead=`): dados editáveis, mensagem do formulário, UTM e campos extras recebidos, aviso de correspondência ("Já existe Ana Souza · 2 negócios" com link), compositor (anotação/atividade/arquivo) e histórico.
-- **Diálogo de conversão** (`crm-convert-dialog`): título, valor, funil e etapa, responsável; **Contato**: "Vincular a Ana Souza (existente)" (pré-selecionado quando casar) · "Criar novo" · "Sem contato"; **Empresa**: idem; botão **Converter** (`crm-convert-confirm`) → abre o negócio criado com toast "Lead convertido".
+- **Diálogo de conversão** (`crm-convert-dialog`): título, valor, funil e etapa, responsável; **Contato**: "Vincular a Ana Souza (existente)" (pré-selecionado quando casar) · "Criar novo" (pré-selecionado quando não casar e o lead tem nome, e-mail ou telefone) · "Sem contato"; **Empresa**: idem (criar nova pré-selecionado quando o lead tem nome de empresa); botão **Converter** (`crm-convert-confirm`) → abre o negócio criado com toast "Lead convertido".
 - "+ Lead" manual no cabeçalho.
 
 ## Contatos e empresas
@@ -75,7 +76,7 @@ Nome (`field-name`), e-mail (`field-email`), telefone com "é WhatsApp" (`field-
 CNPJ primeiro (`field-cnpj`): ao completar um CNPJ válido, busca os dados (spinner no campo) e preenche razão social, nome fantasia, segmento, telefone, e-mail e endereço, tudo editável, com aviso se a situação não for ativa; falha não trava. Depois nome, site, responsável, etiquetas, campos. Duplicado: mesmo aviso do contato.
 
 ### Página do contato / empresa
-Cabeçalho com nome, cargo/CNPJ, etiquetas, responsável, ações (WhatsApp, ligar, e-mail, editar, ⋯ excluir). Coluna de detalhes (dados, endereço, campos personalizados, empresas ligadas ou contatos da empresa com "principal"). Área principal com abas **Negócios** (abertos com total, ganhos, perdidos; "+ Negócio" já preenchido) · **Histórico** (mesmo componente do negócio, reunindo os negócios ligados) · **Atividades**.
+Cabeçalho com nome, cargo/CNPJ, etiquetas, responsável, ações (WhatsApp, ligar, e-mail, editar, ⋯ excluir). Coluna de detalhes (dados, endereço, campos personalizados, empresas ligadas ou contatos da empresa com "principal"). Área principal com abas **Negócios** (abertos com total, ganhos, perdidos, cada um com etapa e valor; **+ Negócio** — `crm-contact-deal-new` no contato, `crm-company-deal-new` na empresa — abre o mesmo `FormSheet` do funil com a pessoa e a empresa já preenchidas) · **Histórico** (mesmo componente do negócio, reunindo os negócios ligados) · **Atividades**.
 
 ## Atividades (`/crm/atividades`)
 
@@ -115,7 +116,14 @@ O `/rodsaas:verify` tem uma parte só do CRM (`skills/verify/suite/tests/09-crm.
 | `crm-deal-card` | card, com `data-deal-id` |
 | `crm-next-activity` | selo da próxima atividade no card, com `data-state` (`overdue`, `today`, `future`, `none`) |
 | `crm-deal-new` | "+ Negócio"; abre `form-sheet` com `field-title` (erro em `field-error-title`), `field-value` (moeda, aceita "1.500,00") e `form-submit` |
-| `crm-deal-title`, `crm-deal-status` | título e selo de status do negócio (`data-status`) |
+| `field-contact`, `field-company` | pessoa e empresa no `FormSheet` de "+ Negócio" (clique abre o seletor `crm-relation-search`/`crm-relation-option`) |
+| `crm-deal-title`, `crm-deal-status`, `crm-deal-value` | título, selo de status (`data-status`) e valor em R$ do negócio |
+| `crm-deal-contact` (`data-contact-id`), `crm-deal-contact-link`, `crm-deal-contact-unlink`, `crm-deal-call`, `crm-deal-whatsapp` | seção Pessoa do negócio |
+| `crm-deal-company` (`data-company-id`), `crm-deal-company-link`, `crm-deal-company-unlink` | seção Empresa do negócio |
+| `crm-relation-search`, `crm-relation-option` (`data-id`), `crm-relation-create` | seletor de relação (pessoa, empresa, produto): busca, resultado, "Criar «texto»" |
+| `crm-deal-items`, `crm-deal-item-row`, `crm-deal-item-add` | produtos do negócio; "+ Adicionar produto" abre `form-sheet` com o seletor, `field-quantity`, `field-unit-price`, `field-discount` e `form-submit` |
+| `crm-deal-lead-origin` | lead de origem no negócio convertido |
+| `crm-contact-deal-new`, `crm-company-deal-new` | "+ Negócio" já preenchido na página do contato e da empresa |
 | `crm-stage-step` | etapa na barra de etapas, com `data-stage-id`; a atual com `aria-current="step"` |
 | `crm-deal-won`, `crm-deal-lost`, `crm-deal-reopen` | ganhar, perder, reabrir |
 | `crm-lost-dialog`, `crm-lost-reason`, `crm-lost-reason-option`, `crm-lost-confirm` | diálogo de perda: gatilho do seletor de motivo, cada opção, confirmar |

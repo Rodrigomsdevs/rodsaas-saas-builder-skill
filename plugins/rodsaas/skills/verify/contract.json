@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -337,7 +337,30 @@
         "field-error-title",
         "field-value",
         "field-subject",
-        "field-email"
+        "field-email",
+        "field-contact",
+        "field-company",
+        "crm-deal-value",
+        "crm-deal-contact",
+        "crm-deal-contact-link",
+        "crm-deal-contact-unlink",
+        "crm-deal-call",
+        "crm-deal-whatsapp",
+        "crm-deal-company",
+        "crm-deal-company-link",
+        "crm-deal-company-unlink",
+        "crm-relation-search",
+        "crm-relation-option",
+        "crm-relation-create",
+        "crm-deal-items",
+        "crm-deal-item-row",
+        "crm-deal-item-add",
+        "crm-deal-lead-origin",
+        "crm-contact-deal-new",
+        "crm-company-deal-new",
+        "field-quantity",
+        "field-unit-price",
+        "field-discount"
       ],
       "api": [
         {
@@ -420,7 +443,8 @@
           "body": [
             "name",
             "email",
-            "phone"
+            "phone",
+            "companyId"
           ]
         },
         {
@@ -477,6 +501,49 @@
         {
           "method": "post",
           "path": "/v1/public/crm/leads"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/contacts/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/companies"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/companies",
+          "body": [
+            "name",
+            "cnpj"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/companies/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/products"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/products",
+          "body": [
+            "name",
+            "unitPrice"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/items",
+          "body": [
+            "productId",
+            "name",
+            "unitPrice",
+            "quantity",
+            "discountPercent"
+          ]
         }
       ]
     },

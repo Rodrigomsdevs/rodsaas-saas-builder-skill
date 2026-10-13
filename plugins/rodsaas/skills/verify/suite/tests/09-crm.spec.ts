@@ -36,6 +36,27 @@ async function expectCode(res: import("@playwright/test").APIResponse, status: n
   return JSON.parse(body || "{}");
 }
 
+/** Garante a feature no plano da empresa (no modo de teste da cobrança assina o plano que tem); senão pula o teste. */
+async function ensureFeature(req: APIRequestContext, feature: string) {
+  const plan: any = (await me(req)).plan;
+  if (plan?.features?.includes(feature)) return;
+  const mode = await billingMode(req);
+  test.skip(mode !== "fake", `"${feature}" exige plano pago e a cobrança está em modo "${mode}"`);
+  const target = (await plansFromApi(req)).paid.find((p) => p.features?.includes(feature));
+  test.skip(!target, `nenhum plano com a feature ${feature}`);
+  await ok(await call(req, "POST", "/v1/billing/checkout-sessions", { plan: target!.id, interval: "month" }), `assinar plano com ${feature} (modo de teste)`);
+}
+const createCompany = async (req: APIRequestContext, name = `Acme ${uniq()}`) => ok<any>(await call(req, "POST", "/v1/crm/companies", { name }), `criar empresa "${name}"`);
+const createContact = async (req: APIRequestContext, body: Record<string, unknown> = {}) => {
+  const data = { name: `Ana ${uniq()}`, email: `ana.${uniq()}@example.com`, ...body };
+  return ok<any>(await call(req, "POST", "/v1/crm/contacts", data), `criar contato "${data.name}"`);
+};
+/** Escolhe um registro no seletor de relação aberto (busca + resultado). */
+async function pickRelation(page: Page, text: string, id: string) {
+  await page.getByTestId("crm-relation-search").fill(text);
+  await page.locator(`[data-testid="crm-relation-option"][data-id="${id}"]`).click();
+}
+
 const stageColumn = (page: Page, stageId: string) => page.locator(`[data-testid="crm-stage-column"][data-stage-id="${stageId}"]`);
 const dealCard = (page: Page, dealId: string) => page.locator(`[data-testid="crm-deal-card"][data-deal-id="${dealId}"]`);
 
@@ -194,11 +215,68 @@ test.describe("CRM", () => {
     expect(conv.contact?.id, "conversão reaproveita o contato com o mesmo e-mail").toBe(contact.id);
     const deal = await ok<any>(await getDeal(request, conv.deal.id), "negócio criado na conversão");
     expect(deal.contact?.id, "negócio ligado ao contato").toBe(contact.id);
+    expect(deal.leadId, "negócio guarda o lead de origem").toBe(leadId);
     await expectCode(await call(request, "POST", `/v1/crm/leads/${leadId}/convert`, {}), 409, "LEAD_ALREADY_CONVERTED", "converter de novo");
 
     await ok(await call(request, "DELETE", `/v1/crm/capture-keys/${created.id}`), "revogar chave");
     await expectCode(await capture(created.key), 401, "CAPTURE_KEY_INVALID", "captura com chave revogada");
     await anon.dispose();
+  });
+
+  test("API: negócio com pessoa e empresa aparece nos dois lados e desvincula", async ({ request, browser }) => {
+    await register(request, newUser("crmrel"));
+    const company = await createCompany(request);
+    const contact = await createContact(request, { phone: "(44) 99999-1234", companyId: company.id });
+    const title = `Implantação ${uniq()}`;
+    const deal = await createDeal(request, { title, value: 50000, contactId: contact.id, companyId: company.id });
+    const d = await ok<any>(await getDeal(request, deal.id), "ler negócio");
+    expect(d.contact?.id, "DealDetail com a pessoa").toBe(contact.id);
+    expect(d.contact?.name).toBe(contact.name);
+    expect(d.company?.id, "DealDetail com a empresa").toBe(company.id);
+    expect(d.company?.name).toBe(company.name);
+
+    const card = (await board(request, (await defaultPipeline(request)).id)).stages.flatMap((x: any) => x.deals).find((x: any) => x.id === deal.id);
+    expect(card?.company?.name, "card do quadro com a empresa").toBe(company.name);
+    expect(card?.contact?.id, "card do quadro com a pessoa").toBe(contact.id);
+
+    const c = await ok<any>(await call(request, "GET", `/v1/crm/contacts/${contact.id}`), "detalhe do contato");
+    expect((c.deals ?? []).map((x: any) => x.id), "contato lista o negócio").toContain(deal.id);
+    const co = await ok<any>(await call(request, "GET", `/v1/crm/companies/${company.id}`), "detalhe da empresa");
+    expect((co.deals ?? []).map((x: any) => x.id), "empresa lista o negócio").toContain(deal.id);
+    expect(items<any>(await ok(await call(request, "GET", `/v1/crm/deals?contactId=${contact.id}`), "filtro por pessoa")).map((x) => x.id)).toContain(deal.id);
+    expect(items<any>(await ok(await call(request, "GET", `/v1/crm/deals?companyId=${company.id}`), "filtro por empresa")).map((x) => x.id)).toContain(deal.id);
+
+    const onlyContact = await createDeal(request, { title: `Só pessoa ${uniq()}`, contactId: contact.id });
+    expect((await ok<any>(await getDeal(request, onlyContact.id), "ler")).company?.id, "pessoa com empresa principal preenche a empresa").toBe(company.id);
+
+    await ok(await call(request, "PATCH", `/v1/crm/deals/${deal.id}`, { contactId: null }), "desvincular pessoa");
+    const after = await ok<any>(await getDeal(request, deal.id), "ler");
+    expect(after.contact ?? null, "pessoa removida").toBeNull();
+    expect(after.company?.id, "empresa continua").toBe(company.id);
+
+    const other = await newContext(browser);
+    await register(other.request, newUser("crmrel2"));
+    const foreign = await createContact(other.request);
+    const bad = await expectCode(await call(request, "POST", "/v1/crm/deals", { title: "Invasor", contactId: foreign.id }), 400, "VALIDATION_ERROR", "negócio com pessoa de outra empresa");
+    expect((bad.errors ?? []).map((e: any) => e.path), "erro no campo da pessoa").toContain("contactId");
+    await other.close();
+  });
+
+  test("API: produtos no negócio somam o valor no servidor", async ({ request }) => {
+    await register(request, newUser("crmprod"));
+    await ensureFeature(request, "crm_products");
+    const product = await ok<any>(await call(request, "POST", "/v1/crm/products", { name: `Plano anual ${uniq()}`, unitPrice: 120000 }), "criar produto");
+    const deal = await createDeal(request, { title: `Venda ${uniq()}`, value: 999 });
+    const r1 = await ok<any>(await call(request, "POST", `/v1/crm/deals/${deal.id}/items`, { productId: product.id, quantity: 2, discountPercent: 10 }), "item do catálogo");
+    expect(r1.item?.total, "2 × R$ 1.200 com 10% de desconto").toBe(216000);
+    expect(r1.value, "valor do negócio = soma").toBe(216000);
+    const r2 = await ok<any>(await call(request, "POST", `/v1/crm/deals/${deal.id}/items`, { name: "Instalação", unitPrice: 5000, quantity: 1 }), "item avulso");
+    expect(r2.value).toBe(221000);
+    const d = await ok<any>(await getDeal(request, deal.id), "ler negócio");
+    expect(d.value).toBe(221000);
+    expect(d.valueMode, "valor passa a vir dos produtos").toBe("ITEMS");
+    expect(d.items ?? [], "itens no DealDetail").toHaveLength(2);
+    await expectCode(await call(request, "PATCH", `/v1/crm/deals/${deal.id}`, { value: 100 }), 409, "DEAL_VALUE_FROM_ITEMS", "mudar o valor à mão com produtos");
   });
 
   // ------------------------------------------------------------------ telas
@@ -290,6 +368,93 @@ test.describe("CRM", () => {
     await expect(dealCard(page, deal.id).getByTestId("crm-next-activity"), "card volta para 'sem atividade'").toHaveAttribute("data-state", "none");
   });
 
+  test("negócio: vincular pessoa e empresa pela tela, com Ligar/WhatsApp, e o card mostra a empresa", async ({ page }) => {
+    await signUp(page, "crmlink");
+    const req = page.context().request;
+    const company = await createCompany(req);
+    const contact = await createContact(req, { phone: "(44) 99999-1234" });
+    const deal = await createDeal(req, { title: `Projeto ${uniq()}`, value: 100000 });
+    await page.goto(`/crm/negocios/${deal.id}`);
+
+    const person = page.getByTestId("crm-deal-contact");
+    await person.getByTestId("crm-deal-contact-link").click();
+    await pickRelation(page, contact.name, contact.id);
+    await expect(person, "pessoa vinculada").toHaveAttribute("data-contact-id", contact.id);
+    await expect(person).toContainText(contact.name);
+    await expect(person.getByTestId("crm-deal-whatsapp"), "WhatsApp com o número do contato").toHaveAttribute("href", /wa\.me\/5544999991234/);
+    await expect(person.getByTestId("crm-deal-call"), "ligar").toHaveAttribute("href", /^tel:/);
+
+    const comp = page.getByTestId("crm-deal-company");
+    await comp.getByTestId("crm-deal-company-link").click();
+    await pickRelation(page, company.name, company.id);
+    await expect(comp, "empresa vinculada").toHaveAttribute("data-company-id", company.id);
+    await expect.poll(async () => { const d = await ok<any>(await getDeal(req, deal.id), "ler"); return `${d.contact?.id}|${d.company?.id}`; }, { message: "pessoa e empresa gravadas na API" }).toBe(`${contact.id}|${company.id}`);
+
+    await person.getByTestId("crm-deal-contact-unlink").click();
+    await expect.poll(async () => (await ok<any>(await getDeal(req, deal.id), "ler")).contact ?? null, { message: "pessoa removida pela tela" }).toBeNull();
+
+    await page.goto("/crm/negocios");
+    await expect(dealCard(page, deal.id), "card com o nome da empresa").toContainText(company.name);
+  });
+
+  test("+ Negócio já com empresa e pessoa nova criada pelo seletor", async ({ page }) => {
+    await signUp(page, "crmnewrel", "/crm/negocios");
+    const req = page.context().request;
+    const company = await createCompany(req);
+    await page.getByTestId("crm-deal-new").click();
+    const sheet = page.getByTestId("form-sheet");
+    await expect(sheet).toBeVisible();
+    const title = `Consultoria ${uniq()}`, person = `Bruno ${uniq()}`;
+    await sheet.getByTestId("field-title").fill(title);
+    await sheet.getByTestId("field-company").click();
+    await pickRelation(page, company.name, company.id);
+    await sheet.getByTestId("field-contact").click();
+    await page.getByTestId("crm-relation-search").fill(person);
+    await page.getByTestId("crm-relation-create").click();
+    await sheet.getByTestId("form-submit").click();
+    await expect(sheet).toBeHidden();
+
+    let created: any;
+    await expect.poll(async () => { created = items<any>(await ok(await call(req, "GET", `/v1/crm/deals?q=${encodeURIComponent(title)}`), "lista")).find((d) => d.title === title); return !!created; }, { message: "negócio criado" }).toBe(true);
+    const d = await ok<any>(await getDeal(req, created.id), "ler");
+    expect(d.company?.id, "empresa escolhida no + Negócio").toBe(company.id);
+    expect(d.contact?.name, "pessoa criada pelo seletor e vinculada").toBe(person);
+  });
+
+  test("contato: + Negócio na página do contato já vem com a pessoa", async ({ page }) => {
+    await signUp(page, "crmcontactdeal");
+    const req = page.context().request;
+    const contact = await createContact(req);
+    await page.goto(`/crm/contatos/${contact.id}`);
+    await page.getByTestId("crm-contact-deal-new").click();
+    const sheet = page.getByTestId("form-sheet");
+    await expect(sheet).toBeVisible();
+    const title = `Renovação ${uniq()}`;
+    await sheet.getByTestId("field-title").fill(title);
+    await sheet.getByTestId("form-submit").click();
+    await expect.poll(async () => items<any>(await ok(await call(req, "GET", `/v1/crm/deals?contactId=${contact.id}`), "negócios do contato")).map((d) => d.title), { message: "negócio criado já ligado ao contato" }).toContain(title);
+  });
+
+  test("produtos: adicionar produto no negócio pela tela e o valor vira a soma", async ({ page }) => {
+    await signUp(page, "crmprodui");
+    const req = page.context().request;
+    await ensureFeature(req, "crm_products");
+    const product = await ok<any>(await call(req, "POST", "/v1/crm/products", { name: `Plano anual ${uniq()}`, unitPrice: 120000 }), "criar produto");
+    const deal = await createDeal(req, { title: `Venda ${uniq()}`, value: 999 });
+    await page.goto(`/crm/negocios/${deal.id}`);
+    await expect(page.getByTestId("crm-deal-items")).toBeVisible();
+    await page.getByTestId("crm-deal-item-add").click();
+    const sheet = page.getByTestId("form-sheet");
+    await expect(sheet).toBeVisible();
+    await pickRelation(page, product.name, product.id);
+    await sheet.getByTestId("field-quantity").fill("2");
+    await sheet.getByTestId("field-discount").fill("10");
+    await sheet.getByTestId("form-submit").click();
+    await expect(page.getByTestId("crm-deal-item-row").filter({ hasText: product.name }), "item na tabela").toBeVisible();
+    await expect(page.getByTestId("crm-deal-value"), "valor do negócio = soma").toContainText("2.160,00");
+    await expect.poll(async () => (await ok<any>(await getDeal(req, deal.id), "ler")).value, { message: "valor gravado" }).toBe(216000);
+  });
+
   test("contato: aviso de duplicado com link para o existente", async ({ page }) => {
     await signUp(page, "crmcontact");
     const req = page.context().request;
@@ -331,6 +496,8 @@ test.describe("CRM", () => {
     await page.getByTestId("crm-convert-confirm").click();
     await expect(page, "vai para o negócio criado").toHaveURL(/\/crm\/negocios\/[^/?#]+/, { timeout: 15_000 });
     await expect(page.getByTestId("crm-deal-title")).toBeVisible();
+    await expect(page.getByTestId("crm-deal-contact"), "negócio convertido já com a pessoa do lead").toContainText(name);
+    await expect(page.getByTestId("crm-deal-lead-origin"), "lead de origem no negócio").toBeVisible();
     const after = await ok<any>(await call(req, "GET", `/v1/crm/leads/${lead.id}`), "lead depois");
     expect(after.status, "lead marcado como convertido").toBe("CONVERTED");
   });

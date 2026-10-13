@@ -15,6 +15,23 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos
 2. **Add-on `uploads`** (anexos e importação): se `rodsaas.json` não tiver `uploads` em `addons`, rode o fluxo da skill `uploads` primeiro (leia o `SKILL.md` dela) e volte.
 3. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, recharts, leitor de planilha).
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo. Cada fase aponta o arquivo (→ `references/...`).
+2. **Tudo o que está nas referências é escopo da v1**, exceto o que está em "Fora da v1". Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": um negócio só com título e valor, sem pessoa, empresa, produtos e histórico, **não é** o CRM desta skill.
+3. **O contrato testável (testids e rotas ★) é o mínimo que o `/rodsaas:verify` consegue conferir, não o escopo.** Passar no verify não significa que a fase acabou.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase (cada linha de tabela e cada marcador) e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo. Use o "Pronto quando" de cada fase abaixo como mínimo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+## Projeto que já tem o CRM (revisão)
+
+Se `rodsaas.json → presets` já tem `crm` (ou existe `api/src/modules/crm`), rode em **modo revisão** em vez de instalar de novo:
+
+1. Leia todas as referências (`01` a `07`) inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 7 (é onde mais se simplifica: negócio sem pessoa/empresa/produtos, sem barra de etapas, sem histórico, conversão de lead sem vincular contato).
+3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
+4. Feche com `references/07-checklist.md` e `/rodsaas:verify` (`-g "CRM"`).
+
 ## Decisões padrão (confirme numa rodada só)
 
 | Decisão | Padrão |
@@ -35,12 +52,17 @@ Fora da v1 (registre no README do projeto como próximos passos): sincronizar e-
 Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(crm): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
 1. **Integração e contrato**: registrar o preset e o **app CRM** no registro de apps (menu do app, widgets do Início, provedor da busca, contador no trilho), notificações, planos. → `references/01-escopo-e-integracao.md`
+   - *Pronto quando*: app no trilho com o menu completo do `01`, `rodsaas.json` atualizado, limites e features em todos os planos, `crm-lib` portado com os testes passando.
 2. **Modelo e regras**: models, migrations com RLS e triggers, funil inicial, visibilidade, histórico de etapas, campos personalizados, deduplicação. → `references/02-modelo.md`
+   - *Pronto quando*: **todos** os models do `02` existem (empresas, contatos, ligação empresa↔contato, funis, etapas, negócios com `contactId`/`companyId`/`leadId`, itens e produtos, leads, atividades, anotações, histórico de etapas, campos, etiquetas, origens, motivos, chaves), cada um com RLS `FORCE` e as travas de mesma empresa.
 3. **API de cadastros e funil**: empresas (com CNPJ), contatos, negócios, quadro, ganhar/perder, produtos, configurações. → `references/03-api.md`
+   - *Pronto quando*: negócio criado e alterado **com contato e empresa** (`DealCard`/`DealDetail` devolvem os dois), contato e empresa devolvem os negócios ligados, itens de produto recalculam o valor no servidor, relação com registro de outra empresa recusada, filtros `contactId`/`companyId` funcionando.
 4. **Leads, atividades e histórico**: caixa de leads e conversão, atividades e agenda, anotações, anexos, linha do tempo, notificações. → `references/03-api.md`
+   - *Pronto quando*: converter lead cria (ou reaproveita) contato e empresa e grava o `leadId` no negócio; atividades ligadas a negócio, lead, contato ou empresa; linha do tempo junta anotações, atividades, mudanças e arquivos.
 5. **Captura, importação e exportação**: chaves e formulários públicos, importação de CSV/Excel em etapas com desfazer, exportação. → `references/06-captura-e-importacao.md`
 6. **Relatórios**: funil de conversão, ganhos e perdas, previsão, por vendedor, motivos de perda, tempo por etapa. → `references/03-api.md`
 7. **Telas**: funil (quadro e lista), negócio, leads, contatos, empresas, atividades, produtos, relatórios, importação, configurações. → `references/04-telas.md`
+   - *Pronto quando*: a página do negócio tem **as quatro partes** do `04` (cabeçalho com valor e ganhar/perder, barra de etapas, coluna de detalhes com Resumo · **Pessoa** · **Empresa** · **Produtos** · campos · lead de origem, e área com compositor, planejado e histórico); "+ Negócio" com pessoa e empresa; contato e empresa com a aba Negócios e "+ Negócio" já preenchido; card do quadro com empresa/contato; todos os testids da seção "Contrato testável".
 8. **Interações e estados**: arrastar e soltar, otimismo e desfazer, WhatsApp e ligação com registro, atalhos, todos os estados de carregamento/vazio/erro. → `references/05-interacoes-e-estados.md`
 9. **Fechamento**: `references/07-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (a bateria tem uma parte só do CRM), README do projeto.
 

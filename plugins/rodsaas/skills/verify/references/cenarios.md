@@ -107,12 +107,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | contato duplicado | e-mail não normalizado (maiúsculas passam); índice único sem `WHERE "deletedAt" IS NULL`; 409 sem `existing` |
 | captura sem Origin | a checagem de Origin (CSRF) da base aplicada também à rota pública; rota exigindo cookie |
 | chave errada/revogada | revogar só marca `revokedAt` mas a busca ignora; mensagens diferentes para errada e revogada |
-| conversão reaproveita contato | conversão sempre cria contato novo; procura por e-mail sem normalizar |
+| conversão reaproveita contato | conversão sempre cria contato novo; procura por e-mail sem normalizar; `leadId` não gravado no negócio |
+| pessoa e empresa nos dois lados | negócio sem `companyId`/`contactId` no model ou no `DealCard`; detalhe do contato/empresa sem `deals`; `contactId: null` ignorado no PATCH; pessoa com empresa principal não preenche a empresa; relação de outra empresa aceita (falta validar no service e o trigger de mesma empresa) |
+| produtos somam o valor | total do item calculado no front ou sem desconto (`itemTotal`); valor do negócio não recalculado; `valueMode` não muda para `ITEMS`; valor manual aceito com produtos |
 | criar negócio pela tela | campo de moeda mandando "1.500,00" como texto ou 1.5; erro de validação só em toast |
 | barra de etapas | clique só muda a tela (sem chamar `move`); `aria-current` fixo na primeira etapa |
 | atividade de hoje | data padrão calculada em UTC (vira amanhã à noite no Brasil); próxima atividade não recalculada ao concluir; agenda filtrando por outro responsável |
 | aviso de duplicado | formulário fecha ou mostra só um toast genérico no 409 |
-| converter lead pela tela | conversão sem navegar para o negócio; lead continua `OPEN` |
+| converter lead pela tela | conversão sem navegar para o negócio; lead continua `OPEN`; negócio sem a pessoa do lead ou sem "Lead de origem" (`crm-deal-lead-origin`) |
+| vincular pessoa e empresa pela tela | página do negócio **sem as seções Pessoa e Empresa** (versão simplificada); seletor sem `crm-relation-search`/`crm-relation-option` com `data-id`; WhatsApp sem o número normalizado (`wa.me/55…`); card do quadro sem o nome da empresa |
+| + Negócio com empresa e pessoa nova | `FormSheet` só com título e valor (sem `field-contact`/`field-company`); seletor sem "Criar «texto»" (`crm-relation-create`) |
+| + Negócio no contato | botão abre o formulário vazio, sem a pessoa |
+| produtos pela tela | sem a seção de produtos no negócio; escolher produto não preenche o preço; valor do cabeçalho (`crm-deal-value`) não acompanha a resposta da API |
 | modo restrito na tela | quadro buscando de uma rota sem o filtro de visibilidade; página do negócio mostrando erro genérico em vez de "não encontrado" |
 
 ## Casca de apps (`10-apps.spec.ts`)

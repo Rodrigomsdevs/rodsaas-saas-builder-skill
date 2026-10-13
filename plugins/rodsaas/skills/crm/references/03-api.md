@@ -26,9 +26,9 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 
 | Rota | Config | Faz |
 |---|---|---|
-| `GET /v1/crm/companies` | — | lista com filtros (abaixo) e cursor; item: `{ id, name, legalName, cnpj, segment, phone, email, addressCity, addressState, owner, tagIds, openDeals: { count, value }, customFields, createdAt }` |
-| `POST /v1/crm/companies` | `limit: 'crmContacts'`, idempotente | campos do model; CNPJ repetido → 409 `COMPANY_DUPLICATE` `{ existing: { id, name } }` |
-| `GET /v1/crm/companies/:id` | — | detalhe + contatos (com principal) + resumo de negócios visíveis (abertos, ganhos, perdidos, valores) |
+| ★ `GET /v1/crm/companies` | — | lista com filtros (abaixo) e cursor; item: `{ id, name, legalName, cnpj, segment, phone, email, addressCity, addressState, owner, tagIds, openDeals: { count, value }, customFields, createdAt }` |
+| ★ `POST /v1/crm/companies` | `limit: 'crmContacts'`, idempotente | campos do model (`{ name, legalName?, cnpj?, phone?, email?, ... }` → `{ id, name, ... }`); CNPJ repetido → 409 `COMPANY_DUPLICATE` `{ existing: { id, name } }` |
+| ★ `GET /v1/crm/companies/:id` | — | detalhe + `contacts: [{ id, name, isPrimary }]` + **`deals: [DealCard]`** (visíveis, abertos primeiro) + resumo (abertos, ganhos, perdidos, valores) |
 | `PATCH /v1/crm/companies/:id` · `DELETE` · `POST .../restore` | excluir: criador, responsável ou owner/admin | soft delete com desfazer |
 | `PUT /v1/crm/companies/:id/contacts/:contactId` · `DELETE` | — | ligar/desligar contato (`{ isPrimary?, role? }`) |
 | `GET /v1/crm/lookup/cnpj/:cnpj` | rate limit 20/min por usuário | dados públicos do CNPJ (abaixo) |
@@ -43,8 +43,8 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 | Rota | Config | Faz |
 |---|---|---|
 | ★ `GET /v1/crm/contacts` | — | lista com filtros e cursor; item: `{ id, name, jobTitle, email, phone, phoneIsWhatsapp, company: { id, name } \| null (principal), owner, tagIds, openDeals: { count, value }, lastActivityAt, customFields }`; `?q=` serve ao `RelationSelect` |
-| ★ `POST /v1/crm/contacts` | `limit: 'crmContacts'`, idempotente | `{ name, email?, phone?, phoneIsWhatsapp?, jobTitle?, cpf?, birthday?, companyId?, ownerId?, tagIds?, customFields? }`; e-mail ou CPF repetido → **409 `CONTACT_DUPLICATE` `{ existing: { id, name } }`** |
-| `GET /v1/crm/contacts/:id` | — | detalhe + empresas + negócios visíveis + próximas atividades |
+| ★ `POST /v1/crm/contacts` | `limit: 'crmContacts'`, idempotente | `{ name, email?, phone?, phoneIsWhatsapp?, jobTitle?, cpf?, birthday?, companyId?, ownerId?, tagIds?, customFields? }` (`companyId` vira a empresa principal); e-mail ou CPF repetido → **409 `CONTACT_DUPLICATE` `{ existing: { id, name } }`** |
+| ★ `GET /v1/crm/contacts/:id` | — | detalhe + `companies: [{ id, name, isPrimary }]` + **`deals: [DealCard]`** (visíveis, abertos primeiro) + próximas atividades |
 | `PATCH` · `DELETE` · `POST .../restore` | idem empresas | — |
 | `GET /v1/crm/duplicates?email=&phone=&cpf=&cnpj=&excludeId=` | — | `{ contacts: [{ id, name, matchedBy }], companies: [...] }` para o aviso no formulário enquanto digita |
 
@@ -54,9 +54,9 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 |---|---|---|
 | ★ `GET /v1/crm/pipelines/:id/board` | — | `{ pipeline: { id, name }, totals: { count, value, weighted }, stages: [{ id, name, probability, rottingDays, count, value, weighted, deals: [DealCard], nextCursor }] }`; só abertos; primeiras 50 por etapa; mesmos filtros de `/deals`; `?stageId=&cursor=` carrega mais de uma etapa |
 | ★ `GET /v1/crm/deals` | — | lista com filtros, ordenação e cursor (`status` padrão `OPEN`; `all` para todos); `{ data: [DealCard], meta, totals: { count, value, weighted } }` |
-| ★ `POST /v1/crm/deals` | idempotente, audit | `{ title, value?, pipelineId?, stageId?, companyId?, contactId?, ownerId?, sourceId?, expectedCloseDate?, probability?, tagIds?, customFields? }` |
+| ★ `POST /v1/crm/deals` | idempotente, audit | `{ title, value?, pipelineId?, stageId?, companyId?, contactId?, ownerId?, sourceId?, expectedCloseDate?, probability?, tagIds?, customFields? }`; `contactId`/`companyId` que não existem (ou são de outra empresa) → **400 `VALIDATION_ERROR`** com `path` no campo; só `contactId` com empresa principal preenche `companyId` |
 | ★ `GET /v1/crm/deals/:id` | — | `DealDetail` (abaixo) |
-| ★ `PATCH /v1/crm/deals/:id` | — | qualquer campo do POST (mudar `stageId`/`pipelineId` segue as regras de mudança de etapa) |
+| ★ `PATCH /v1/crm/deals/:id` | — | qualquer campo do POST (mudar `stageId`/`pipelineId` segue as regras de mudança de etapa); `contactId: null`/`companyId: null` desvincula; `value` com `valueMode: ITEMS` → 409 `DEAL_VALUE_FROM_ITEMS` |
 | ★ `POST /v1/crm/deals/:id/move` | — | `{ stageId, beforeId?, afterId? }` (etapa e posição no quadro); fechado → 409 `DEAL_NOT_OPEN` |
 | ★ `POST /v1/crm/deals/:id/won` | — | ganho; já fechado → 409 `DEAL_NOT_OPEN` |
 | ★ `POST /v1/crm/deals/:id/lost` | — | `{ lostReasonId?, lostNote? }`; sem motivo com `requireLostReason` → **400 `LOST_REASON_REQUIRED`** |
@@ -64,7 +64,7 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 | `POST /v1/crm/deals/:id/duplicate` | idempotente | cópia aberta na primeira etapa, com itens, sem histórico |
 | `POST /v1/crm/deals/bulk` | — | `{ ids (≤100), set: { ownerId?, stageId?, addTagIds?, removeTagIds?, expectedCloseDate? } }` ou `{ ids, action: 'delete' }`; tudo ou nada |
 | `DELETE /v1/crm/deals/:id` · `POST .../restore` | responsável ou owner/admin | soft delete com desfazer |
-| `GET/POST /v1/crm/deals/:id/items` · `PATCH/DELETE /v1/crm/deal-items/:id` · `POST .../items/reorder` | escrita: `feature: 'crm_products'` | itens; a resposta traz o `value` novo do negócio |
+| `GET /v1/crm/deals/:id/items` · ★ `POST /v1/crm/deals/:id/items` · `PATCH/DELETE /v1/crm/deal-items/:id` · `POST .../items/reorder` | escrita: `feature: 'crm_products'` | ★ POST `{ productId?, name?, unitPrice?, quantity, discountPercent? }` (com `productId`, nome e preço vêm do catálogo se não enviados; sem, `name` e `unitPrice` obrigatórios) → **201 `{ item: { id, name, unitPrice, quantity, discountPercent, total }, value }`**; `total` pelo `itemTotal` do `crm-lib`; o primeiro item muda o negócio para `valueMode: ITEMS`; toda resposta traz o `value` novo do negócio |
 | `PUT /v1/crm/deals/:id/value-mode` | — | `{ mode: 'MANUAL' \| 'ITEMS' }` |
 
 **DealCard** ★: `{ id, title, value, status, pipelineId, stageId, position, owner: { id, name }, company: { id, name } \| null, contact: { id, name, phone, phoneIsWhatsapp } \| null, expectedCloseDate, effectiveProbability, weightedValue, nextActivity: { id, type, subject, dueDate, dueTime, state } \| null, rotting: { days } \| null, tagIds, cardFields: [{ key, label, display }] }`
@@ -76,7 +76,7 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 
 ## Produtos (catálogo)
 
-`GET /v1/crm/products?q=&active=` (todos) · `POST/PATCH/DELETE /v1/crm/products[/:id]` (owner/admin, `feature: 'crm_products'`). Excluir produto usado em negócios = desativar (os itens guardam nome e preço próprios). Código repetido → 409 `PRODUCT_CODE_TAKEN`.
+★ `GET /v1/crm/products?q=&active=` (todos) · ★ `POST /v1/crm/products` `{ name, unitPrice, code?, unit?, description? }` → `{ id, ... }` · `PATCH/DELETE /v1/crm/products/:id` (owner/admin, `feature: 'crm_products'`). Excluir produto usado em negócios = desativar (os itens guardam nome e preço próprios). Código repetido → 409 `PRODUCT_CODE_TAKEN`.
 
 ## Leads
 
@@ -158,6 +158,7 @@ Mesmas regras do `tarefas`: nunca notificar quem fez a ação, respeitar visibil
 | `DEAL_NOT_CLOSED` | 409 | reabrir negócio aberto |
 | `INVALID_STAGE` | 400 | etapa de outro funil |
 | `LEAD_ALREADY_CONVERTED` | 409 | converter de novo |
+| `DEAL_VALUE_FROM_ITEMS` | 409 | mudar o valor à mão com produtos no negócio |
 | `PIPELINE_HAS_DEALS` | 409 | excluir funil/etapa com negócios sem destino |
 | `LAST_PIPELINE` / `LAST_STAGE` | 400 | excluir o último |
 | `PRODUCT_CODE_TAKEN` | 409 | código de produto repetido |
@@ -177,7 +178,9 @@ Campos personalizados inválidos usam `VALIDATION_ERROR` com `path: "customField
 - Mudança de etapa grava histórico (uma passagem aberta por negócio); reordenar não grava; ganho/perda/reabertura com datas coerentes (constraint) e `LOST_REASON_REQUIRED`.
 - Valor com produtos: total do item, soma no negócio, volta para manual; feature exigida.
 - Próxima atividade recalculada em criar/editar/concluir/reabrir/excluir; estados `overdue/today/future/none` no fuso da empresa (teste com relógio fixo perto da meia-noite).
-- Conversão de lead: reaproveita contato por e-mail e empresa por CNPJ; cria quando não há; move atividades e anotações; não converte duas vezes; limite `crmContacts` na criação.
+- Conversão de lead: reaproveita contato por e-mail e empresa por CNPJ; cria quando não há; grava `leadId` no negócio; move atividades e anotações; não converte duas vezes; limite `crmContacts` na criação.
+- Negócio com contato e empresa: `DealCard`/`DealDetail` devolvem os dois; contato e empresa listam o negócio; desvincular com `null`; relação de outra empresa → 400; filtros `contactId`/`companyId`.
+- Produtos: itens calculados no servidor (`itemTotal`), valor do negócio = soma, `DEAL_VALUE_FROM_ITEMS` ao editar o valor com itens, voltar para manual.
 - Campos personalizados: cada tipo válido e inválido, obrigatório na criação, chave desconhecida, opção removida, filtro `cf.`.
 - Relatórios: números exatos sobre um conjunto conhecido (funil com etapa pulada, ganho/perda por mês, previsão, tempo por etapa).
 - Planos: `crmPipelines`, `crmContacts`, `crmCustomFields`, `crm_products`, `crm_capture`, `crm_reports` → 403 com o code certo no Free.
