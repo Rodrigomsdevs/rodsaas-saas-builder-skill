@@ -50,3 +50,4 @@ Confira cada item **usando o app** (API e front rodando), não só lendo o códi
 ## Entrega
 - [ ] README do projeto: o que o app faz, como rodar, o que ficou fora da v1 (tempo real, comentários, histórico, upload, templates, permissões por página)
 - [ ] testes ponta a ponta: criar página → escrever → recarregar; arrastar na árvore; conflito em duas abas; database em quadro; link público
+- [ ] **conferência final**: tabela item a item de `03-editor.md` e `04-frontend.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

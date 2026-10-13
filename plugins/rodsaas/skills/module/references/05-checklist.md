@@ -27,3 +27,4 @@
 - [ ] usuário de outra empresa não vê nem acessa por URL (404)
 - [ ] MEMBER sem permissão não vê os botões e recebe 403 se tentar pela API
 - [ ] typecheck, lint, build e todos os testes verdes; commit feito
+- [ ] **conferência final**: tabela item a item de a especificação aprovada (cada campo e cada visão) com ✅/❌; nenhum ❌ sem pendência registrada no relatório

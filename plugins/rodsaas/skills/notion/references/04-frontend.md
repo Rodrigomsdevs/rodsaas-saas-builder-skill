@@ -48,8 +48,8 @@ Comportamento:
 ### Árvore de páginas
 
 - Dados: `GET /v1/pages/tree` (TanStack Query), atualizado de forma **otimista** em criar, renomear, mover, arquivar e restaurar.
-- Cada item: seta de abrir/fechar (só se tiver filhos), ícone (ou ícone padrão de página/database), título ("Sem título" em cinza).
-- Ao passar o mouse: **+** (criar sub-página e abrir) e **⋯** (Renomear, Duplicar, Mover para…, Copiar link, Favoritar, Excluir).
+- Árvore `pages-tree`; cada item (`pages-tree-item` com `data-page-id`): seta de abrir/fechar (só se tiver filhos), ícone (ou ícone padrão de página/database), título ("Sem título" em cinza).
+- Ao passar o mouse: **+** (`pages-tree-add`: criar sub-página e abrir) e **⋯** (Renomear, Duplicar, Mover para…, Copiar link, Favoritar, Excluir).
 - **Arrastar e soltar** (dnd-kit ou equivalente atual): soltar entre itens reordena; soltar sobre um item torna filha. Indicador visual de onde vai cair. Bloqueie no front o que o backend recusaria (soltar dentro de um descendente). Erro da API → desfaz e toast.
 - "Mover para…" (alternativa por teclado e celular): `Command` com busca de páginas destino.
 
@@ -62,50 +62,50 @@ O Ctrl+K é da casca (busca em todos os apps); o Páginas registra o provedor `p
 
 ## Início do app (`/paginas`)
 
-"Bom dia, Ana" (saudação pela hora), **Visitadas recentemente** (cards com capa/ícone e título, rolagem horizontal), **Favoritos**, e "Nova página". Workspace novo mostra "Comece aqui" em destaque.
+Container `pages-home`. "Bom dia, Ana" (saudação pela hora), **Visitadas recentemente** (cards com capa/ícone e título, rolagem horizontal), **Favoritos**, e "Nova página". Workspace novo mostra "Comece aqui" em destaque. Botão **Nova página** (`pages-new`) cria e abre a página.
 
 ## Lixeira
 
-Popover ou painel com busca por título, lista das páginas excluídas (com o caminho original), **Restaurar** e **Excluir de vez** (com `ConfirmDialog`). Texto: "Páginas na lixeira há mais de 30 dias são excluídas automaticamente."
+Aberto pelo item **Lixeira** do menu (`pages-trash-open`). Popover ou painel (`pages-trash`) com busca por título, lista das páginas excluídas (`pages-trash-item`, com o caminho original), **Restaurar** (`pages-trash-restore`) e **Excluir de vez** (com `ConfirmDialog`). Texto: "Páginas na lixeira há mais de 30 dias são excluídas automaticamente."
 
 Abrir uma página arquivada pelo link mostra um aviso no topo: "Esta página está na lixeira" + Restaurar / Excluir de vez, com o conteúdo somente leitura.
 
 ## Databases
 
-A página de database mostra: título/ícone/capa como qualquer página, **abas das visões** (+ nova visão), barra com **Filtro**, **Ordenar**, busca e **Novo**.
+A página de database mostra: título/ícone/capa como qualquer página, **abas das visões** (`db-view-tab` com `data-view-type` = `TABLE` ou `BOARD`; + nova visão), barra com **Filtro**, **Ordenar**, busca e **Novo** (`db-new-row`).
 
 ### Tabela
 
-- Colunas = título + propriedades visíveis; largura redimensionável (salva na visão); cabeçalho com menu (renomear, tipo, ordenar, ocultar, excluir).
+- Tabela `db-table`, linhas `db-row` (`data-page-id`), células `db-cell` (`data-property-id`). Colunas = título + propriedades visíveis; largura redimensionável (salva na visão); cabeçalho com menu (renomear, tipo, ordenar, ocultar, excluir).
 - **Células editáveis no lugar**: texto/número/URL (input), seleção/múltipla (popover com busca e "Criar opção"), data (calendário), checkbox (clique), pessoa (membros do workspace).
 - Salvamento por célula, otimista, desfaz se a API recusar (com o erro do campo).
-- "+ Nova" no fim cria linha; "+" no cabeçalho cria propriedade.
+- "+ Nova" no fim cria linha; "+" no cabeçalho cria propriedade (`db-property-new`).
 - Clique no título (ou ícone "Abrir") abre a linha no **side peek**.
 - Paginação por cursor com "Carregar mais" no fim da tabela.
 
 ### Quadro (kanban)
 
-- Colunas = opções da propriedade de agrupamento (na ordem delas) + "Sem status"; contagem em cada coluna.
-- Cards com título e as propriedades visíveis.
+- Quadro `db-board`; colunas (`db-board-column` com `data-option-id`; "Sem status" com `data-option-id=""`) = opções da propriedade de agrupamento (na ordem delas) + "Sem status"; contagem em cada coluna.
+- Cards (`db-card` com `data-page-id`) com título e as propriedades visíveis.
 - **Arrastar entre colunas e dentro da coluna**: otimista, desfaz se falhar. Alternativa por teclado: menu do card "Mover para…".
 - "+ Novo" no fim de cada coluna cria linha já com aquele status.
 - Sem propriedade de seleção: estado vazio explicando e botão "Criar propriedade Status".
 
 ### Side peek
 
-O `FormSheet` da base em versão larga, abrindo pela direita com a linha como página: título, propriedades (editáveis, em lista), e o editor do conteúdo com o mesmo autosave. Botão para abrir em página inteira. A URL guarda `?linha=<id>` (voltar fecha; link abre direto).
+O `FormSheet` da base em versão larga (`db-peek`), abrindo pela direita com a linha como página: título, propriedades (editáveis, em lista), e o editor do conteúdo com o mesmo autosave. Botão para abrir em página inteira. A URL guarda `?linha=<id>` (voltar fecha; link abre direto).
 
 ## Compartilhar
 
 Botão no topo da página → popover:
-- "Publicar na web" (switch). Sem a feature `public_pages` no plano: switch desabilitado com selo do plano e o `UpgradeDialog` ao clicar.
-- Ligado: link com "Copiar" e aviso "Qualquer pessoa com o link pode ver esta página".
+- "Publicar na web" (switch `page-share-toggle`, `role="switch"` com `aria-checked`). Sem a feature `public_pages` no plano: switch desabilitado com selo do plano e o `UpgradeDialog` ao clicar.
+- Ligado: link (`page-share-link`, com a URL no texto) com "Copiar" e aviso "Qualquer pessoa com o link pode ver esta página".
 - Desligar pede confirmação ("O link atual vai parar de funcionar").
 
 ## Página pública (`/publico/[token]`)
 
 Fora do grupo `(app)`, sem guard e sem casca:
-- capa, ícone, título e o conteúdo no editor **somente leitura**;
+- container `public-page`; capa, ícone, título e o conteúdo no editor **somente leitura**;
 - rodapé discreto "Feito com {produto}";
 - 404 amigável se o link não existir mais;
 - metadata com o título da página e `noindex`.
@@ -113,3 +113,18 @@ Fora do grupo `(app)`, sem guard e sem casca:
 ## Estados (lembrete)
 
 Toda área que carrega dados tem skeleton com o formato, vazio com ação, erro com "tentar de novo" (`05-estados-e-feedback.md` do frontend). Árvore vazia: "Nenhuma página ainda" + "Criar a primeira página". Database sem linhas: "Nenhuma linha" + "Nova".
+
+## Contrato testável (data-testid)
+
+A bateria do `/rodsaas:verify` (`suite/tests/15-paginas.spec.ts`) roda quando `rodsaas.json` tem `notion` em `presets`. Lista canônica em `skills/verify/contract.json` (`presets.notion`). Ela confere o mínimo; o escopo é tudo o que está descrito aqui e em `03-editor.md`.
+
+| testid | Elemento |
+|---|---|
+| `pages-home`, `pages-new` | início do app e "Nova página" |
+| `pages-tree`, `pages-tree-item` (`data-page-id`), `pages-tree-add` | árvore do menu |
+| `pages-trash-open`, `pages-trash`, `pages-trash-item`, `pages-trash-restore` | lixeira |
+| `page-title`, `page-editor`, `page-save-status`, `page-breadcrumbs`, `page-favorite`, `page-menu`, `page-delete`, `page-conflict` | página e editor (`03-editor.md`) |
+| `page-share`, `page-share-toggle`, `page-share-link`, `public-page` | compartilhar e página pública |
+| `db-view-tab` (`data-view-type`), `db-table`, `db-row` (`data-page-id`), `db-cell` (`data-property-id`), `db-new-row`, `db-property-new` | database em tabela |
+| `db-board`, `db-board-column` (`data-option-id`), `db-card` (`data-page-id`), `db-peek` | quadro e side peek (arrastar o card para outra coluna muda a propriedade) |
+

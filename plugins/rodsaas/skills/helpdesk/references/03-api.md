@@ -27,7 +27,7 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 | ★ `GET /v1/helpdesk/tickets/:id` | — | o item acima + `messages: [{ id, kind, authorKind, author: { id, name, email }, bodyHtml, bodyText, channel, attachments, hasRemoteImages, deliveryStatus, createdAt }]`, `events`, `ccs`, `fields`, `csat: { rating, comment, at }`, `followUpOf`, `mergedInto` |
 | ★ `PATCH /v1/helpdesk/tickets/:id` | — | `{ status?, priority?, queueId?, assigneeId?, tags?, subject?, fields?, ccs? }`; `status` pelo `canSetStatus` (fechar à mão → 409 `INVALID_STATUS_TRANSITION`; fechado não muda → 409 `TICKET_CLOSED`); responsável precisa ser atendente ativo da fila (400 com `path`) |
 | ★ `POST /v1/helpdesk/tickets/:id/messages` | — | `{ kind: 'PUBLIC'\|'NOTE', body, status?, attachments?, macroId?, ccs? }` → **201 `{ message, ticket: { status, firstResponseAt, ... } }`**; regras abaixo |
-| `POST /v1/helpdesk/tickets/:id/merge` | — | `{ intoId }`: mensagens e acessos vão para o destino (que precisa estar aberto, mesma empresa, não o mesmo; 409 `MERGE_INVALID`), o origem vira Fechado com "Mesclado em #N" |
+| ★ `POST /v1/helpdesk/tickets/:id/merge` | — | `{ intoId }` → **`{ ticket }`** (o destino): mensagens e acessos vão para o destino (que precisa estar aberto, mesma empresa, não o mesmo; 409 `MERGE_INVALID`), o origem vira Fechado com "Mesclado em #N" |
 | `POST /v1/helpdesk/tickets/:id/spam` · `DELETE .../spam` | — | marca/desmarca spam (e opcionalmente bloqueia o remetente) |
 | `POST /v1/helpdesk/tickets/bulk` | — | `{ ids (até 100), patch }` (mesmas regras do PATCH, uma transação por chamado; devolve o que falhou e por quê) |
 | `POST /v1/helpdesk/tickets/:id/presence` | — | `{ typing }` → `{ viewers: [{ userId, name, typing }] }` (memória com expiração de 30 s; a tela chama a cada 10 s) |
@@ -48,8 +48,8 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 
 | Rota | Config | Faz |
 |---|---|---|
-| `GET/POST /v1/helpdesk/macros` · `PATCH/DELETE /:id` | da empresa: owner/admin; pessoais: dono | `{ name, bodyHtml?, actions: [{ type, value }], shared }` (`TEMPLATE_VARS` no editor) |
-| `POST /v1/helpdesk/macros/:id/apply` | — | `{ ticketId }` → `{ bodyHtml }` (com `renderTemplate`) + `patch` (a tela aplica no rascunho; nada é gravado até enviar) |
+| ★ `GET/POST /v1/helpdesk/macros` · `PATCH/DELETE /:id` | da empresa: owner/admin; pessoais: dono | `{ name, bodyHtml?, actions: [{ type, value }], shared }` (`TEMPLATE_VARS` no editor) |
+| ★ `POST /v1/helpdesk/macros/:id/apply` | — | `{ ticketId }` → **`{ bodyHtml, patch: { status?, priority?, queueId?, assigneeId?, tags? } }`** (com `renderTemplate` e `applyActions`) (a tela aplica no rascunho; nada é gravado até enviar) |
 | ★ `GET /v1/helpdesk/rules` · ★ `POST` · `PATCH/DELETE /:id` · `POST /reorder` | owner/admin, `feature: 'helpdesk_automation'` | `{ name, active, on, conditions, actions }` (`validateRule`) |
 | `GET/POST /v1/helpdesk/views` · `PATCH/DELETE /:id` | da empresa: owner/admin | visões salvas `{ name, filters, sort, shared }` |
 | `GET /v1/helpdesk/contacts` · `GET/PATCH /:id` | — | contatos com contadores; detalhe com chamados; `blocked` |

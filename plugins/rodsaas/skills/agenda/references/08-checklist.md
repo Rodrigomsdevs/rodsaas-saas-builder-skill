@@ -45,3 +45,4 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER que aten
 - [ ] claro/escuro, 360 px, teclado
 - [ ] `/rodsaas:verify` verde, incluindo a parte da Agenda (`-g "Agenda"` roda só ela)
 - [ ] README do projeto atualizado (o que a Agenda faz, tabelas públicas sem RLS, variáveis do Google/Outlook, fora da v1)
+- [ ] **conferência final**: tabela item a item de `04-pagina-publica.md` e `05-app-interno.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

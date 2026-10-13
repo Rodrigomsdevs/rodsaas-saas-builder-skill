@@ -150,6 +150,9 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | uma pergunta por vez | Enter não avança; mostra todas as perguntas |
 | lógica ao vivo | condição calculada só no envio; opções sem `<input type="radio">` acessível |
 | encerrado | tela branca ou formulário aberto em formulário encerrado |
+| todos os tipos e resumo | tipos faltando no esquema ou no público; validação brasileira (CPF, CNPJ, telefone) só no front; resumo calculado no front ou sem o `summarize` (opções, NPS, sim/não, média) |
+| CSV | sem BOM (acentos quebram no Excel); separador `,`; fórmula sem o `csvSafe` |
+| paleta | construtor só com alguns tipos (os 20 de pergunta precisam estar na paleta) |
 
 ## Agenda (`12-agenda.spec.ts`, preset `agenda`)
 
@@ -170,6 +173,9 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | aprovar e cancelar pelo painel | botão só muda a tela sem chamar a API; cancelar sem `confirm-dialog` |
 | cliente cancela pelo link | falta o passo de confirmação `agenda-manage-cancel-confirm`; tela de cancelado aparece mesmo com erro da API |
 | criar tipo pela tela | `FormSheet` sem `field-name`/`form-submit`; tipo criado sem a pessoa que criou como quem atende; cartão sem o link público |
+| rodízio | "qualquer um" atendendo sempre a primeira pessoa (falta o `pickHost`); membro sem agenda padrão; página pública devolvendo quem atende |
+| turma | vagas ignoradas (uma pessoa fecha o horário) ou sem limite; `seatsLeft` ausente |
+| encaixe interno | encaixe sem checar a disponibilidade (ou recusando mesmo com a confirmação); sobreposição aceita quando `outsideAvailability: true` |
 
 ## Suporte (`13-helpdesk.spec.ts`, preset `helpdesk`)
 
@@ -193,4 +199,36 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | isso resolveu e avaliação | botão de avaliação gravando sem o "Enviar avaliação" (`helpdesk-csat-submit`) |
 | central de ajuda | resultado sem `data-slug`; "isso ajudou?" sem chamar a API; sugestões não buscam enquanto digita |
 | visões | contadores de todas as visões iguais; "sem responsável" mostrando atribuídos |
+| macro | variáveis sem `renderTemplate`; aplicar já gravando (deveria só preencher o rascunho) |
+| mesclar | conversa não copiada para o destino; link antigo do cliente deixando de abrir; mesclar consigo mesmo aceito |
+
+## Tarefas (`14-tarefas.spec.ts`, preset `tarefas`)
+
+| Teste | Causas comuns |
+|---|---|
+| fluxo padrão e código | projeto inicial "Primeiros passos" (PP) não criado com a empresa; número calculado com `count + 1` fora de trava (simultâneas repetem) ou contador da empresa em vez do projeto |
+| quadro e conclusão | quadro com colunas fixas em vez dos status do projeto; `completedAt` não preenchido/limpo ao mudar de categoria |
+| subtarefas, checklist e vínculos | detalhe sem `subtaskList`/`checklist`/`links`; vínculo gravado de um lado só (falta o `blocked_by`); subtarefa de subtarefa aceita |
+| descrição com versão | salvar sem conferir `descriptionVersion` (o último vence) |
+| menção | menção sem notificação; autor notificado da própria ação; quem comenta não passa a seguir |
+| cronômetro | dois cronômetros por pessoa; iniciar outro sem lançar o anterior; cronômetro só no front (some ao recarregar) |
+| edição em massa | aplica até o primeiro erro (sem transação) |
+| projeto privado | filtro de visibilidade só na lista, esquecido no detalhe, no código, no quadro ou na busca; 403 em vez de 404 |
+| sprint | iniciar duas ao mesmo tempo; concluir sem mover as pendentes |
+| telas | adição rápida sem o `parseQuickAdd` (título com os atalhos); arrastar só na tela; painel sem subtarefas/checklist/comentários ou sem salvar na API; minhas tarefas sem as abas; calendário em UTC (dia errado à noite) |
+
+## Páginas (`15-paginas.spec.ts`, preset `notion`)
+
+| Teste | Causas comuns |
+|---|---|
+| conteúdo inicial | workspace novo sem "Comece aqui" ou sem o database "Tarefas" com Status, visões e linhas; linhas do database aparecendo na árvore |
+| árvore | mover sem checar descendentes (ciclo trava a árvore); posição renumerada ou ignorada |
+| autosave com versão | `PATCH` sem conferir a versão; o front reenviando com a versão nova sozinho no 409 (sobrescreve em silêncio) |
+| busca e lixeira | busca só no título (sem `contentText`); `portuguese` não usado (plural não acha); excluir o pai sem arquivar os filhos; restaurar só a raiz |
+| database | valor sem validar por tipo; pessoa de fora do workspace aceita; filtro da visão aplicado só no front |
+| link público | resposta com campos internos; desligar sem apagar o token; publicar sem conferir a feature |
+| links perigosos | conteúdo salvo sem sanitizar `href` |
+| editor (tela) | `<textarea>` no lugar do editor de blocos (sem `contenteditable` em `page-editor`); autosave só do título; título não atualiza na árvore |
+| conflito (tela) | aviso de conflito ausente; recarregar e sobrescrever sem perguntar |
+| quadro e tabela (tela) | arrastar só na tela; linha nova sem chamar a API; side peek ausente |
 

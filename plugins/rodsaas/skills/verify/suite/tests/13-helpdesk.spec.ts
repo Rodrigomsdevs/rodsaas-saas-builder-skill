@@ -385,6 +385,41 @@ test.describe("Helpdesk", () => {
     await Promise.all([pub.ctx.dispose(), ownerCtx.close(), memberCtx.close(), other.close()]);
   });
 
+  test("API: macro preenche as variáveis e devolve as ações, sem gravar nada", async ({ request, playwright }) => {
+    await register(request, newUser("hdmacro"));
+    const pub = await anon(playwright, await portalOf(request));
+    const tk = await openTicket(pub, { name: "Ana Souza" });
+    const t = await findTicket(request, tk.number);
+    const macro = await ok<any>(await call(request, "POST", "/v1/helpdesk/macros", { name: "Pedir detalhes", bodyHtml: "<p>Olá {{cliente.primeiro_nome}}, sobre o chamado {{chamado.numero}}: pode mandar um print?</p>", actions: [{ type: "set_status", value: "PENDING" }, { type: "add_tags", value: ["aguardando-print"] }], shared: true }), "criar macro");
+    const applied = await ok<any>(await call(request, "POST", `/v1/helpdesk/macros/${macro.id}/apply`, { ticketId: t.id }), "aplicar macro");
+    expect(applied.bodyHtml, "variáveis preenchidas").toContain(`Olá Ana, sobre o chamado #${tk.number}`);
+    expect(applied.patch?.status, "ação de status").toBe("PENDING");
+    expect(applied.patch?.tags ?? [], "ação de etiqueta").toContain("aguardando-print");
+    const d = await detail(request, t.id);
+    expect(d.status, "aplicar não grava nada até enviar").toBe("OPEN");
+    expect(d.messages.filter((x: any) => x.authorKind === "AGENT"), "nenhuma mensagem enviada").toHaveLength(0);
+    await pub.ctx.dispose();
+  });
+
+  test("API: mesclar chamados junta a conversa e o link antigo do cliente abre o que ficou", async ({ request, playwright }) => {
+    await register(request, newUser("hdmerge"));
+    const pub = await anon(playwright, await portalOf(request));
+    const a = await openTicket(pub, { description: `Primeira mensagem ${uniq()}` });
+    const b = await openTicket(pub, { description: `Segunda mensagem ${uniq()}` });
+    const ta = await findTicket(request, a.number), tb = await findTicket(request, b.number);
+    await expectCode(await call(request, "POST", `/v1/helpdesk/tickets/${ta.id}/merge`, { intoId: ta.id }), 409, "MERGE_INVALID", "mesclar consigo mesmo");
+    await ok(await call(request, "POST", `/v1/helpdesk/tickets/${ta.id}/merge`, { intoId: tb.id }), "mesclar A em B");
+    const da = await detail(request, ta.id);
+    expect(da.status, "origem fechada").toBe("CLOSED");
+    expect(da.mergedInto?.id ?? da.mergedInto, "origem aponta para o destino").toBe(tb.id);
+    const db = await detail(request, tb.id);
+    const texts = db.messages.map((x: any) => x.bodyText).join("\n");
+    expect(texts, "destino com a conversa dos dois").toContain("Primeira mensagem");
+    expect(texts).toContain("Segunda mensagem");
+    expect((await ok<any>(await pub.view(a.token), "link antigo do cliente")).number, "link antigo abre o chamado que ficou").toBe(b.number);
+    await pub.ctx.dispose();
+  });
+
   // ------------------------------------------------------------------ telas
   test("portal: erro no campo, abrir chamado e a equipe vê na caixa de entrada", async ({ page, browser }) => {
     await signUp(page, "hdui");

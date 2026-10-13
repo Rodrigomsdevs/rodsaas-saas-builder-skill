@@ -11,3 +11,4 @@
 - [ ] testes da API verdes (tipos, tamanho, cota, isolamento, token local, sanitização)
 - [ ] testado de verdade: enviar imagem, PDF e um arquivo proibido; estourar o limite; outra empresa não acessa a URL
 - [ ] produção: CORS do bucket e, se driver local, `client_max_body_size` do nginx ajustado
+- [ ] **conferência final**: tabela item a item de `01-backend.md` e `02-frontend.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

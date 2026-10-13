@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -645,6 +645,14 @@
           "body": [
             "answers"
           ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/summary"
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/responses/export"
         }
       ]
     },
@@ -1096,6 +1104,439 @@
             "description",
             "requester"
           ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/merge",
+          "body": [
+            "intoId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/macros"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/macros",
+          "body": [
+            "name",
+            "bodyHtml",
+            "actions"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/macros/{id}/apply",
+          "body": [
+            "ticketId"
+          ]
+        }
+      ]
+    },
+    "tarefas": {
+      "when": "rodsaas.json → presets inclui \"tarefas\"",
+      "routes": [
+        "/tarefas",
+        "/tarefas/projetos",
+        "/tarefas/p/[key]",
+        "/tarefas/p/[key]/relatorios",
+        "/tarefas/p/[key]/configuracoes",
+        "/tarefas/t/[codigo]",
+        "/tarefas/horas",
+        "/notificacoes",
+        "/configuracoes/notificacoes"
+      ],
+      "testids": [
+        "tasks-project-card",
+        "tasks-project-new",
+        "field-key",
+        "tasks-view-tab",
+        "tasks-board",
+        "tasks-column",
+        "tasks-card",
+        "tasks-quick-add",
+        "tasks-list-row",
+        "tasks-calendar",
+        "tasks-calendar-item",
+        "tasks-mine-tab-overdue",
+        "tasks-mine-tab-today",
+        "tasks-mine-tab-week",
+        "tasks-mine-tab-later",
+        "tasks-mine-tab-nodate",
+        "tasks-mine-row",
+        "tasks-mine-done",
+        "tasks-task-panel",
+        "tasks-task-title",
+        "tasks-task-status",
+        "tasks-subtask-add",
+        "tasks-subtask-row",
+        "tasks-checklist-add",
+        "tasks-checklist-item",
+        "tasks-link-add",
+        "tasks-link-row",
+        "tasks-comment-input",
+        "tasks-comment-submit",
+        "tasks-timeline-item",
+        "tasks-timer-toggle",
+        "tasks-timer-chip",
+        "tasks-timer-stop"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/task-projects"
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-projects",
+          "body": [
+            "name",
+            "key",
+            "visibility",
+            "sprintsEnabled"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-projects/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-projects/by-key/{key}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-projects/{id}/board"
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks"
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/mine"
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/by-key/{key}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks",
+          "body": [
+            "projectId",
+            "title",
+            "statusId",
+            "priority",
+            "assigneeId",
+            "dueDate",
+            "sprintId"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/tasks/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/tasks/{id}/description",
+          "body": [
+            "version",
+            "content"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/move",
+          "body": [
+            "statusId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/bulk",
+          "body": [
+            "ids"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/subtasks",
+          "body": [
+            "title"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/checklist",
+          "body": [
+            "text"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/links",
+          "body": [
+            "toTaskId",
+            "type"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/{id}/timeline"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/comments",
+          "body": [
+            "body"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/timer"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/timer/start"
+        },
+        {
+          "method": "post",
+          "path": "/v1/timer/stop"
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/{id}/time-entries"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/time-entries",
+          "body": [
+            "minutes",
+            "date"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-projects/{id}/sprints",
+          "body": [
+            "startDate",
+            "endDate"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/sprints/{id}/start"
+        },
+        {
+          "method": "post",
+          "path": "/v1/sprints/{id}/complete",
+          "body": [
+            "moveOpenTo"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/notifications"
+        },
+        {
+          "method": "get",
+          "path": "/v1/notifications/unread-count"
+        }
+      ]
+    },
+    "notion": {
+      "when": "rodsaas.json → presets inclui \"notion\"",
+      "routes": [
+        "/paginas",
+        "/paginas/[id]",
+        "/pagina/[id]",
+        "/publico/[token]"
+      ],
+      "testids": [
+        "pages-home",
+        "pages-new",
+        "pages-tree",
+        "pages-tree-item",
+        "pages-tree-add",
+        "pages-trash-open",
+        "pages-trash",
+        "pages-trash-item",
+        "pages-trash-restore",
+        "page-title",
+        "page-editor",
+        "page-save-status",
+        "page-breadcrumbs",
+        "page-favorite",
+        "page-menu",
+        "page-delete",
+        "page-conflict",
+        "page-share",
+        "page-share-toggle",
+        "page-share-link",
+        "public-page",
+        "db-view-tab",
+        "db-table",
+        "db-row",
+        "db-cell",
+        "db-new-row",
+        "db-property-new",
+        "db-board",
+        "db-board-column",
+        "db-card",
+        "db-peek"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/pages/tree"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages",
+          "body": [
+            "parentId",
+            "type",
+            "title"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/pages/{id}",
+          "body": [
+            "version",
+            "title",
+            "content"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/move",
+          "body": [
+            "parentId",
+            "beforeId",
+            "afterId"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/pages/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/trash"
+        },
+        {
+          "method": "post",
+          "path": "/v1/trash/{id}/restore"
+        },
+        {
+          "method": "put",
+          "path": "/v1/pages/{id}/favorite"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/favorites"
+        },
+        {
+          "method": "get",
+          "path": "/v1/search"
+        },
+        {
+          "method": "get",
+          "path": "/v1/databases/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/databases/{id}/properties",
+          "body": [
+            "name",
+            "type",
+            "options"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/databases/{id}/views",
+          "body": [
+            "name",
+            "type",
+            "config"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/databases/{id}/rows"
+        },
+        {
+          "method": "post",
+          "path": "/v1/databases/{id}/rows",
+          "body": [
+            "title",
+            "properties"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/pages/{id}/properties"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/share"
+        },
+        {
+          "method": "put",
+          "path": "/v1/pages/{id}/share"
+        },
+        {
+          "method": "delete",
+          "path": "/v1/pages/{id}/share"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/pages/{token}"
+        }
+      ]
+    },
+    "uploads": {
+      "when": "rodsaas.json → addons inclui \"uploads\"",
+      "routes": [],
+      "testids": [],
+      "api": [
+        {
+          "method": "post",
+          "path": "/v1/uploads",
+          "body": [
+            "fileName",
+            "size",
+            "mimeType",
+            "purpose"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/uploads/{id}/complete"
+        },
+        {
+          "method": "delete",
+          "path": "/v1/uploads/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/files/{id}/url"
+        },
+        {
+          "method": "get",
+          "path": "/v1/files/usage"
         }
       ]
     }

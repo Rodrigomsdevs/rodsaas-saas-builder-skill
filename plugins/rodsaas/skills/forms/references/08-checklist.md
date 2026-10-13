@@ -46,3 +46,4 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER, uma seg
 - [ ] claro/escuro, 360 px, teclado
 - [ ] `/rodsaas:verify` verde, incluindo a parte do Forms (`-g "Forms"` roda só ela)
 - [ ] README do projeto atualizado (o que o Forms faz, tabela pública sem RLS, fora da v1)
+- [ ] **conferência final**: tabela item a item de `04-construtor.md`, `05-formulario-publico.md` e `06-respostas-e-integracoes.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

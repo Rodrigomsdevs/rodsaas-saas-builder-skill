@@ -43,6 +43,16 @@ Se a doc atual contradiz um exemplo desta skill, a doc vence; anote no relatóri
 1. **Precisa do backend.** Procure `api/` com `openapi.json` (ou o script `openapi:export` para gerá-lo). Sem backend, pare e sugira `/rodsaas:backend` primeiro: o front é gerado a partir do contrato da API.
 2. Leia o **`rodsaas.json`** na raiz do projeto, se existir (o backend cria com nome, portas e domínios). As respostas de marca vão para ele. O front roda em `ports.web` e fala com a API em `domains.api`.
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo.
+2. **Tudo o que está nas referências é escopo**, exceto o que está marcado como fora do escopo. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": telas sem os estados de carregando/vazio/erro, sem a casca de apps completa, sem a troca de plano dentro do app ou sem os testids do contrato **não são** o frontend desta skill.
+3. **O contrato testável é o mínimo que o `/rodsaas:verify` confere, não o escopo.** Passar no verify não significa que acabou: a checklist (`references/10-checklist.md`) também precisa estar inteira.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+**Projeto que já tem o `web/` (revisão).** Se a pasta `web/` já existe, não gere de novo: leia todas as referências, compare item a item com o código e monte a tabela de lacunas (item · ✅/❌ · onde está ou o que falta), mostre ao usuário e complete fase por fase, sem reescrever o que já está certo e sem perder dados. Feche com `references/10-checklist.md` e o `/rodsaas:verify`.
+
 ## Fases
 
 Cada fase termina com `tsc --noEmit`, `biome check`, `next build` e testes da fase passando, mais um commit (`feat(web): ...`). Não avance com fase quebrada. Mostre o progresso na lista de tarefas.

@@ -127,5 +127,9 @@ Quando `rodsaas.json → presets` tem um preset listado em `contract.json → pr
 | `forms` | `skills/forms/references/04-construtor.md` (seção "Contrato testável"), `05-formulario-publico.md` (acessibilidade e testids do público) e os formatos ★ de `03-api.md` | `suite/tests/11-forms.spec.ts` |
 | `agenda` | `skills/agenda/references/05-app-interno.md` (seção "Contrato testável"), `04-pagina-publica.md` (rótulos e testids da página pública) e os formatos ★ de `03-api.md` | `suite/tests/12-agenda.spec.ts` |
 | `helpdesk` | `skills/helpdesk/references/05-app-interno.md` (seção "Contrato testável"), `04-portal-e-widget.md` (rótulos e testids do portal e do chamado do cliente) e os formatos ★ de `03-api.md` | `suite/tests/13-helpdesk.spec.ts` |
+| `tarefas` | `skills/tarefas/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` | `suite/tests/14-tarefas.spec.ts` |
+| `notion` | `skills/notion/references/04-frontend.md` (seção "Contrato testável"), `03-editor.md` e os formatos ★ de `02-api.md` | `suite/tests/15-paginas.spec.ts` |
+
+Em todos os presets, o contrato é o **mínimo** que dá para conferir de fora; o escopo de cada um é a referência inteira da skill (cada SKILL.md tem "Como trabalhar" e "Pronto quando" por fase).
 
 Rotas dinâmicas do contrato (`/crm/negocios/[id]`) aceitam qualquer nome de parâmetro na pasta (`[dealId]`).

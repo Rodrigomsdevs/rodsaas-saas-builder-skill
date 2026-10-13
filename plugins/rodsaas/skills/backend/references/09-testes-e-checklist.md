@@ -76,3 +76,4 @@ Rode e confirme cada item antes do relatório final:
 - [ ] checklist de segurança de `07-seguranca.md` completa
 - [ ] `.env.example` com todas as variáveis e comentários
 - [ ] README do projeto com: como rodar, variáveis, estrutura, catálogo de erros, como criar um módulo, como configurar Stripe (produtos/preços, portal, webhook) e notas de produção (rate limit com store compartilhado, provisionar o banco de produção com `/rodsaas:db`, `DOCS_ENABLED`)
+- [ ] **conferência final**: tabela item a item de cada referência com ✅/❌; nenhum ❌ sem pendência registrada no relatório

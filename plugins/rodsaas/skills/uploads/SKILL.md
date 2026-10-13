@@ -26,6 +26,23 @@ O arquivo não passa pela API no driver S3 (não pesa no servidor); a API só au
 - Projeto rodsaas com `api/`, `web/` e `rodsaas.json`, tudo verde.
 - Mesma regra de versões: `npm view` + doc atual (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`, `file-type`).
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo. Cada fase aponta o arquivo (→ `references/...`).
+2. **Tudo o que está nas referências é escopo da v1**, exceto o que está marcado como fora da v1. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": upload sem conferir o tipo real do arquivo, sem cota do plano ou sem os componentes de pré-visualização **não é** o add-on desta skill.
+3. **O contrato testável (testids e rotas ★) é o mínimo que o `/rodsaas:verify` consegue conferir, não o escopo.** Passar no verify não significa que a fase acabou.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase (cada linha de tabela e cada marcador) e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo. Use o "Pronto quando" de cada fase abaixo como mínimo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+## Projeto que já tem o uploads (revisão)
+
+Se `rodsaas.json → addons` já tem `uploads` (ou existe `api/src/modules/files`), rode em **modo revisão** em vez de instalar de novo:
+
+1. Leia todas as referências inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 1 e 2 (é onde mais se simplifica: validação só pela extensão, sem cota, sem limpeza de órfãos, sem pré-visualização ou progresso).
+3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
+4. Feche com `references/03-checklist.md` e o `/rodsaas:verify`.
+
 ## Perguntas (com padrões)
 
 - **Onde guardar em produção?** Padrão: **compatível com S3** (Cloudflare R2 costuma ser o mais barato por não cobrar saída; MinIO se quiser no próprio servidor). Em dev, sempre o driver **local**.
@@ -35,9 +52,11 @@ O arquivo não passa pela API no driver S3 (não pesa no servidor); a API só au
 ## Fases
 
 1. **Backend** — env, driver (`local` + `s3`), model `File` com RLS, rotas, validação, cota, jobs de limpeza, testes. → `references/01-backend.md`
+   - *Pronto quando*: drivers `local` e `s3`, tipo real conferido (magic bytes) e não só a extensão, cota do plano, URL assinada, limpeza de órfãos e testes.
 2. **Frontend** — `useUpload`, `Dropzone`, `FileList`, `FilePreview`, mensagens e estados, ligação com o `UpgradeDialog`. → `references/02-frontend.md`
+   - *Pronto quando*: `useUpload` com progresso e cancelar, `Dropzone`, `FileList`, `FilePreview`, mensagens de erro por motivo e ligação com o `UpgradeDialog`.
 3. **Integrações** — se o preset `notion` existir, ligar o upload de imagens no editor (que estava desligado). Registrar `uploads` em `rodsaas.json` (`addons`).
-4. **Fechamento** — `references/03-checklist.md`.
+4. **Fechamento** — `references/03-checklist.md` e o `/rodsaas:verify` (tem uma parte só do uploads: `-g "Uploads"`; ela usa as rotas ★ de `01-backend.md`).
 
 Cada fase termina com typecheck, lint, testes e commit (`feat(uploads): ...`).
 

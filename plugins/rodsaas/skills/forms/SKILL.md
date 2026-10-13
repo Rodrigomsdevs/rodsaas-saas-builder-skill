@@ -15,6 +15,23 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 2. **Add-on `uploads`** (pergunta de arquivo, capa e logo do formulário): se `rodsaas.json` não tiver `uploads` em `addons`, rode o fluxo da skill `uploads` primeiro.
 3. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, gerador de QR code, leitor de planilha para exportar `.xlsx`).
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo. Cada fase aponta o arquivo (→ `references/...`).
+2. **Tudo o que está nas referências é escopo da v1**, exceto o que está marcado como fora da v1. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": um formulário só com campos de texto, sem lógica, páginas, modo "uma por vez", resumo com gráficos e exportação **não é** o Forms desta skill.
+3. **O contrato testável (testids e rotas ★) é o mínimo que o `/rodsaas:verify` consegue conferir, não o escopo.** Passar no verify não significa que a fase acabou.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase (cada linha de tabela e cada marcador) e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo. Use o "Pronto quando" de cada fase abaixo como mínimo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+## Projeto que já tem o Forms (revisão)
+
+Se `rodsaas.json → presets` já tem `forms` (ou existe `api/src/modules/forms`), rode em **modo revisão** em vez de instalar de novo:
+
+1. Leia todas as referências inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 5, 6 e 7 (é onde mais se simplifica: construtor sem os 20 tipos de pergunta, sem lógica ou páginas; público sem o modo uma por vez ou sem máscaras BR; respostas sem resumo, gráficos e exportação).
+3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
+4. Feche com `references/08-checklist.md` e o `/rodsaas:verify` (`-g "Forms"`).
+
 ## Decisões padrão (confirme numa rodada só)
 
 | Decisão | Padrão |
@@ -34,12 +51,17 @@ Fora da v1 (registre no README do projeto como próximos passos): respostas parc
 Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(forms): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
 1. **Integração e regras** — registro do preset e do **app Forms**, planos, e o porte de `scripts/forms-lib.mjs` (com os testes) para o back e o front: é o coração (esquema, lógica, validação). → `references/01-escopo-e-integracao.md`
+   - *Pronto quando*: app no trilho, planos, `forms-lib` portado com os testes passando.
 2. **Modelo** — models com RLS, tabela de busca pública sem RLS, versões, estatísticas, webhooks. → `references/02-modelo.md`
 3. **API interna** — formulários, rascunho com versão, publicar/encerrar, modelos, colaboradores, respostas, resumo, funil, exportação. → `references/03-api.md`
+   - *Pronto quando*: rascunho com versão (409 em conflito), publicar copia o esquema para uma versão, modelos, colaboradores, respostas com filtros, resumo, funil e exportação.
 4. **API pública** — abrir o formulário publicado, enviar resposta (sem Origin, com anti-spam e limites), eventos de funil, upload de arquivo. → `references/03-api.md`
 5. **Construtor** — lista, criar (em branco ou modelo), construtor de três colunas, propriedades, lógica, tema, configurações, compartilhar. → `references/04-construtor.md`
+   - *Pronto quando*: construtor de três colunas com **os 20 tipos** de pergunta, propriedades de cada tipo, lógica condicional, páginas, tema, configurações e compartilhar; salvamento automático que sobrevive a recarregar.
 6. **Formulário público** — renderização clássica e uma por vez, validação, lógica ao vivo, máscaras BR, endereço por CEP, arquivos, boas-vindas e agradecimento, incorporação. → `references/05-formulario-publico.md`
+   - *Pronto quando*: clássico e uma por vez, lógica ao vivo, máscaras e validações brasileiras, endereço por CEP, arquivos, boas-vindas e agradecimento, incorporação.
 7. **Respostas e integrações** — tabela, detalhe, resumo com gráficos, funil, exportação, notificações, resposta automática, webhooks, CRM, LGPD. → `references/06-respostas-e-integracoes.md`
+   - *Pronto quando*: tabela e detalhe das respostas, resumo com gráficos por tipo, NPS, funil, exportação CSV/Excel, notificações, resposta automática, webhooks e envio para o CRM.
 8. **Interações e estados** — salvamento automático, desfazer, arrastar, atalhos, todos os estados de carregamento/vazio/erro. → `references/07-interacoes-e-estados.md`
 9. **Fechamento** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Forms), README do projeto.
 

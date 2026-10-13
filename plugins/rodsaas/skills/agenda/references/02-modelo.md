@@ -273,4 +273,4 @@ Usuários (`userId` de agendas, pessoas que atendem, conexões) conferidos no se
 
 ## Conteúdo inicial
 
-Na instalação (para cada empresa) e na criação de empresa nova: `AgendaSettings` (slug da página a partir do nome da empresa, único com sufixo se preciso; `AgendaPublicLookup`), agenda padrão do owner, perfil do owner (slug do nome) e um tipo de exemplo **inativo** "Reunião de 30 minutos" (Jitsi), para a tela não começar vazia sem publicar nada sozinho.
+Na instalação (para cada empresa) e na criação de empresa nova: `AgendaSettings` (slug da página a partir do nome da empresa, único com sufixo se preciso; `AgendaPublicLookup`), agenda padrão do owner (e de cada membro: quem ainda não tem ganha a padrão — seg–sex 09:00–18:00 no fuso da empresa — no primeiro `GET /v1/agenda/schedules` dele ou ao entrar como pessoa que atende num tipo), perfil do owner (slug do nome) e um tipo de exemplo **inativo** "Reunião de 30 minutos" (Jitsi), para a tela não começar vazia sem publicar nada sozinho.

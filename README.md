@@ -75,6 +75,9 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 🧭 | **`/rodsaas:apps`** | Atualiza um projeto já gerado para o **menu novo com trilho de apps** (cada módulo no seu app, sem misturar) |
 | 🗄️ | **`/rodsaas:db`** | Cria o banco e os usuários do Postgres (o backend já chama; use sozinho para o banco de produção) |
 
+> [!NOTE]
+> **Já instalou um preset antes?** Rode o mesmo comando de novo (por exemplo `/rodsaas:crm`, `/rodsaas:tarefas`, `/rodsaas:notion`): ele entra em **modo revisão**, compara item por item o que a skill pede com o que existe no projeto, mostra a tabela do que falta e completa sem refazer o que está certo. Funciona no Claude, no Gemini e no ChatGPT (skills em `.agents/skills`).
+
 > [!TIP]
 > Não precisa decorar nada. Pedir em português também funciona:
 > *"quero começar um SaaS com login e planos"*, *"cria o painel com a cor do meu logo"*, *"cria um módulo de agendamentos ligado a clientes"*, *"adiciona gestão de tarefas com sprints"*, *"quero um CRM com funil de vendas"*, *"cria uma pesquisa NPS"*, *"testa se está tudo funcionando"*, *"coloca no ar em app.meusaas.com.br"*.
@@ -109,7 +112,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +11 do Forms, +15 da Agenda e +17 do Suporte, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas e +4 do uploads, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |

@@ -14,6 +14,14 @@ O caminho é sempre: **descrição em linguagem natural → especificação (`ro
 - Projeto rodsaas com `api/`, `web/` e `rodsaas.json`, e com typecheck, lint, build e testes **passando**. Base vermelha: conserte antes.
 - Referência de código: o módulo de exemplo `projects`, se ainda existir. Se foi removido (por exemplo pelo preset `notion`), siga as referências das skills `backend` (`references/08-modulos.md`) e `frontend` (`references/05` a `09`), que descrevem o mesmo padrão.
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo.
+2. **Tudo o que está nas referências é escopo**, exceto o que está marcado como fora do escopo. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": um módulo sem os filtros, as colunas, o quadro (quando a especificação pede), a validação de cada campo no back e no front, o limite de plano ou os testes **não é** o módulo desta skill. Cada campo da especificação aprovada vira tipo, validação, coluna, filtro e campo de formulário.
+3. **O contrato testável é o mínimo que o `/rodsaas:verify` confere, não o escopo.** Passar no verify não significa que acabou: a checklist (`references/05-checklist.md`) também precisa estar inteira.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
 ## 1. Entender o pedido e montar a especificação
 
 Leia o pedido e proponha a especificação completa, preenchendo o que der para deduzir e usando os padrões da tabela abaixo. Pergunte **só** o que for ambíguo e mudar o resultado (de preferência numa única rodada).

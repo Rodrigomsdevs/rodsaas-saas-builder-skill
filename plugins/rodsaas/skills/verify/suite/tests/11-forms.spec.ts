@@ -75,6 +75,8 @@ async function anon(playwright: any) {
     });
   return { ctx, get, submit };
 }
+const ALL_TYPES = ["short_text", "long_text", "email", "phone", "cpf", "cnpj", "address", "number", "money", "rating", "nps", "scale", "single_choice", "multiple_choice", "dropdown", "yes_no", "date", "time", "file", "consent", "statement", "page"];
+const CHOICE = ["single_choice", "multiple_choice", "dropdown"];
 const labels = async (res: APIResponse) => ((await res.json()).schema?.fields ?? []).map((f: any) => f.label);
 /** Envio feito rápido demais é tratado como robô (`_ts`); a tela espera o mesmo que uma pessoa levaria. */
 const humanPause = (page: Page) => page.waitForTimeout(2_500);
@@ -192,6 +194,52 @@ test.describe("Forms", () => {
     await Promise.all([ownerCtx.close(), memberCtx.close(), other.close()]);
   });
 
+  test("API: todos os tipos de pergunta são aceitos, publicados e chegam ao link público; o resumo conta as respostas", async ({ request, playwright }) => {
+    await register(request, newUser("formtypes"));
+    await ensureFeature(request, "forms_files");
+    const fields = ALL_TYPES.map((t) => ({ id: `f_${t}`, type: t, label: `Pergunta ${t}`, ...(CHOICE.includes(t) ? { options: [{ id: "o_a", label: "A" }, { id: "o_b", label: "B" }] } : {}) }));
+    const { id, slug } = await createPublished(request, { version: 1, fields, hidden: [] });
+    const { ctx, get, submit } = await anon(playwright);
+    const pub = await (await get(slug)).json();
+    expect((pub.schema?.fields ?? []).map((f: any) => f.type), "os 22 tipos (20 de pergunta + texto informativo e página) chegam ao público").toEqual(ALL_TYPES);
+
+    const answers = { f_short_text: "Ana", f_long_text: "Texto longo", f_email: "ana@example.com", f_phone: "(44) 99999-1234", f_cpf: "529.982.247-25", f_cnpj: "11.222.333/0001-81", f_number: 7, f_money: 15000, f_rating: 4, f_nps: 9, f_scale: 3, f_single_choice: "o_a", f_multiple_choice: { selected: ["o_a", "o_b"] }, f_dropdown: "o_b", f_yes_no: true, f_date: "2026-10-20", f_time: "14:30", f_consent: true };
+    const res = await submit(slug, { answers });
+    expect(res.status(), `resposta com todos os tipos → ${(await res.text()).slice(0, 300)}`).toBe(201);
+    const bad = await submit(slug, { answers: { f_cpf: "111.111.111-11", f_cnpj: "11.111.111/1111-11", f_email: "x@" } });
+    expect(bad.status(), "CPF, CNPJ e e-mail inválidos recusados").toBe(400);
+    expect(((await bad.json()).errors ?? []).map((e: any) => e.path).sort(), "erro em cada campo").toEqual(["answers.f_cnpj", "answers.f_cpf", "answers.f_email"]);
+    const saved = (await responsesOf(request, id))[0];
+    expect(saved.answers.f_phone, "telefone normalizado").toBe("5544999991234");
+    expect(saved.answers.f_cpf, "CPF só com dígitos").toBe("52998224725");
+
+    const summary = await ok<any>(await call(request, "GET", `/v1/forms/${id}/summary`), "resumo");
+    const byId = Object.fromEntries((summary.fields ?? []).map((f: any) => [f.fieldId, f]));
+    expect(byId.f_single_choice?.options?.find((o: any) => o.id === "o_a")?.count, "escolha única contada").toBe(1);
+    expect(byId.f_nps?.nps?.score, "NPS calculado").toBe(100);
+    expect(byId.f_yes_no?.yes, "sim/não contado").toBe(1);
+    expect(byId.f_rating?.average, "média das estrelas").toBe(4);
+    expect(summary.totals?.responses, "total de respostas").toBe(1);
+    await ctx.dispose();
+  });
+
+  test("API: exportar respostas em CSV que abre no Excel", async ({ request, playwright }) => {
+    await register(request, newUser("formcsv"));
+    const { id, slug } = await createPublished(request, SIMPLE);
+    const { ctx, submit } = await anon(playwright);
+    await submit(slug, { answers: { f_nome: "=SOMA(1;2)", f_email: `csv.${uniq()}@example.com` } });
+    const res = await call(request, "GET", `/v1/forms/${id}/responses/export?format=csv`);
+    expect(res.status(), "exportar").toBe(200);
+    expect(res.headers()["content-type"] ?? "", "tipo CSV").toContain("text/csv");
+    const buf = await res.body();
+    expect([...buf.subarray(0, 3)], "UTF-8 com BOM (acentos no Excel)").toEqual([0xef, 0xbb, 0xbf]);
+    const text = buf.toString("utf8").slice(1);
+    const [header, line] = text.split(/\r?\n/);
+    expect(header, "cabeçalho com as perguntas, separado por ;").toContain("Seu nome;Seu e-mail");
+    expect(line, "fórmula neutralizada (não executa no Excel)").toContain("'=SOMA");
+    await ctx.dispose();
+  });
+
   // ------------------------------------------------------------------ telas
   test("construtor: montar pela tela e publicar", async ({ page }) => {
     await signUp(page, "formui", "/forms");
@@ -229,6 +277,15 @@ test.describe("Forms", () => {
     const fields = detail.published?.fields ?? [];
     expect(fields.map((f: any) => [f.type, f.label]), "perguntas publicadas").toEqual([["short_text", "Seu nome"], ["email", "Seu e-mail"]]);
     expect(fields[0].required, "primeira pergunta obrigatória").toBe(true);
+  });
+
+  test("construtor: a paleta oferece todos os tipos de pergunta", async ({ page }) => {
+    await signUp(page, "formpalette", "/forms");
+    await page.getByTestId("forms-new").click();
+    await page.getByTestId("forms-template-blank").click();
+    await expect(page).toHaveURL(/\/forms\/f\/[^/]+\/editar/);
+    await page.getByTestId("forms-add-field").click();
+    for (const t of ALL_TYPES.filter((x) => x !== "page" && x !== "statement")) await expect(page.getByTestId(`forms-field-type-${t}`), `tipo ${t} na paleta`).toBeVisible();
   });
 
   test("formulário público: erro no campo, enviar e a resposta aparece para o dono", async ({ page, browser }) => {

@@ -51,3 +51,4 @@ Confira **usando o app** (API e front rodando), com dois usuários de papéis di
 - [ ] atalhos de teclado e folha de atalhos (`?`)
 - [ ] claro/escuro, 360 px de largura, navegação por teclado
 - [ ] README do projeto atualizado (o que o módulo faz, decisões, fora da v1)
+- [ ] **conferência final**: tabela item a item de `04-telas.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

@@ -22,6 +22,23 @@ Acrescenta a um projeto rodsaas (API em `api/`, painel em `web/`) o app **Págin
 2. `rodsaas.json` na raiz.
 3. Mesma regra de versões das outras skills: `npm view` + documentação atual antes de cada pacote novo (principalmente o editor de blocos e a lib de arrastar e soltar).
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo. Cada fase aponta o arquivo (→ `references/...`).
+2. **Tudo o que está nas referências é escopo da v1**, exceto o que está marcado como fora da v1. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": páginas sem árvore com arrastar, editor sem menu "/" e blocos, autosave sem controle de conflito ou databases só com tabela **não é** o Páginas desta skill.
+3. **O contrato testável (testids e rotas ★) é o mínimo que o `/rodsaas:verify` consegue conferir, não o escopo.** Passar no verify não significa que a fase acabou.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase (cada linha de tabela e cada marcador) e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo. Use o "Pronto quando" de cada fase abaixo como mínimo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+## Projeto que já tem o Páginas (revisão)
+
+Se `rodsaas.json → presets` já tem `notion` (ou existe `api/src/modules/pages`), rode em **modo revisão** em vez de instalar de novo:
+
+1. Leia todas as referências inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 2, 5 e 6 (é onde mais se simplifica: árvore sem mover/arrastar, editor de texto simples em vez de blocos, autosave sem versão, databases sem quadro, filtros ou side peek).
+3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
+4. Feche com `references/05-checklist.md` e o `/rodsaas:verify` (`-g "Páginas"`).
+
 ## Perguntas (uma rodada, com padrões)
 
 - **Remover o módulo de exemplo `projects`?** Padrão: **sim**, se o projeto ainda só tiver o exemplo (API, tabela, telas, item no app Cadastros e limite de plano). Sem nenhum módulo, o app Cadastros sai do registro e o Páginas fica sendo o único app (menu clássico) até entrar outro.
@@ -39,29 +56,35 @@ Cada fase termina com typecheck, lint, build, testes da fase passando e commit (
 ### Fase 2 — API de páginas
 Models e migrations (com RLS), árvore, criar/editar/mover/duplicar, autosave com versão, lixeira, favoritos, recentes, busca em português, páginas iniciais criadas junto com cada workspace, testes.
 → `references/01-escopo-e-modelo.md`, `references/02-api.md`
+*Pronto quando*: árvore com criar, mover (sem ciclo, `INVALID_MOVE`), duplicar, autosave com versão (409 `VERSION_CONFLICT`), lixeira com restaurar, favoritos, recentes e busca em português.
 
 ### Fase 3 — API de databases
 Propriedades tipadas, linhas (que são páginas), valores validados por tipo, visões de tabela e quadro com filtro/ordenação/agrupamento.
 → `references/02-api.md`
+*Pronto quando*: propriedades tipadas com validação por tipo, linhas que são páginas, visões de tabela e quadro com filtro, ordenação e agrupamento salvos.
 
 ### Fase 4 — App Páginas na casca
 Registro do app **Páginas** (`/paginas`) em `config/apps.ts`: menu do app com busca, favoritos, árvore de páginas com arrastar e soltar e lixeira; tela inicial do app com recentes; widgets no Início global. Projeto com menu antigo: rode antes o `/rodsaas:apps`.
 → `references/04-frontend.md`
+*Pronto quando*: app no trilho com busca, favoritos, árvore com arrastar e lixeira no menu; início do app com recentes; widgets no Início.
 
 ### Fase 5 — Página e editor
 Título, ícone, capa, breadcrumbs, editor de blocos com menu "/", atalhos markdown, arrastar blocos, autosave com indicador e tratamento de conflito.
 → `references/03-editor.md`
+*Pronto quando*: editor de blocos com menu "/", atalhos markdown, arrastar blocos, título, ícone, capa, breadcrumbs, indicador de salvamento e tratamento de conflito.
 
 ### Fase 6 — Databases no front
 Visão de tabela editável, visão de quadro com arrastar entre colunas, nova propriedade, filtros/ordenação, abrir linha no side peek.
 → `references/04-frontend.md`
+*Pronto quando*: tabela editável célula a célula, quadro com arrastar entre colunas, nova propriedade, filtros e ordenação, side peek da linha.
 
 ### Fase 7 — Compartilhamento público
 Diálogo "Compartilhar" (link público liga/desliga, conforme o plano) e a página pública somente leitura.
 → `references/02-api.md`, `references/04-frontend.md`
+*Pronto quando*: link público liga/desliga conforme o plano e a página pública somente leitura.
 
 ### Fase 8 — Fechamento
-Checklist de `references/05-checklist.md`, testes ponta a ponta, README do projeto atualizado.
+Checklist de `references/05-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Páginas: `-g "Páginas"`; ela exige os testids da seção "Contrato testável" de `04-frontend.md` e os formatos ★ de `02-api.md`), README do projeto atualizado.
 
 ## Princípios
 

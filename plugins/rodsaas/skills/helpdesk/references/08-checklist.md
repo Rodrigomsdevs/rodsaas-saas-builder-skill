@@ -51,3 +51,4 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER atendent
 - [ ] claro/escuro, 360 px, teclado (atalhos)
 - [ ] `/rodsaas:verify` verde, incluindo a parte do Suporte (`-g "Helpdesk"` roda só ela)
 - [ ] README do projeto atualizado (o que o Suporte faz, tabelas públicas sem RLS, variáveis, como conectar o e-mail, SPF/DKIM, fora da v1)
+- [ ] **conferência final**: tabela item a item de `04-portal-e-widget.md` e `05-app-interno.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

@@ -78,13 +78,15 @@ Os presets podem restringir mais por `purpose` (ex.: `editor_image` e `avatar` s
 
 ## Rotas
 
+As rotas com ★ fazem parte do **contrato testável** (`skills/verify/contract.json`, grupo `presets.uploads`; testes em `suite/tests/16-uploads.spec.ts`, que rodam quando `rodsaas.json → addons` tem `uploads`).
+
 | Rota | Config | Faz |
 |---|---|---|
-| `POST /v1/uploads` | autenticado, idempotente | `{ fileName, size, mimeType, purpose }` → valida allowlist, `size ≤ maxFileMb`, cota (`usado + PENDING recentes + size ≤ storageMb`) → cria `File` PENDING com chave nova → `{ fileId, uploadUrl, headers, expiresAt }` |
-| `POST /v1/uploads/:id/complete` | autenticado | só quem iniciou; `head` (existe e tamanho = declarado), assinatura do conteúdo confere com o tipo; ok → READY + `completedAt`; diferente → apaga o objeto, DELETED, 400 com o motivo |
-| `DELETE /v1/uploads/:id` | autenticado | cancela um PENDING (apaga o objeto se chegou a subir) |
-| `GET /v1/files/:id/url` | autenticado | READY e da empresa → URL assinada de 5 min; `?download=1` força download; inline só para imagem e PDF |
-| `GET /v1/files/usage` | autenticado | `{ usedBytes, limitBytes, maxFileBytes }` (também entra no uso do plano em `/v1/me`) |
+| ★ `POST /v1/uploads` | autenticado, idempotente | `{ fileName, size, mimeType, purpose }` → valida allowlist, `size ≤ maxFileMb`, cota (`usado + PENDING recentes + size ≤ storageMb`) → cria `File` PENDING com chave nova → `{ fileId, uploadUrl, headers, expiresAt }` |
+| ★ `POST /v1/uploads/:id/complete` | autenticado | só quem iniciou; `head` (existe e tamanho = declarado), assinatura do conteúdo confere com o tipo; ok → READY + `completedAt`; diferente → apaga o objeto, DELETED, 400 com o motivo |
+| ★ `DELETE /v1/uploads/:id` | autenticado | cancela um PENDING (apaga o objeto se chegou a subir) |
+| ★ `GET /v1/files/:id/url` | autenticado | READY e da empresa → URL assinada de 5 min; `?download=1` força download; inline só para imagem e PDF |
+| ★ `GET /v1/files/usage` | autenticado | `{ usedBytes, limitBytes, maxFileBytes }` (também entra no uso do plano em `/v1/me`) |
 
 Quem **liga** o arquivo a um registro é a feature dona (ex.: `POST /v1/tasks/:id/attachments { fileId }`), conferindo: mesma empresa, READY, `purpose` compatível, quem enviou é quem está ligando (ou admin). Ao desligar (excluir o anexo), a feature marca o `File` como DELETED se ele não estiver ligado a mais nada.
 

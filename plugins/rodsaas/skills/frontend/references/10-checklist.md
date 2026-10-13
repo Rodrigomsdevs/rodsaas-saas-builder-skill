@@ -79,3 +79,4 @@ Confira item por item antes do relatório. Para os itens de interface, **abra a 
 - [ ] `web/README.md`: como rodar, variáveis, como regenerar tipos e tema, como criar uma tela nova seguindo o molde
 - [ ] `brand-preview.html` no `.gitignore`
 - [ ] relatório final com o que ficou pendente (logo definitivo, domínios de produção, configuração do portal da Stripe)
+- [ ] **conferência final**: tabela item a item de `09-telas.md` e `12-casca-e-apps.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

@@ -2,7 +2,7 @@
 
 ## Editor
 
-Use um editor de blocos pronto no estilo Notion, não construa um do zero. Recomendação: **BlockNote** (sobre ProseMirror/TipTap), que já traz menu "/", alça de arrastar blocos, barra de formatação e atalhos markdown. Antes de instalar, confira na doc atual:
+Use um editor de blocos pronto no estilo Notion, não construa um do zero (um `<textarea>` ou um editor de texto simples **não** serve). O editor fica dentro de `page-editor` (o elemento editável — `contenteditable` — está dentro dele). Recomendação: **BlockNote** (sobre ProseMirror/TipTap), que já traz menu "/", alça de arrastar blocos, barra de formatação e atalhos markdown. Antes de instalar, confira na doc atual:
 
 - a **licença de cada pacote**: use só os pacotes centrais de licença livre; pacotes "pro"/XL (multi-colunas, exportação, IA) costumam ter licença restritiva ou paga — não use sem o usuário decidir;
 - se existe a integração de UI com **shadcn/ui** (combina com o resto do painel); senão, a integração padrão, com o tema ajustado;
@@ -42,16 +42,16 @@ Bloco que o editor não suporta nativamente (callout, link de página): use os m
 
 ## Topo da página
 
-- **Breadcrumbs** (ancestrais clicáveis; no meio corta com "…" quando ficar comprido).
+- **Breadcrumbs** (`page-breadcrumbs`; ancestrais clicáveis; no meio corta com "…" quando ficar comprido).
 - "Editado há 3 min por Ana" (relativo, atualizando).
-- **Indicador de salvamento**: "Salvando…" / "Salvo" / "Sem conexão — vamos salvar quando voltar" / "Erro ao salvar — tentar de novo".
-- ⭐ Favoritar, **Compartilhar**, menu ⋯ (Largura cheia, Copiar link, Duplicar, Mover para…, Excluir).
+- **Indicador de salvamento** (`page-save-status`): "Salvando…" / "Salvo" / "Sem conexão — vamos salvar quando voltar" / "Erro ao salvar — tentar de novo".
+- ⭐ Favoritar (`page-favorite`, `aria-pressed`), **Compartilhar** (`page-share`), menu ⋯ (`page-menu`: Largura cheia, Copiar link, Duplicar, Mover para…, Excluir `page-delete`).
 
 Acima do título, ao passar o mouse: "Adicionar ícone" e "Adicionar capa".
 
 - **Ícone**: seletor de emoji com busca (use uma lib mantida e leve; confira a licença) e "Remover".
 - **Capa**: galeria de degradês gerados das cores da marca (`gradient:1`…`gradient:8`) e "Link de imagem" (só `https`). Botões "Trocar" e "Remover" ao passar o mouse.
-- **Título**: campo grande, placeholder "Sem título"; Enter leva o foco para o primeiro bloco; o título também vai no autosave.
+- **Título** (`page-title`): campo grande, placeholder "Sem título"; Enter leva o foco para o primeiro bloco; o título também vai no autosave.
 
 ## Autosave (o mais importante desta fase)
 
@@ -75,7 +75,7 @@ ao trocar de página, fechar a aba ou perder o foco da janela → salva na hora 
 
 ### Conflito (`VERSION_CONFLICT`)
 
-Diálogo: "Ana editou esta página às 14:32 enquanto você escrevia."
+Diálogo (`page-conflict`): "Ana editou esta página às 14:32 enquanto você escrevia."
 
 - **Ver a versão mais nova**: copia o seu conteúdo para a área de transferência (avisa), recarrega a página do servidor.
 - **Manter a minha**: reenvia com a `currentVersion` que veio no erro (sobrescreve, e o usuário escolheu isso conscientemente).

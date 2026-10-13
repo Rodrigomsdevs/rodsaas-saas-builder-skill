@@ -17,6 +17,23 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 4. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (`imapflow`, `mailparser`, `nodemailer` se ainda não houver, `sanitize-html`, editor de texto rico — o mesmo do Notion/Tarefas se o projeto já tiver, senão TipTap).
 5. Se o preset `forms` existir, reaproveite o `forms-lib` dele para os **campos do chamado** e a assinatura dos webhooks; se não existir, copie `skills/forms/scripts/forms-lib.mjs` (com os testes) para o projeto.
 
+## Como trabalhar (obrigatório)
+
+1. **Leia a referência da fase inteira antes de começar a fase**, do início ao fim, não por amostragem nem resumo. Cada fase aponta o arquivo (→ `references/...`).
+2. **Tudo o que está nas referências é escopo da v1**, exceto o que está marcado como fora da v1. Nada de "versão simplificada", "básico por enquanto" ou "dá para melhorar depois": um chamado sem nota interna, sem SLA, sem visões ou sem o encadeamento de e-mail **não é** o Suporte desta skill.
+3. **O contrato testável (testids e rotas ★) é o mínimo que o `/rodsaas:verify` consegue conferir, não o escopo.** Passar no verify não significa que a fase acabou.
+4. **Conferência ao fim de cada fase**: antes do commit, monte uma tabela com **cada item** da referência da fase (cada linha de tabela e cada marcador) e o status ✅ feito / ❌ faltando, com o arquivo onde está. Só avance com tudo ✅; o que não der para fazer vira pendência explícita no relatório final, com o motivo. Use o "Pronto quando" de cada fase abaixo como mínimo.
+5. Se o usuário pedir para pular ou cortar algo, registre como desvio no relatório final.
+
+## Projeto que já tem o Suporte (revisão)
+
+Se `rodsaas.json → presets` já tem `helpdesk` (ou existe `api/src/modules/helpdesk`), rode em **modo revisão** em vez de instalar de novo:
+
+1. Leia todas as referências inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 6 (é onde mais se simplifica: e-mail sem encadeamento ou sem proteção contra loop, SLA em horas corridas, chamado sem as três colunas, sem macros, sem colisão, base de conhecimento sem busca em português).
+3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
+4. Feche com `references/08-checklist.md` e o `/rodsaas:verify` (`-g "Helpdesk"`).
+
 ## Decisões padrão (confirme numa rodada só)
 
 | Decisão | Padrão |
@@ -43,11 +60,17 @@ Fora da v1 (registre no README do projeto): chat ao vivo e WhatsApp (add-on), te
 Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(helpdesk): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
 1. **Integração e regras** — registro do preset e do **app Suporte**, papéis, planos, porte de `scripts/helpdesk-lib.mjs` (com os testes) para o back: horário comercial, SLA, encadeamento de e-mail, distribuição e gatilhos saem dali. → `references/01-escopo-e-integracao.md`
+   - *Pronto quando*: app no trilho só para atendentes, papéis, planos, `helpdesk-lib` portado com os testes passando.
 2. **Modelo** — models com RLS, numeração por empresa sem buracos nem repetição, tokens do cliente, tabelas de busca pública sem RLS, busca em português, conteúdo inicial. → `references/02-modelo.md`
+   - *Pronto quando*: numeração por empresa com `UPDATE … RETURNING`, tokens por destinatário, tabelas de busca pública, busca em português (`pt_unaccent`), conteúdo inicial.
 3. **API interna** — chamados, mensagens, visões, filas, atendentes, macros, gatilhos, SLA, contatos, base de conhecimento, relatórios. → `references/03-api.md`
+   - *Pronto quando*: chamados com visões e contadores, mensagens pública e nota (nota nunca sai), filas, atendentes, macros com variáveis, gatilhos (`runRules`), SLA (`slaDueDates`, pausa e retomada), contatos, base de conhecimento, mesclar, spam, relatórios.
 4. **API pública e e-mail** — portal, chamado pelo token, respostas e CSAT do cliente, recebimento de e-mail (IMAP e webhook), envio com encadeamento, API com chave. → `references/03-api.md` e `references/06-email-e-integracoes.md`
+   - *Pronto quando*: portal e chamado pelo token, recebimento de e-mail por IMAP **e** por webhook no mesmo `ingestEmail` (dedupe, encadeamento, citação, resposta automática), envio com `Message-ID`/`In-Reply-To`, API com chave.
 5. **Portal e widget** — central de ajuda, artigos, abrir chamado com sugestões, chamado do cliente, meus chamados, widget. → `references/04-portal-e-widget.md`
+   - *Pronto quando*: central com busca, categorias e artigo com "isso ajudou?", abrir chamado com sugestões, chamado do cliente com responder/resolver/avaliar, meus chamados por link mágico, widget.
 6. **App interno** — caixa de entrada, chamado (conversa, resposta, painel lateral), contatos, base de conhecimento, relatórios, configurações. → `references/05-app-interno.md`
+   - *Pronto quando*: caixa de entrada com visões, filtros, busca e massa; chamado com conversa, propriedades e histórico do solicitante; editor com nota, macros, artigos, enviar como status e rascunho; colisão; contatos, base de conhecimento com editor, relatórios e todas as configurações; todos os testids da seção "Contrato testável".
 7. **E-mail e integrações** — caixas de e-mail, avisos, SLA e fechamento automático na fila, CRM, Forms, webhooks. → `references/06-email-e-integracoes.md`
 8. **Interações e estados** — atalhos, otimismo, colisão, todos os estados. → `references/07-interacoes-e-estados.md`
 9. **Fechamento** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Suporte: `-g "Helpdesk"`; ela exige os testids de `05-app-interno.md` e `04-portal-e-widget.md`, os rótulos do formulário do portal e os formatos ★ de `03-api.md`), README do projeto.

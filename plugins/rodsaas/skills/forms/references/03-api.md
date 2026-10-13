@@ -32,8 +32,8 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 | `PATCH /v1/forms/:id/responses/:rid` | `{ read?, starred? }` |
 | `DELETE /v1/forms/:id/responses/:rid` · `POST .../restore` | soft delete e desfazer (editor) |
 | `POST /v1/forms/:id/responses/bulk` | `{ ids (≤500), action: 'read' \| 'unread' \| 'star' \| 'unstar' \| 'delete' }` |
-| `GET /v1/forms/:id/responses/export?format=csv\|xlsx&<filtros>` | `responsesToCsv` (CSV `;` com BOM) ou planilha; streaming; audit `forms.exported`; rate limit 5/min |
-| `GET /v1/forms/:id/summary?from=&to=` | `{ totals: { views, starts, responses, completionRate, avgDurationSec }, fields: summarize(...) }` sobre a versão publicada atual (respostas de versões antigas entram nas perguntas que ainda existem) |
+| ★ `GET /v1/forms/:id/responses/export?format=csv\|xlsx&<filtros>` | `responsesToCsv` (CSV `;` com BOM) ou planilha; streaming; audit `forms.exported`; rate limit 5/min |
+| ★ `GET /v1/forms/:id/summary?from=&to=` | `{ totals: { views, starts, responses, completionRate, avgDurationSec }, fields: summarize(...) }` (cada item no formato do `summarize` do `forms-lib`: escolha com `options[{ id, count, pct }]`, NPS com `nps.score`, sim/não com `yes`/`no`, números com `average`) sobre a versão publicada atual (respostas de versões antigas entram nas perguntas que ainda existem) |
 | `GET /v1/forms/:id/funnel?version=` | páginas com `reached` e queda entre elas |
 | `GET /v1/forms/responses/recent` | caixa "Respostas" do menu: últimas respostas de todos os formulários que a pessoa vê, com título do formulário e um resumo (2 primeiras respostas) |
 

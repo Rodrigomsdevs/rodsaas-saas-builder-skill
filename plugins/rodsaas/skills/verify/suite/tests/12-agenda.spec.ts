@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext, type APIResponse, type Page } from "@playwright/test";
 import { billingMode, call, items, me, newUser, ok, plansFromApi, register, uniq } from "../support/api";
 import { cfg } from "../support/config.mjs";
-import { newContext, signUp } from "../support/ui";
+import { newContext, ownerWithMember, signUp } from "../support/ui";
 
 // Parte da Agenda (preset /rodsaas:agenda). Roda quando rodsaas.json tem "agenda" em presets ou a API tem /v1/agenda/settings.
 
@@ -314,6 +314,61 @@ test.describe("Agenda", () => {
     const slotsText = JSON.stringify(await pub.days());
     expect(slotsText, "horários não expõem clientes").not.toContain(who.email);
     await Promise.all([other.close(), pub.ctx.dispose()]);
+  });
+
+  test("API: qualquer um da equipe — agendamentos distribuídos em rodízio", async ({ browser, request, playwright }) => {
+    test.slow();
+    const { ownerCtx, memberCtx } = await ownerWithMember(browser, request);
+    const o = ownerCtx.request, m = memberCtx.request;
+    await ensureFeature(o, "agenda_team");
+    const memberId = (await me(m)).user.id, ownerId = (await me(o)).user.id;
+    const ms = items<any>(await ok(await call(m, "GET", "/v1/agenda/schedules"), "agenda do membro (nasce sozinha)"));
+    expect(ms.length, "membro ganha a agenda padrão").toBeGreaterThan(0);
+    await ok(await call(m, "PATCH", `/v1/agenda/schedules/${ms[0].id}`, { timeZone: TZ, weekly: WEEKDAYS_9_12 }), "disponibilidade do membro");
+    const s = await setup(o, { assignment: "any", hostIds: [ownerId, memberId] });
+    const pub = await anon(playwright, s);
+    const list = await pub.slots();
+    for (const sl of list.slice(0, 4)) await booked(await pub.book(sl.start), "agendar no rodízio");
+    const appts = items<any>(await ok(await call(o, "GET", "/v1/agenda/appointments?status=upcoming"), "agendamentos"));
+    const hostIds = appts.map((a) => a.hosts?.[0]?.id);
+    expect(hostIds.filter((x) => x === ownerId), `rodízio equilibrado (${hostIds.join(", ")})`).toHaveLength(2);
+    expect(hostIds.filter((x) => x === memberId)).toHaveLength(2);
+    const slotsText = JSON.stringify(await pub.days());
+    expect(slotsText, "página pública não diz quem atende no rodízio").not.toContain(memberId);
+    await Promise.all([pub.ctx.dispose(), ownerCtx.close(), memberCtx.close()]);
+  });
+
+  test("API: turma — vagas por horário e a última vaga fecha o horário", async ({ request, playwright }) => {
+    await register(request, newUser("agendaturma"));
+    await ensureFeature(request, "agenda_team");
+    const s = await setup(request, { capacity: 3 });
+    const pub = await anon(playwright, s);
+    const [a] = await pub.slots();
+    expect(a.seatsLeft, "turma começa com 3 vagas").toBe(3);
+    await booked(await pub.book(a.start), "vaga 1");
+    expect((await pub.slots()).find((x) => iso(x.start) === iso(a.start))?.seatsLeft, "sobram 2").toBe(2);
+    await booked(await pub.book(a.start), "vaga 2");
+    await booked(await pub.book(a.start), "vaga 3");
+    await expectCode(await pub.book(a.start), 409, "SLOT_TAKEN", "quarta pessoa na turma de 3");
+    expect(await pub.has(a.start), "turma cheia sai da página").toBe(false);
+    await pub.ctx.dispose();
+  });
+
+  test("API: encaixe interno — fora da disponibilidade só com confirmação e nunca sobreposto", async ({ request, playwright }) => {
+    await register(request, newUser("agendaencaixe"));
+    const s = await setup(request);
+    const pub = await anon(playwright, s);
+    const [a] = await pub.slots();
+    await booked(await pub.book(a.start), "agendamento público");
+    let sat = addDays(today(), 1);
+    while (new Date(sat + "T12:00:00Z").getUTCDay() !== 6) sat = addDays(sat, 1);
+    const satStart = new Date(Date.parse(sat + "T13:00:00Z")).toISOString(); // 10:00 em São Paulo
+    const client = { name: `Encaixe ${uniq()}`, email: `encaixe.${uniq()}@example.com` };
+    await expectCode(await call(request, "POST", "/v1/agenda/appointments", { eventTypeId: s.typeId, start: satStart, client }), 409, "OUTSIDE_AVAILABILITY", "encaixe no sábado sem confirmar");
+    const ok1 = await ok<any>(await call(request, "POST", "/v1/agenda/appointments", { eventTypeId: s.typeId, start: satStart, client, outsideAvailability: true }), "encaixe confirmado");
+    expect(ok1.status, "encaixe nasce confirmado").toBe("CONFIRMED");
+    await expectCode(await call(request, "POST", "/v1/agenda/appointments", { eventTypeId: s.typeId, start: a.start, client, outsideAvailability: true }), 409, "SLOT_TAKEN", "encaixe em cima de outro agendamento");
+    await pub.ctx.dispose();
   });
 
   // ------------------------------------------------------------------ telas

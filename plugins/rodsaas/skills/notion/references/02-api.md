@@ -1,35 +1,47 @@
 # API
 
+Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/verify/contract.json`, grupo `presets.notion`; testes em `suite/tests/15-paginas.spec.ts`).
+
 Todas as rotas seguem o padrão da base: `/v1`, tenant pelo token, `withTenant`, schemas Zod de entrada **e** saída, erros RFC 9457, paginação por cursor onde houver lista, `config` declarativo (`roles`, `limit`, `feature`, `idempotent`, `audit`).
 
 ## Páginas
 
 | Rota | Config | Faz |
 |---|---|---|
-| `GET /v1/pages/tree` | — | árvore leve do workspace para o menu: `id, parentId, type, title, icon, position, hasChildren`, sem arquivadas e **sem linhas de database** |
-| `GET /v1/pages/:id` | — | página completa (com `content`, `version`, `lastEditedBy`, `updatedAt`) + `breadcrumbs` (ancestrais com id, título e ícone) + `isFavorite`; registra a visita em `PageVisit` (upsert) |
-| `POST /v1/pages` | `limit: 'pages'` (exceto linha de database), idempotente, audit | `{ parentId?, type?, title?, afterId? }`; posição no fim dos irmãos ou depois de `afterId`; devolve a página criada |
-| `PATCH /v1/pages/:id` | — | `{ version, title?, content? }` → versão nova; 409 `VERSION_CONFLICT` se a versão estiver velha. Body limit desta rota: 2 MB |
+| ★ `GET /v1/pages/tree` | — | árvore leve do workspace para o menu: `id, parentId, type, title, icon, position, hasChildren`, sem arquivadas e **sem linhas de database** |
+| ★ `GET /v1/pages/:id` | — | página completa (com `content`, `version`, `lastEditedBy`, `updatedAt`) + `breadcrumbs` (ancestrais com id, título e ícone) + `isFavorite`; registra a visita em `PageVisit` (upsert) |
+| ★ `POST /v1/pages` | `limit: 'pages'` (exceto linha de database), idempotente, audit | `{ parentId?, type?, title?, afterId? }`; posição no fim dos irmãos ou depois de `afterId`; devolve a página criada |
+| ★ `PATCH /v1/pages/:id` | — | `{ version, title?, content? }` → versão nova; 409 `VERSION_CONFLICT` se a versão estiver velha. Body limit desta rota: 2 MB |
 | `PATCH /v1/pages/:id/meta` | — | `{ icon?, cover?, fullWidth? }`, sem versão |
-| `POST /v1/pages/:id/move` | audit | `{ parentId: string \| null, beforeId?, afterId? }`; valida mesmo workspace, não arquivado e **sem ciclo** (400 `INVALID_MOVE`) |
+| ★ `POST /v1/pages/:id/move` | audit | `{ parentId: string \| null, beforeId?, afterId? }`; valida mesmo workspace, não arquivado e **sem ciclo** (400 `INVALID_MOVE`) |
 | `POST /v1/pages/:id/duplicate` | `limit: 'pages'`, idempotente | copia a página e os descendentes (título com " (cópia)"), logo abaixo da original |
-| `DELETE /v1/pages/:id` | audit | manda para a lixeira com os descendentes |
-| `GET /v1/trash` | — | páginas raiz da lixeira (`archivedRootId = id`), busca por título, cursor |
-| `POST /v1/trash/:id/restore` | audit | restaura o lote; volta para a raiz se o pai não existir mais |
+| ★ `DELETE /v1/pages/:id` | audit | manda para a lixeira com os descendentes |
+| ★ `GET /v1/trash` | — | páginas raiz da lixeira (`archivedRootId = id`), busca por título, cursor |
+| ★ `POST /v1/trash/:id/restore` | audit | restaura o lote; volta para a raiz se o pai não existir mais |
 | `DELETE /v1/trash/:id` | owner/admin ou criador · audit | exclui de vez (com descendentes, valores, favoritos, visitas, link público) |
-| `PUT /v1/pages/:id/favorite` / `DELETE` | — | favorita/desfavorita para o usuário atual |
-| `GET /v1/pages/favorites` | — | favoritos do usuário na ordem dele |
+| ★ `PUT /v1/pages/:id/favorite` / `DELETE` | — | favorita/desfavorita para o usuário atual |
+| ★ `GET /v1/pages/favorites` | — | favoritos do usuário na ordem dele |
 | `POST /v1/pages/favorites/reorder` | — | `{ pageId, beforeId?, afterId? }` |
 | `GET /v1/pages/recent` | — | últimas visitas do usuário (até 20), sem arquivadas |
 
 Regras de cada operação: `01-escopo-e-modelo.md`.
+
+### Formatos ★
+
+- **Árvore** (`GET /v1/pages/tree`): `{ data: [{ id, parentId, type: 'DOCUMENT' | 'DATABASE', title, icon, position, hasChildren }] }` — todos os itens não arquivados (o front monta a árvore); irmãos ordenados por `position`.
+- **Página** (`GET /v1/pages/:id`, resposta do `POST`): `{ id, parentId, type, title, icon, cover, fullWidth, content, version, lastEditedBy: { id, name } | null, updatedAt, breadcrumbs: [{ id, title, icon }], isFavorite, archivedAt }`.
+- `PATCH /v1/pages/:id` → `{ version, updatedAt }`; conflito → 409 `VERSION_CONFLICT` com `currentVersion`.
+- `GET /v1/search` → `{ data: [{ id, title, icon, type, parentId, snippet }], nextCursor }`; `GET /v1/trash` → `{ data: [{ id, title, icon, archivedAt, path }] }`.
+- **Database** (`GET /v1/databases/:id`): `{ id, title, properties: [{ id, name, type, options: [{ id, name, color }] }], views: [{ id, name, type: 'TABLE' | 'BOARD', config }] }`; `POST .../properties` `{ name, type, options?: [{ name, color? }] }` devolve a propriedade com os ids das opções; `POST .../views` `{ name, type, config }` devolve a visão.
+- **Linhas** (`GET /v1/databases/:id/rows?viewId=`): `{ data: [{ id, title, properties: { [propertyId]: valor } }], nextCursor }` com o filtro e a ordenação da visão aplicados no servidor; `POST .../rows` devolve a linha no mesmo formato.
+- **Compartilhar**: `{ enabled, url }`; página pública: `{ title, icon, cover, fullWidth, content, updatedAt, workspaceName }` — nada além disso.
 
 ### Conteúdo
 
 - `content` é a lista de blocos do editor (JSON). Valide como **array de objetos** com tamanho máximo, sem tentar espelhar o schema inteiro do editor (ele evolui).
 - No save, o backend:
   1. **sanitiza links**: qualquer `href`/`url` que não seja `http:`, `https:`, `mailto:` ou link interno (`/paginas/<id>`, e o antigo `/pagina/<id>`) é removido;
-  2. extrai `contentText` para a busca;
+  2. extrai `contentText` para a busca — junte **todo campo `text` (string) dos blocos, em qualquer profundidade** (serve para BlockNote e TipTap);
   3. atualiza `lastEditedById`.
 - Menções de página guardam o id; a resposta do `GET` não precisa resolver títulos (o front resolve pelo cache da árvore).
 
@@ -57,15 +69,15 @@ Uma database é uma `Page` com `type: DATABASE`. As **linhas são páginas filha
 
 | Rota | Config | Faz |
 |---|---|---|
-| `GET /v1/databases/:id` | — | propriedades, visões e metadados da database |
-| `POST /v1/databases/:id/properties` | — | `{ name, type, options? }` |
+| ★ `GET /v1/databases/:id` | — | propriedades, visões e metadados da database |
+| ★ `POST /v1/databases/:id/properties` | — | `{ name, type, options? }` |
 | `PATCH /v1/databases/:id/properties/:propertyId` | — | renomear, opções, mudar tipo (ver regra abaixo) |
 | `DELETE /v1/databases/:id/properties/:propertyId` | — | remove a propriedade e o valor dela de todas as linhas |
 | `POST /v1/databases/:id/properties/reorder` | — | posição |
-| `POST /v1/databases/:id/views` / `PATCH` / `DELETE .../views/:viewId` | — | visões e `config` |
-| `GET /v1/databases/:id/rows?viewId=&cursor=&limit=` | — | linhas aplicando filtro e ordenação da visão; quadro: agrupado por `groupBy` |
-| `POST /v1/databases/:id/rows` | idempotente | `{ title?, properties?, afterId? }` (não conta no limite de páginas) |
-| `PATCH /v1/pages/:id/properties` | — | `{ [propertyId]: valor }`, validado pelo tipo |
+| ★ `POST /v1/databases/:id/views` / `PATCH` / `DELETE .../views/:viewId` | — | visões e `config` |
+| ★ `GET /v1/databases/:id/rows?viewId=&cursor=&limit=` | — | linhas aplicando filtro e ordenação da visão; quadro: agrupado por `groupBy` |
+| ★ `POST /v1/databases/:id/rows` | idempotente | `{ title?, properties?, afterId? }` (não conta no limite de páginas) |
+| ★ `PATCH /v1/pages/:id/properties` | — | `{ [propertyId]: valor }`, validado pelo tipo |
 
 ### Valores por tipo
 
@@ -104,10 +116,10 @@ Valor inválido → 400 `VALIDATION_ERROR` com `errors[].path = properties.<prop
 
 | Rota | Config | Faz |
 |---|---|---|
-| `GET /v1/pages/:id/share` | — | `{ enabled, url }` |
-| `PUT /v1/pages/:id/share` | `feature: 'public_pages'` · audit | liga: cria `PublicShare` com token aleatório (32 bytes) e devolve a URL `APP_URL/publico/<token>` |
-| `DELETE /v1/pages/:id/share` | audit | desliga (apaga o token; o link antigo para de funcionar na hora) |
-| `GET /v1/public/pages/:token` | `public: true`, rate limit por IP | busca `PublicShare` pelo token (tabela sem RLS), abre `withTenant(organizationId)` e devolve **só** `title, icon, cover, fullWidth, content, updatedAt` e o nome do workspace |
+| ★ `GET /v1/pages/:id/share` | — | `{ enabled, url }` |
+| ★ `PUT /v1/pages/:id/share` | `feature: 'public_pages'` · audit | liga: cria `PublicShare` com token aleatório (32 bytes) e devolve a URL `APP_URL/publico/<token>` |
+| ★ `DELETE /v1/pages/:id/share` | audit | desliga (apaga o token; o link antigo para de funcionar na hora) |
+| ★ `GET /v1/public/pages/:token` | `public: true`, rate limit por IP | busca `PublicShare` pelo token (tabela sem RLS), abre `withTenant(organizationId)` e devolve **só** `title, icon, cover, fullWidth, content, updatedAt` e o nome do workspace |
 
 Regras do link público:
 - Mostra só aquela página. Sub-páginas e links internos aparecem como texto, sem navegar (na v1).

@@ -18,7 +18,7 @@ const rodsaas = (() => {
     return {};
   }
 })();
-const installedPresets = Object.keys(contract.presets ?? {}).filter((p) => (rodsaas.presets ?? []).includes(p));
+const installedPresets = Object.keys(contract.presets ?? {}).filter((p) => [...(rodsaas.presets ?? []), ...(rodsaas.addons ?? [])].includes(p));
 const webSrc = ["web/src", "web/app", "web"].map((p) => join(projectDir, p)).find((p) => existsSync(p));
 
 if (!webSrc) {
