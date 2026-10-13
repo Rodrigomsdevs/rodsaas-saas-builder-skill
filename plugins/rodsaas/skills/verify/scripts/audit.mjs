@@ -11,6 +11,14 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const contract = JSON.parse(readFileSync(join(here, "..", "contract.json"), "utf8"));
 const projectDir = resolve(process.argv[2] ?? process.cwd());
+const rodsaas = (() => {
+  try {
+    return JSON.parse(readFileSync(join(projectDir, "rodsaas.json"), "utf8"));
+  } catch {
+    return {};
+  }
+})();
+const installedPresets = Object.keys(contract.presets ?? {}).filter((p) => (rodsaas.presets ?? []).includes(p));
 const webSrc = ["web/src", "web/app", "web"].map((p) => join(projectDir, p)).find((p) => existsSync(p));
 
 if (!webSrc) {
@@ -48,6 +56,7 @@ const check = (group, ids) => {
   }
 };
 for (const [group, ids] of Object.entries(contract.testids)) check(group, ids);
+for (const preset of installedPresets) check(`preset ${preset}`, contract.presets[preset].testids ?? []);
 
 const hasProjects = existsSync(join(projectDir, "web/src/app/(app)/projetos")) || /\/v1\/projects/.test(source);
 const warnings = {};
@@ -68,7 +77,11 @@ const pages = appDir
       .map((f) => "/" + relative(appDir, dirname(f)).split("/").filter((s) => !/^\(.*\)$/.test(s)).join("/"))
       .map((r) => (r === "/" ? "/" : r.replace(/\/$/, "")))
   : [];
-const missingRoutes = contract.routes.filter((r) => !pages.includes(r));
+// segmentos dinâmicos com qualquer nome: /crm/negocios/[id] casa com /crm/negocios/[dealId]
+const normRoute = (r) => r.replace(/\[[^\]]+\]/g, "[]");
+const pageSet = new Set(pages.map(normRoute));
+const expectedRoutes = [...contract.routes, ...installedPresets.flatMap((p) => contract.presets[p].routes ?? [])];
+const missingRoutes = expectedRoutes.filter((r) => !pageSet.has(normRoute(r)));
 
 // ------------------------------------------------------------------ API (openapi.json)
 const openapiPath = ["api/openapi.json", "openapi.json"].map((p) => join(projectDir, p)).find((p) => existsSync(p));
@@ -79,7 +92,7 @@ if (!openapiPath) {
   const spec = JSON.parse(readFileSync(openapiPath, "utf8"));
   const norm = (p) => p.replace(/\{[^}]+\}|:[A-Za-z_]+/g, "{}");
   const paths = Object.fromEntries(Object.entries(spec.paths ?? {}).map(([p, v]) => [norm(p), v]));
-  for (const ep of contract.api) {
+  for (const ep of [...contract.api, ...installedPresets.flatMap((p) => contract.presets[p].api ?? [])]) {
     const op = paths[norm(ep.path)]?.[ep.method];
     if (!op) {
       apiIssues.push(`${ep.method.toUpperCase()} ${ep.path} não existe no OpenAPI`);
@@ -101,7 +114,7 @@ if (!openapiPath) {
 // ------------------------------------------------------------------ resultado
 let problems = 0;
 console.log(`Auditoria do contrato rodsaas · ${projectDir}`);
-console.log(`  front: ${files.length} arquivos · testids encontrados: ${found.size}${hasProjects ? " · módulo de exemplo: sim" : ""}`);
+console.log(`  front: ${files.length} arquivos · testids encontrados: ${found.size}${hasProjects ? " · módulo de exemplo: sim" : ""}${installedPresets.length ? ` · presets: ${installedPresets.join(", ")}` : ""}`);
 for (const [group, ids] of Object.entries(missing)) {
   problems += ids.length;
   console.log(`✗ data-testid faltando (${group}): ${ids.join(", ")}`);

@@ -94,3 +94,23 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | cadastro com plano | `?plano=` ignorado pelo cadastro |
 | celular | menu fixo ocupando a tela; tabela larga sem virar cards |
 | tema | `next-themes` sem `attribute="class"` |
+
+## CRM (`09-crm.spec.ts`, preset `crm`)
+
+| Teste | Causas comuns |
+|---|---|
+| funil padrão | empresa criada sem o conteúdo inicial (gancho de "empresa criada" não chama o seed do CRM); empresas antigas sem o script de instalação |
+| totais do quadro | soma feita no front com a página carregada (só 50 cards) em vez de agregação no servidor; negócios ganhos/perdidos somando na coluna |
+| perder sem motivo | `requireLostReason` ignorado; motivo validado só na tela |
+| outra empresa | busca por `findUnique({ id })` sem `organizationId`; trigger de mesma empresa ausente em `stageId`/`pipelineId` |
+| cada vendedor vê os seus | helper de visibilidade aplicado no detalhe mas esquecido no quadro, na lista ou nos totais; 403 em vez de 404; regra "atividade atribuída dá visão" não implementada |
+| contato duplicado | e-mail não normalizado (maiúsculas passam); índice único sem `WHERE "deletedAt" IS NULL`; 409 sem `existing` |
+| captura sem Origin | a checagem de Origin (CSRF) da base aplicada também à rota pública; rota exigindo cookie |
+| chave errada/revogada | revogar só marca `revokedAt` mas a busca ignora; mensagens diferentes para errada e revogada |
+| conversão reaproveita contato | conversão sempre cria contato novo; procura por e-mail sem normalizar |
+| criar negócio pela tela | campo de moeda mandando "1.500,00" como texto ou 1.5; erro de validação só em toast |
+| barra de etapas | clique só muda a tela (sem chamar `move`); `aria-current` fixo na primeira etapa |
+| atividade de hoje | data padrão calculada em UTC (vira amanhã à noite no Brasil); próxima atividade não recalculada ao concluir; agenda filtrando por outro responsável |
+| aviso de duplicado | formulário fecha ou mostra só um toast genérico no 409 |
+| converter lead pela tela | conversão sem navegar para o negócio; lead continua `OPEN` |
+| modo restrito na tela | quadro buscando de uma rota sem o filtro de visibilidade; página do negócio mostrando erro genérico em vez de "não encontrado" |

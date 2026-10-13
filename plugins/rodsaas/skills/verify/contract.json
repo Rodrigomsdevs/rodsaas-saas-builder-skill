@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -249,5 +249,206 @@
       "method": "post",
       "path": "/v1/billing/portal-sessions"
     }
-  ]
+  ],
+  "presets": {
+    "crm": {
+      "when": "rodsaas.json → presets inclui \"crm\"",
+      "routes": [
+        "/crm/negocios",
+        "/crm/negocios/[id]",
+        "/crm/leads",
+        "/crm/contatos",
+        "/crm/contatos/[id]",
+        "/crm/empresas",
+        "/crm/empresas/[id]",
+        "/crm/atividades",
+        "/crm/produtos",
+        "/crm/relatorios",
+        "/crm/importar",
+        "/crm/configuracoes"
+      ],
+      "testids": [
+        "crm-pipeline-select",
+        "crm-board",
+        "crm-stage-column",
+        "crm-stage-total",
+        "crm-deal-card",
+        "crm-next-activity",
+        "crm-deal-new",
+        "crm-deal-title",
+        "crm-deal-status",
+        "crm-stage-step",
+        "crm-deal-won",
+        "crm-deal-lost",
+        "crm-deal-reopen",
+        "crm-lost-dialog",
+        "crm-lost-reason",
+        "crm-lost-reason-option",
+        "crm-lost-confirm",
+        "crm-activity-new",
+        "crm-activity-row",
+        "crm-activity-done",
+        "crm-activities-tab-overdue",
+        "crm-activities-tab-today",
+        "crm-activities-tab-upcoming",
+        "crm-note-input",
+        "crm-note-submit",
+        "crm-timeline",
+        "crm-timeline-item",
+        "crm-contact-new",
+        "crm-company-new",
+        "crm-duplicate-warning",
+        "crm-duplicate-open",
+        "crm-lead-row",
+        "crm-lead-convert",
+        "crm-convert-dialog",
+        "crm-convert-confirm",
+        "field-title",
+        "field-error-title",
+        "field-value",
+        "field-subject",
+        "field-email"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/crm/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/crm/settings",
+          "body": [
+            "visibility",
+            "requireLostReason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/pipelines"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/pipelines/{id}/board"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/deals"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals",
+          "body": [
+            "title",
+            "value",
+            "pipelineId",
+            "stageId",
+            "contactId",
+            "companyId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/deals/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/crm/deals/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/move",
+          "body": [
+            "stageId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/won"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/lost",
+          "body": [
+            "lostReasonId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/reopen"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/lost-reasons"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/contacts"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/contacts",
+          "body": [
+            "name",
+            "email",
+            "phone"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/leads"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/leads",
+          "body": [
+            "personName",
+            "email"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/leads/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/leads/{id}/convert"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/activities"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/activities",
+          "body": [
+            "type",
+            "subject",
+            "dueDate",
+            "ownerId",
+            "dealId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/activities/{id}/complete"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/capture-keys",
+          "body": [
+            "name",
+            "kind"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/crm/capture-keys/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/crm/leads"
+        }
+      ]
+    }
+  }
 }

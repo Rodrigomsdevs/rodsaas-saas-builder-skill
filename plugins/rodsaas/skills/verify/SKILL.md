@@ -56,7 +56,7 @@ Pare e pergunte quando a correção exigir uma decisão de produto ou uma mudan�
 
 ## Relatório final
 
-Tabela curta por área (API, autenticação, sessão, empresas, membros, módulo, estados, plano, celular/tema) com ✓/✗/○, a lista do que foi corrigido (arquivo e motivo, uma linha cada), o que ficou pulado e por quê, e o que ainda falha (se algo ficou pendente com o usuário).
+Tabela curta por área (API, autenticação, sessão, empresas, membros, módulo, estados, plano, celular/tema e presets instalados, como CRM) com ✓/✗/○, a lista do que foi corrigido (arquivo e motivo, uma linha cada), o que ficou pulado e por quê, e o que ainda falha (se algo ficou pendente com o usuário).
 
 ## O que a bateria cobre
 
@@ -71,8 +71,9 @@ Tabela curta por área (API, autenticação, sessão, empresas, membros, módulo
 | **Estados** | 404 dentro do app; erro da API com código e "tentar de novo"; skeleton com API lenta; API inacessível sem tela branca nem stack |
 | **Plano e cobrança** | API: preços, modo de cobrança no `/v1/me`, free não comprável, membro não assina; no modo de teste: assinar, já-assina (409), mesmo plano (400), prévia, trocar, cancelar e retomar. Tela: cards, selo do atual, uso, **botão de assinar sempre visível para o owner**, aviso de modo; assinar → trocar (diálogo com prévia) → cancelar → retomar; admin sem botões e com aviso; cadastro com `?plano=` já sai assinando |
 | **Celular e tema** | menu vira gaveta; sem rolagem horizontal nas telas principais; claro/escuro |
+| **CRM** (preset `crm`) | API: funil padrão, criar e mover negócio, totais do quadro, ganhar/reabrir/perder com motivo obrigatório, isolamento entre empresas, modo "cada vendedor vê os seus" (404 e quadro), contato duplicado (409 com o existente), captura por chave **sem Origin**, chave errada/revogada, conversão reaproveitando o contato. Tela: criar negócio com erro no campo e total da coluna, barra de etapas, ganhar/reabrir/perder com motivo, agendar atividade → selo no card → concluir pela agenda, aviso de duplicado com link, converter lead, membro sem o negócio do owner no quadro e no link direto |
 
-Testes que dependem de algo opcional (módulo `projects`, limite de plano baixo) são **pulados** com o motivo, não reprovados.
+Testes que dependem de algo opcional (módulo `projects`, limite de plano baixo, preset `crm`) são **pulados** com o motivo, não reprovados. Presets instalados (`rodsaas.json → presets`) acrescentam a parte deles ao contrato e à auditoria (`contract.json → presets`); `-g "CRM"` roda só a do CRM.
 
 ## Mapa
 

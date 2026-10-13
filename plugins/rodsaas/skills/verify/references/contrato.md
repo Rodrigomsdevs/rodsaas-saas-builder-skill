@@ -100,3 +100,13 @@ Os módulos gerados pelo `/rodsaas:module` seguem o mesmo padrão de testids.
 | `GET/POST /v1/projects` (exemplo) | `{ name, description? }` | `{ id, name, ... }` / `{ data, meta }` |
 
 E-mails (verificação, reset, convite) chegam no **Mailpit** em dev, com links absolutos para o painel.
+
+## Presets
+
+Quando `rodsaas.json → presets` tem um preset listado em `contract.json → presets`, a auditoria passa a exigir as rotas, testids e rotas de API dele, e a bateria roda a parte correspondente.
+
+| Preset | Onde está o contrato | Testes |
+|---|---|---|
+| `crm` | `skills/crm/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `skills/crm/references/03-api.md` e `06-captura-e-importacao.md` | `suite/tests/09-crm.spec.ts` |
+
+Rotas dinâmicas do contrato (`/crm/negocios/[id]`) aceitam qualquer nome de parâmetro na pasta (`[dealId]`).
