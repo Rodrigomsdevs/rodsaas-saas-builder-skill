@@ -184,6 +184,16 @@ Não use `findUnique({ where: { id } })` em tabela de tenant: troque por `findFi
 
 `TenantAuth` é o `request.auth` com `orgId` garantidamente não nulo (o plugin de auth já devolveu 403 `NO_ACTIVE_ORGANIZATION` se fosse nulo numa rota de tenant).
 
+## Organizações
+
+| Rota | Quem | Faz |
+|---|---|---|
+| `GET /v1/organizations` | autenticado · `tenant: false` | organizações do usuário com o papel em cada |
+| `POST /v1/organizations` | autenticado · `tenant: false` | cria `{ name }`, o usuário vira owner e ela vira a organização ativa (novo access token) |
+| `GET /v1/organizations/current` | todos | dados da organização ativa |
+| `PATCH /v1/organizations/current` | owner, admin | atualiza nome e dados |
+| `DELETE /v1/organizations/current` | owner | `{ confirmName }` precisa bater com o nome; cancela a assinatura na Stripe antes de excluir; o usuário fica sem organização ativa (ou cai na próxima que tiver) |
+
 ## Membros e convites
 
 Rotas (todas de tenant):

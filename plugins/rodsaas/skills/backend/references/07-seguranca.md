@@ -91,6 +91,8 @@ Plugin em `onResponse`: se a rota tem `config.audit` e o status é 2xx, grava `{
 
 Ações mínimas auditadas: login (em um log de segurança do usuário, não do tenant), membro convidado/removido/papel alterado, convite revogado, organização alterada, plano alterado, e as mutações do módulo de exemplo.
 
+Leitura: `GET /v1/audit` (owner/admin, `feature: 'audit_log'`), paginado por cursor, com filtros `action` e `actorUserId`, devolvendo também o nome do autor para exibição.
+
 ## Jobs (pg-boss)
 
 - `lib/jobs.ts` inicia o pg-boss com `DATABASE_URL` no schema `pgboss` (criado pelo `/rodsaas:db`).

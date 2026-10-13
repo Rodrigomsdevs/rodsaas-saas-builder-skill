@@ -2,9 +2,9 @@
 
 **Skills para o Claude Code criarem a base de um SaaS B2B pra você: login, empresas, usuários, planos e pagamento com Stripe, já do jeito certo e seguro.**
 
-Você descreve o seu SaaS e o Claude monta o backend inteiro seguindo um padrão testado. Você foca no que o seu produto faz de diferente.
+Você descreve o seu SaaS e o Claude monta o backend e o painel inteiros seguindo um padrão testado. Você foca no que o seu produto faz de diferente.
 
-> **Status: rascunho (v0.1).** As skills de banco e backend já funcionam para teste. O frontend vem em seguida.
+> **Status: rascunho (v0.2).** Banco, backend e frontend prontos para teste.
 
 ---
 
@@ -16,7 +16,7 @@ O **rodsaas** é um pacote de *skills* para o Claude Code. Uma skill é um manua
 
 ## O que você ganha
 
-Rodando as skills, você termina com uma API funcionando que tem:
+Rodando as skills, você termina com uma API e um painel funcionando, com:
 
 - ✅ Cadastro, login, "esqueci minha senha" e confirmação de e-mail
 - ✅ **Empresas (multi-tenant):** cada cliente tem sua conta, com vários usuários dentro
@@ -25,9 +25,12 @@ Rodando as skills, você termina com uma API funcionando que tem:
 - ✅ Limites por plano (ex.: "plano Free permite 3 usuários")
 - ✅ Documentação da API gerada sozinha, numa página bonita em `/docs`
 - ✅ Segurança séria: um cliente **nunca** vê dados de outro, senhas protegidas, proteção contra ataques comuns
+- ✅ **Painel com a cara do seu produto:** você escolhe nome, cor, logo e estilo, vê uma prévia e aprova antes
+- ✅ Todos os detalhes de tela prontos: carregando, vazio, erro, página não encontrada, confirmações, botões com loading
+- ✅ Máscaras e validações brasileiras (CPF, CNPJ — inclusive o novo alfanumérico —, telefone, CEP com busca de endereço)
 - ✅ Testes automáticos já prontos
 
-A stack usada: **Node.js + TypeScript + Fastify + PostgreSQL + Prisma + Stripe**. Você não precisa dominar nada disso para começar.
+A stack usada: **Node.js + TypeScript + Fastify + PostgreSQL + Prisma + Stripe** no backend e **Next.js + Tailwind + shadcn/ui** no painel. Você não precisa dominar nada disso para começar.
 
 ---
 
@@ -56,7 +59,7 @@ Abra o Claude Code e digite estes dois comandos:
 /plugin install rodsaas@rodsaas
 ```
 
-Pronto. Para conferir se funcionou, digite `/rodsaas` e veja se aparecem as opções `/rodsaas:db` e `/rodsaas:backend`.
+Pronto. Para conferir se funcionou, digite `/rodsaas` e veja se aparecem as opções `/rodsaas:db`, `/rodsaas:backend` e `/rodsaas:frontend`.
 
 <details>
 <summary>Prefere instalar pelo terminal?</summary>
@@ -112,13 +115,39 @@ E abra no navegador: **http://localhost:3333/docs**
 
 Lá você vê todas as rotas da sua API e pode testar cada uma direto pela página.
 
-### 5. Agora é com o seu produto
+### 5. Peça o painel (frontend)
+
+Com a API pronta, digite:
+
+```
+/rodsaas:frontend
+```
+
+Ele pergunta a **identidade visual** do seu produto (tudo tem resposta padrão, pode só apertar enter):
+
+- **Cor principal** — um código (`#2563eb`), o nome de uma cor ("verde petróleo") ou "me sugere"
+- **Logo** — se você mandar, ele tira a cor do próprio logo; se não tiver, cria um provisório
+- **Estilo** — *corporativo* (sóbrio), *moderno* (arredondado e leve) ou *denso* (cabe mais informação, ideal para sistemas de gestão)
+- **Como chamar seus clientes** — Empresa, Clínica, Loja, Escritório… O sistema inteiro passa a usar essa palavra
+
+Antes de construir as telas, ele gera uma **prévia** (`web/brand-preview.html`) com botões, tabela e menu no tema claro e escuro. Abra no navegador, aprove ou peça ajustes.
+
+Depois:
+
+```bash
+cd web
+npm run dev
+```
+
+E abra **http://localhost:3000** (com a API rodando em outro terminal). Crie uma conta e explore: convites, troca de empresa, planos, tudo funcionando.
+
+### 6. Agora é com o seu produto
 
 A base está pronta. Daqui pra frente, peça ao Claude as funcionalidades do **seu** SaaS, em português normal mesmo:
 
-> "Cria um módulo de agendamentos, onde cada empresa cadastra horários e clientes, seguindo o padrão do projeto"
+> "Cria um módulo de agendamentos, com API e telas, onde cada clínica cadastra horários e pacientes, seguindo o padrão do projeto"
 
-O projeto já vem com um módulo de exemplo (`projects`) que o Claude usa como molde, então o que ele criar vai seguir os mesmos padrões de segurança.
+O projeto já vem com um módulo de exemplo (`projects`) na API e no painel, que o Claude usa como molde. Assim o que ele criar segue os mesmos padrões de segurança e de tela.
 
 ---
 
@@ -128,7 +157,7 @@ O projeto já vem com um módulo de exemplo (`projects`) que o Claude usa como m
 |---|---|---|
 | `/rodsaas:backend` | Cria a pasta `api/` com o backend completo | No começo de um SaaS novo |
 | `/rodsaas:db` | Cria o banco de dados e os usuários do Postgres, e grava a conexão no `.env` | O `backend` já chama sozinho. Use direto para preparar o banco de **produção** ou de um projeto que já existe |
-| `/rodsaas:frontend` | *(em breve)* Cria a pasta `web/` com Next.js + Tailwind | — |
+| `/rodsaas:frontend` | Cria a pasta `web/` com o painel completo, com a sua marca | Depois do backend |
 | `/rodsaas:module` | *(em breve)* Adiciona um módulo novo no padrão | — |
 | `/rodsaas:audit` | *(em breve)* Revisa a segurança de um projeto | — |
 
@@ -136,6 +165,7 @@ O projeto já vem com um módulo de exemplo (`projects`) que o Claude usa como m
 
 - "quero começar um SaaS novo com login e planos"
 - "configura o banco postgres desse projeto"
+- "agora cria o painel com a cor do meu logo"
 - "prepara o banco de produção no meu servidor"
 
 ---
@@ -166,6 +196,9 @@ A skill de banco precisa agir como administrador do Postgres. Rode o Claude com 
 **"O usuário do banco não consegue conectar"**
 Normalmente é a configuração de acesso do Postgres (`pg_hba.conf`). A skill identifica isso e te explica o que mudar.
 
+**"Quero trocar a cor ou o estilo depois"**
+Edite a parte `brand` do arquivo `rodsaas.json` (na raiz do projeto) e peça ao Claude: *"aplica a marca de novo"*.
+
 **"Quero mudar um plano ou um limite"**
 Os planos ficam no arquivo `api/src/config/plans.ts`. Peça ao Claude: *"muda o plano Pro para permitir 20 usuários"*.
 
@@ -195,12 +228,17 @@ rodsaas-saas-builder-skill/
             ├── backend/
             │   ├── SKILL.md      # fluxo em 8 fases
             │   └── references/   # API, auth, multi-tenant, billing, segurança, módulos, testes
-            └── db/
-                ├── SKILL.md
+            ├── db/
+            │   ├── SKILL.md
+            │   └── scripts/
+            │       ├── provision.sh   # provisionamento testado e idempotente
+            │       ├── config.example
+            │       └── sql/
+            └── frontend/
+                ├── SKILL.md      # fluxo em 8 fases, começando pela marca
+                ├── references/   # marca, API e sessão, estados, formulários, tabelas, overlays, telas
                 └── scripts/
-                    ├── provision.sh   # provisionamento testado e idempotente
-                    ├── config.example
-                    └── sql/
+                    └── brand.mjs # cor → tema claro/escuro + prévia, com checagem de contraste
 ```
 
 Novas skills entram em `plugins/rodsaas/skills/<nome>/` e viram `/rodsaas:<nome>` automaticamente.

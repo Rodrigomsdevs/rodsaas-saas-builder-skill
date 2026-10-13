@@ -9,7 +9,11 @@
 
 Os dois tokens vão em **cookies httpOnly**, nunca no body para o front guardar. Assim um XSS no front não consegue roubar sessão. O front e a API ficam no mesmo domínio pai (`app.seusaas.com` e `api.seusaas.com`, cookie com `domain=.seusaas.com`).
 
-Atributos dos cookies: `httpOnly`, `secure` (em produção), `sameSite: 'lax'`, `domain` do env, cookies assinados com `COOKIE_SECRET`.
+Atributos dos cookies: `httpOnly`, `secure` (em produção), `sameSite: 'lax'`, `domain` do env, cookies assinados com `COOKIE_SECRET`. Em dev (`localhost`), **não** defina `domain`: o cookie fica no host `localhost` e vale para as portas 3000 e 3333 (cookie não separa por porta), enquanto `domain=localhost` tem comportamento inconsistente entre navegadores.
+
+### `session_hint` (para o front)
+
+Além dos dois tokens, grave um terceiro cookie **sem segredo nenhum**: `session_hint=1`, **não** httpOnly, path `/`, mesmo domínio e mesma validade do refresh. Grave em login, cadastro e refresh; apague em logout, logout-all e quando o refresh falhar. O guard de rota do Next usa a presença dele só para decidir redirecionamentos rápidos (o servidor do Next não consegue validar o access token). Ele não autoriza nada: quem autoriza é a API.
 
 ## Payload do access token
 
@@ -69,7 +73,9 @@ model VerificationToken {
 | `POST /v1/auth/forgot-password` | sim | **sempre 204**, existindo ou não o e-mail |
 | `POST /v1/auth/reset-password` | sim | consome `PASSWORD_RESET`, troca a senha e **revoga todos os refresh** |
 | `POST /v1/auth/switch-organization` | não | valida membership e emite novo access token |
-| `GET /v1/me` | não | usuário + organização ativa + papel + lista de organizações |
+| `GET /v1/me` | não · `tenant: false` | usuário (com `emailVerified`) + organização ativa + papel + lista de organizações (com o papel em cada) + **plano efetivo da organização ativa** (`plan`, `features`, `limits`, `usage`, `status`, `paymentIssue`). Todo membro precisa disso para a interface saber o que mostrar; só owner/admin acessam os detalhes de cobrança em `/v1/billing/subscription` |
+| `PATCH /v1/users/me` | não · `tenant: false` | atualiza nome (e-mail não muda na v1) |
+| `POST /v1/users/me/password` | não · `tenant: false` | `{ currentPassword, newPassword }`; confere a atual; revoga os **outros** refresh do usuário (mantém a sessão atual) |
 
 Organização ativa no login: a última usada (`User.lastOrganizationId`) se ainda for membro; senão a primeira membership; senão `null`.
 

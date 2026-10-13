@@ -47,6 +47,8 @@ Pergunte só o que não dá para deduzir (em uma única mensagem):
 - **Onde criar** — padrão: pasta `api/` no diretório atual (o front vai depois em `web/`, pela skill de frontend).
 - **Planos iniciais** — nomes, limites e features. Se o usuário não souber ainda, use o padrão `free` / `pro` / `business` com limites de exemplo e deixe claro que é placeholder.
 
+Grave as respostas em **`rodsaas.json`** na raiz do projeto (crie se não existir, preserve o que já houver): `product.name`, `domains.app` e `domains.api` (em dev, `http://localhost:3000` e `http://localhost:3333`). Todas as skills rodsaas leem desse arquivo; o `/rodsaas:frontend` completa a parte de marca. Use `product.name` nos e-mails transacionais e no título da documentação da API.
+
 Confira também que existe Docker disponível (o Postgres e o Mailpit de dev rodam no docker compose). Se não houver, avise e peça uma connection string de um Postgres acessível.
 
 ## Como construir: em fases, cada uma terminando verde
@@ -103,7 +105,7 @@ Termine com uma mensagem curta contendo:
 - como subir (`docker compose up -d`, `npm run db:migrate`, `npm run dev`) e onde está a doc (`/docs`);
 - variáveis de ambiente que o usuário precisa preencher (Stripe, SMTP, segredos);
 - o que precisou desviar da skill porque a doc atual de algum pacote mudou;
-- próximo passo natural: `/rodsaas:frontend` para gerar o `web/`.
+- próximo passo natural: `/rodsaas:frontend` para gerar o `web/` (ele usa o `openapi.json` exportado e o `rodsaas.json`).
 
 ## Mapa das referências
 

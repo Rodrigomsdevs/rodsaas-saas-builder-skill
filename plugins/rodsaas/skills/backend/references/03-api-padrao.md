@@ -187,6 +187,7 @@ Offset (`page`/`pageSize` com `total`) só para telas de admin que precisam de "
 - Registre o type provider Zod (`validatorCompiler` e `serializerCompiler`) e o `@fastify/swagger` com o `transform` do provider, para os schemas Zod virarem JSON Schema no documento.
 - Toda rota declara: `tags`, `summary`, `body`/`querystring`/`params` quando houver, e `response` com **todos** os status de sucesso e os de erro relevantes (usando o schema `Problem`).
 - Security scheme `cookieAuth` (cookie `access_token`) aplicado globalmente; rotas públicas sobrescrevem com `security: []`.
+- Schemas reutilizados (`Project`, `Member`, `Problem`, `Paginated…`) saem **com nome** em `components.schemas` (registre os schemas Zod com id/nome conforme o type provider instalado). O front gera os tipos desse arquivo; schema anônimo vira tipo ilegível do lado de lá.
 - UI em `/docs` (Scalar). Em produção, deixe `/docs` atrás de uma flag `DOCS_ENABLED` (padrão: ligado em dev, desligado em prod).
 - `scripts/export-openapi.ts` sobe o app com `buildApp()`, chama `app.ready()`, grava `app.swagger()` em `openapi.json` e encerra. É desse arquivo que o front gera o client tipado.
 
