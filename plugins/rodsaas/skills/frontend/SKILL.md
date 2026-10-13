@@ -68,8 +68,8 @@ Login, cadastro, esqueci/redefinir senha, verificar e-mail, aceitar convite, "se
 → `references/06-formularios.md`, `references/09-telas.md`
 
 ### Fase 6 — Home e configurações
-Home com dados reais (primeiros passos, uso do plano, atividade recente), configurações da empresa, membros, convites, plano e cobrança (Stripe), perfil.
-→ `references/09-telas.md`
+Home com dados reais (primeiros passos, uso do plano, atividade recente), configurações da empresa, membros, convites, perfil e **plano e cobrança completo** (assinar, trocar com prévia, cancelar, retomar, portal, modo de teste, plano escolhido no cadastro). A tela de plano tem que permitir mudar de plano já nesta fase, mesmo sem Stripe (modo de teste).
+→ `references/09-telas.md`, `references/11-plano-e-cobranca.md`
 
 ### Fase 7 — Módulo de exemplo
 Telas do `projects` (lista, detalhe, criar/editar em drawer, excluir com confirmação, limite de plano → upgrade). É o **molde** que a skill de módulos vai copiar: simples, completo, sem atalhos.
@@ -110,4 +110,5 @@ Mensagem curta com: como subir (`npm run dev` no `web/` com a API rodando), URL 
 | `references/08-overlays.md` | Fase 4 — dialog, drawer, confirmação, upgrade |
 | `references/09-telas.md` | Fases 5 a 7 — o que cada tela tem |
 | `references/10-checklist.md` | Fase 8 |
+| `references/11-plano-e-cobranca.md` | Fase 6 — tela de plano: estados, botões por papel, fluxos de assinar/trocar/cancelar |
 | `skills/verify/references/contrato.md` | desde a Fase 4 — data-testid, rotas e formatos fixos |

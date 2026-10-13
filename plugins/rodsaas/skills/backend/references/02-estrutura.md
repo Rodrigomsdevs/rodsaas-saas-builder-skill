@@ -103,6 +103,7 @@ Regras:
 | `db:deploy` | `prisma migrate deploy` |
 | `db:studio` | `prisma studio` |
 | `openapi:export` | `tsx scripts/export-openapi.ts` → `openapi.json` |
+| `billing:sync` | `tsx scripts/billing-sync.ts` — cria/atualiza produtos, preços e portal na Stripe a partir do `plans.ts` (modelo em `templates/billing-sync.ts`) |
 
 ## Variáveis de ambiente (`.env.example`)
 
@@ -123,10 +124,9 @@ JWT_ACCESS_TTL=15m
 REFRESH_TOKEN_TTL_DAYS=30
 COOKIE_SECRET=                           # mínimo 32 caracteres
 
-STRIPE_SECRET_KEY=
+STRIPE_SECRET_KEY=                       # vazio em dev = modo de teste (planos mudam na hora, sem cobrança)
 STRIPE_WEBHOOK_SECRET=
-STRIPE_PRICE_PRO=                        # um por plano pago de plans.ts
-STRIPE_PRICE_BUSINESS=
+BILLING_MODE=auto                        # auto | stripe | fake | disabled (auto: stripe com chave; fake em dev sem chave; disabled em produção sem chave)
 
 DOCS_ENABLED=true                        # false por padrão em produção
 TRUST_PROXY=false                        # true atrás do nginx (o /rodsaas:domain liga)
@@ -138,7 +138,7 @@ SMTP_PASS=
 MAIL_FROM="NOME <no-reply@seusaas.com>"
 ```
 
-`env.ts` valida tudo com Zod (inclusive tamanho mínimo dos segredos) e o processo encerra com mensagem clara se algo faltar. O price ID de cada plano fica em `plans.ts` lendo do env (`STRIPE_PRICE_PRO`, etc.).
+`env.ts` valida tudo com Zod (inclusive tamanho mínimo dos segredos) e o processo encerra com mensagem clara se algo faltar. Os preços ficam em `config/plans.ts` e são enviados à Stripe pelo `npm run billing:sync`; não existe `STRIPE_PRICE_*` no `.env`. `BILLING_MODE=fake` com `NODE_ENV=production` reprova o boot.
 
 ## docker-compose.yml (dev)
 

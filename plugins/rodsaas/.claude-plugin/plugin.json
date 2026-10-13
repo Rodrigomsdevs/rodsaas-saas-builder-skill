@@ -1,6 +1,6 @@
 {
   "name": "rodsaas",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Kit para iniciar, verificar e publicar SaaS B2B multi-tenant: Postgres, backend Fastify + Prisma + Stripe, frontend Next.js + shadcn/ui, verificação ponta a ponta com Playwright, gerador de módulos, uploads, presets (Notion e Tarefas) e domínio com nginx + HTTPS.",
   "author": {
     "name": "Rodrigo"

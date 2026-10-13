@@ -60,7 +60,13 @@ Botões de ação (`LoadingButton`): durante a ação ficam **`disabled`** e com
 | `invitation-row` | linha de convite pendente (contém o e-mail) |
 | `plan-card` | card de plano, com atributo **`data-plan="<id do plano>"`** |
 | `plan-current` | selo "plano atual" dentro do card |
+| `plan-subscribe` | botão de ação do card ("Assinar" / "Mudar para"), com **`data-plan`**; para o owner **nunca some** (desabilitado no modo `disabled`); admin não tem |
 | `usage-bar` | barra de uso de limite |
+| `billing-mode-banner` | aviso de modo de teste ou cobrança não configurada |
+| `plan-change-dialog`, `plan-change-confirm` | diálogo de troca de plano (com a prévia do valor) e o botão de confirmar |
+| `billing-cancel`, `billing-resume` | cancelar a assinatura (abre `confirm-dialog`) / retomar o cancelamento agendado |
+| `billing-owner-only` | aviso para o admin de que só o owner muda o plano |
+| `billing-portal`, `billing-pending`, `billing-cycle-toggle` | recomendados: gerenciar cobrança (Stripe), "confirmando pagamento", seletor mensal/anual |
 
 ### Módulo de exemplo (`projects`, se existir)
 | testid | Elemento |
@@ -82,12 +88,15 @@ Os módulos gerados pelo `/rodsaas:module` seguem o mesmo padrão de testids.
 | `POST /v1/auth/register` | `{ name, email, password, organizationName }` ou `{ name, email, password, invitationToken }` (sem `organizationName`: entra na empresa do convite, não cria outra) | cookies de sessão |
 | `POST /v1/auth/login` | `{ email, password }` | cookies |
 | `POST /v1/auth/switch-organization` | `{ organizationId }` | novo access token |
-| `GET /v1/me` | — | `{ user: { id, name, email, emailVerified }, organization: { id, name, role } \| null, organizations: [{ id, name, role }], plan: { id, name, limits, features, usage } }` |
+| `GET /v1/me` | — | `{ user: { id, name, email, emailVerified }, organization: { id, name, role } \| null, organizations: [{ id, name, role }], plan: { id, name, limits, features, usage, cancelAtPeriodEnd }, billing: { mode, canManage } }` |
 | `POST /v1/organizations` | `{ name }` | `{ id, name }` e a nova empresa vira a ativa |
 | `GET /v1/members` | — | `{ data: [{ id, role, user: { id, name, email } }], meta }` |
 | `PATCH /v1/members/:id` | `{ role }` | — |
 | `POST /v1/invitations` | `{ email, role }` | convite + e-mail com link `APP_URL/convite?token=...` |
-| `GET /v1/billing/plans` | — | lista (ou `{ data }`) de `{ id, name, limits, features }`; limite ilimitado = `null` |
+| `GET /v1/billing/plans` | — | lista (ou `{ data }`) de `{ id, name, prices: { month, year } \| null, limits, features }`; limite ilimitado = `null` |
+| `POST /v1/billing/checkout-sessions` | `{ plan, interval }` | `{ url }`; no modo de teste o plano já muda |
+| `GET /v1/billing/change-plan/preview?plan=&interval=` | — | `{ amountDue, currency, overLimits }` |
+| `POST /v1/billing/change-plan` · `/cancel` · `/resume` | `{ plan, interval }` / — / — | o `/v1/me` reflete na hora (modo de teste) |
 | `GET/POST /v1/projects` (exemplo) | `{ name, description? }` | `{ id, name, ... }` / `{ data, meta }` |
 
 E-mails (verificação, reset, convite) chegam no **Mailpit** em dev, com links absolutos para o painel.

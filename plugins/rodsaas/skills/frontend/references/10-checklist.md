@@ -5,6 +5,12 @@ Confira item por item antes do relatório. Para os itens de interface, **abra a 
 ## Verificação automática (obrigatória)
 - [ ] `/rodsaas:verify`: auditoria do contrato sem pendências e bateria completa verde (relatório em `rodsaas-verify-report/`)
 
+## Plano e cobrança
+- [ ] sem Stripe (modo de teste): owner assina, troca, cancela e retoma; limites e features mudam no app
+- [ ] admin vê sem botões e com o aviso; membro não acessa
+- [ ] diálogo de troca com prévia e aviso de limite no downgrade
+- [ ] cadastro com `?plano=` segue para a assinatura
+
 ## Build e qualidade
 - [ ] `npm run typecheck`, `npm run lint`, `npm run build` sem erros nem warnings novos
 - [ ] `npm test` verde (máscaras CPF/CNPJ/telefone/CEP, `applyApiErrors`, `messageFor`, formatadores)

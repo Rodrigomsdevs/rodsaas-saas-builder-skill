@@ -69,7 +69,7 @@ Tabela curta por área (API, autenticação, sessão, empresas, membros, módulo
 | **Membros** | convidar pela tela → e-mail → criar conta pelo convite (sem empresa própria, papel MEMBER) → aparece na lista; membro não vê ações de admin nem cobrança; promover a admin libera; remover corta o acesso na hora (`/sem-empresa`) |
 | **Módulo de exemplo** | vazio com ação; criar com erro no campo, editar, excluir com confirmação; clique duplo cria uma vez só e o botão fica desabilitado; busca na URL e após recarregar; limite do plano → upgrade |
 | **Estados** | 404 dentro do app; erro da API com código e "tentar de novo"; skeleton com API lenta; API inacessível sem tela branca nem stack |
-| **Plano** | cards de todos os planos da API, selo do atual, barra de uso |
+| **Plano e cobrança** | API: preços, modo de cobrança no `/v1/me`, free não comprável, membro não assina; no modo de teste: assinar, já-assina (409), mesmo plano (400), prévia, trocar, cancelar e retomar. Tela: cards, selo do atual, uso, **botão de assinar sempre visível para o owner**, aviso de modo; assinar → trocar (diálogo com prévia) → cancelar → retomar; admin sem botões e com aviso; cadastro com `?plano=` já sai assinando |
 | **Celular e tema** | menu vira gaveta; sem rolagem horizontal nas telas principais; claro/escuro |
 
 Testes que dependem de algo opcional (módulo `projects`, limite de plano baixo) são **pulados** com o motivo, não reprovados.

@@ -88,5 +88,9 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | skeleton | spinner genérico ou tela em branco enquanto carrega |
 | API inacessível | mensagem crua do `fetch` ("Failed to fetch") na tela |
 | plano | cards fixos no front em vez de vir de `/v1/billing/plans`; sem `data-plan` |
+| botão de assinar | tela feita só como vitrine (sem `plan-subscribe`); botão escondido quando a Stripe não está configurada (deve aparecer: modo de teste em dev, desabilitado com aviso em produção) |
+| assinar/trocar/cancelar pela tela | backend sem modo de teste (exige Stripe até em dev); troca só pelo portal da Stripe; tela não relê `me` depois da mudança; `?status=success` esquecido na URL |
+| admin com aviso | admin vendo botões de pagamento, ou tela inteira escondida em vez do aviso `billing-owner-only` |
+| cadastro com plano | `?plano=` ignorado pelo cadastro |
 | celular | menu fixo ocupando a tela; tabela larga sem virar cards |
 | tema | `next-themes` sem `attribute="class"` |

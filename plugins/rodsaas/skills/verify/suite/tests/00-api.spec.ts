@@ -1,7 +1,7 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
 import { cfg } from "../support/config.mjs";
 import {
-  call, createOrg, createProject, hasProjectsModule, items, me, newUser, ok, register, sleep, switchOrg, uniq,
+  billingMode, call, createOrg, createProject, hasProjectsModule, items, me, newUser, ok, plansFromApi, register, sleep, switchOrg, uniq,
 } from "../support/api";
 import { linkFrom, waitForEmail } from "../support/mailpit";
 
@@ -149,6 +149,11 @@ test.describe("API · sessão e empresas", () => {
     expect(m.organization?.role).toBe("MEMBER");
     const r = await call(memberCtx, "POST", "/v1/invitations", { email: `x.${uniq()}@example.com`, role: "MEMBER" });
     expect(r.status()).toBe(403);
+    const { paid } = await plansFromApi(memberCtx);
+    if (paid[0]) {
+      const c = await call(memberCtx, "POST", "/v1/billing/checkout-sessions", { plan: paid[0].id, interval: "month" });
+      expect(c.status(), "membro não assina plano").toBe(403);
+    }
     await ownerCtx.dispose();
     await memberCtx.dispose();
   });
@@ -177,6 +182,67 @@ test.describe("API · sessão e empresas", () => {
     expect((await call(ctx, "POST", "/v1/auth/logout")).status()).toBeLessThan(300);
     expect((await call(ctx, "GET", "/v1/me")).status()).toBe(401);
     expect((await call(ctx, "POST", "/v1/auth/refresh")).status()).toBe(401);
+    await ctx.dispose();
+  });
+});
+
+test.describe("API · planos e cobrança", () => {
+  test("planos com preço, /v1/me com modo de cobrança e free não é comprável", async () => {
+    const ctx = await pwRequest.newContext();
+    await register(ctx, newUser("plans"));
+    const { all, paid } = await plansFromApi(ctx);
+    expect(all.length).toBeGreaterThan(0);
+    expect(paid.length, "pelo menos um plano pago com prices.month (centavos)").toBeGreaterThan(0);
+    const free = all.find((p) => !p.prices);
+    const m: any = await me(ctx);
+    expect(["stripe", "fake", "disabled"], "me.billing.mode").toContain(m.billing?.mode);
+    expect(m.billing?.canManage, "owner pode gerenciar a cobrança").toBe(true);
+    if (free) {
+      const r = await call(ctx, "POST", "/v1/billing/checkout-sessions", { plan: free.id, interval: "month" });
+      expect(r.status()).toBe(400);
+      expect((await r.json()).code).toBe("PLAN_NOT_PURCHASABLE");
+    }
+    await ctx.dispose();
+  });
+
+  test("modo de teste: assinar, trocar, cancelar e retomar sem Stripe", async () => {
+    const ctx = await pwRequest.newContext();
+    await register(ctx, newUser("fakebill"));
+    const mode = await billingMode(ctx);
+    test.skip(mode !== "fake", `cobrança em modo "${mode}" (este teste roda no modo de teste, sem Stripe)`);
+    const { paid } = await plansFromApi(ctx);
+    const [p1, p2] = paid;
+
+    const notSub = await call(ctx, "POST", "/v1/billing/change-plan", { plan: p1.id, interval: "month" });
+    expect(notSub.status(), "trocar sem assinar").toBe(409);
+    expect((await notSub.json()).code).toBe("NOT_SUBSCRIBED");
+
+    const co = await ok(await call(ctx, "POST", "/v1/billing/checkout-sessions", { plan: p1.id, interval: "month" }), "checkout (fake)");
+    expect(co.url, "checkout devolve url").toBeTruthy();
+    let m: any = await me(ctx);
+    expect(m.plan.id, "plano aplicado na hora no modo de teste").toBe(p1.id);
+    expect(m.plan.limits, "limites do novo plano").toEqual(p1.limits);
+
+    const again = await call(ctx, "POST", "/v1/billing/checkout-sessions", { plan: p1.id, interval: "month" });
+    expect(again.status()).toBe(409);
+    expect((await again.json()).code).toBe("ALREADY_SUBSCRIBED");
+    const same = await call(ctx, "POST", "/v1/billing/change-plan", { plan: p1.id, interval: "month" });
+    expect((await same.json()).code).toBe("SAME_PLAN");
+
+    if (p2) {
+      const preview = await ok(await call(ctx, "GET", `/v1/billing/change-plan/preview?plan=${p2.id}&interval=month`), "prévia da troca");
+      expect(typeof preview.amountDue, "prévia com amountDue").toBe("number");
+      await ok(await call(ctx, "POST", "/v1/billing/change-plan", { plan: p2.id, interval: "month" }), "trocar de plano");
+      m = await me(ctx);
+      expect(m.plan.id).toBe(p2.id);
+    }
+
+    await ok(await call(ctx, "POST", "/v1/billing/cancel"), "cancelar");
+    m = await me(ctx);
+    expect(m.plan.cancelAtPeriodEnd, "cancelamento agendado").toBe(true);
+    expect(m.plan.id, "continua no plano até o fim do período").toBe((p2 ?? p1).id);
+    await ok(await call(ctx, "POST", "/v1/billing/resume"), "retomar");
+    expect(((await me(ctx)) as any).plan.cancelAtPeriodEnd).toBe(false);
     await ctx.dispose();
   });
 });

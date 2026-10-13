@@ -238,4 +238,4 @@ A validação real é a API: se o cookie mentir, a primeira request devolve 401 
 
 ### Voltar do Stripe
 
-Checkout redireciona para `/configuracoes/plano?status=success`. O webhook pode chegar alguns segundos depois: mostre "Confirmando seu pagamento…" e rebusque `me`/assinatura a cada 2 s por até ~20 s até o plano mudar; então toast de sucesso e remova o `?status` da URL. Se não mudar no prazo, mensagem tranquilizando ("pode levar alguns minutos") em vez de erro.
+Checkout volta para `/configuracoes/plano?status=success` (ou `canceled`). Comportamento completo, inclusive modo de teste e webhook atrasado, em `11-plano-e-cobranca.md`.

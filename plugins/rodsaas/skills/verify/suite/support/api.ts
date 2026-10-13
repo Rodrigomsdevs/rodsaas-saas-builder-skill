@@ -97,3 +97,21 @@ export async function routeExists(req: APIRequestContext, path: string) {
 }
 
 export const hasProjectsModule = (req: APIRequestContext) => routeExists(req, "/v1/projects");
+
+export type Plan = {
+  id: string;
+  name: string;
+  prices: { month?: number; year?: number } | null;
+  limits: Record<string, number | null>;
+  features: string[];
+};
+
+/** Planos da API na ordem dela; pagos = com preço mensal. */
+export async function plansFromApi(req: APIRequestContext) {
+  const all = items<Plan>(await ok(await call(req, "GET", "/v1/billing/plans"), "planos"));
+  return { all, paid: all.filter((p) => p.prices && typeof p.prices.month === "number") };
+}
+
+export type BillingMode = "stripe" | "fake" | "disabled";
+export const billingMode = async (req: APIRequestContext): Promise<BillingMode | undefined> =>
+  (await me(req) as any).billing?.mode;

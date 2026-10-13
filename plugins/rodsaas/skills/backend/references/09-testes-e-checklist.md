@@ -48,12 +48,12 @@ loginAs(user, orgId?) // devolve os cookies para usar no app.inject
 - convite conta no limite de membros
 
 ### Billing
-- webhook com assinatura inválida → 400
-- mesmo evento duas vezes → processado uma vez
-- `subscription.updated` muda o plano efetivo; `deleted` volta para free
-- `past_due` mantém o plano com `paymentIssue: true`
-- checkout com assinatura já ativa → 409
-- `member` não acessa rotas de billing
+- modo: sem chave em dev → `fake`; sem chave em produção → `disabled` (503 `BILLING_NOT_CONFIGURED`); `BILLING_MODE=fake` + produção → boot falha
+- **modo fake**: checkout do Free → Pro aplica na hora (limites e features mudam); `change-plan` Pro → Business; prévia com `overLimits` num downgrade acima do limite; cancelar agenda (`cancelAtPeriodEnd`), retomar desfaz, `period_end` simulado volta para free; `payment_failed` simulado liga `paymentIssue`
+- checkout de quem já assina → 409 `ALREADY_SUBSCRIBED`; change-plan de quem não assina → 409 `NOT_SUBSCRIBED`; mesmo plano → 400 `SAME_PLAN`; free no checkout → 400 `PLAN_NOT_PURCHASABLE`
+- admin e member: 403 em checkout, change-plan, cancel, resume e portal; admin lê a assinatura, member não
+- webhook com assinatura inválida → 400; mesmo evento duas vezes → processado uma vez
+- `subscription.updated` muda o plano (pelo metadado `rodsaas_plan` do produto); `deleted` volta para free; `past_due` mantém o plano com `paymentIssue: true`; produto sem metadado não derruba o webhook
 - guard de feature e de limite
 
 ### API

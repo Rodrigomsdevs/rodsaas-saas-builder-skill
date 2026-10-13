@@ -45,7 +45,7 @@ Pergunte só o que não dá para deduzir (em uma única mensagem):
 
 - **Nome do projeto** (vira nome do pacote, do banco e título da doc da API).
 - **Onde criar** — padrão: pasta `api/` no diretório atual (o front vai depois em `web/`, pela skill de frontend).
-- **Planos iniciais** — nomes, limites e features. Se o usuário não souber ainda, use o padrão `free` / `pro` / `business` com limites de exemplo e deixe claro que é placeholder.
+- **Planos iniciais** — nomes, **preços** (mensal e, se quiser, anual), limites e features. Se o usuário não souber ainda, use o padrão `free` / `pro` / `business` com valores e limites de exemplo e deixe claro que é placeholder. Não pergunte pela Stripe: sem chave, a cobrança roda em modo de teste e tudo funciona.
 
 - **Portas** — da API e do frontend. Padrão: API `3333`, front `3000`. Antes de sugerir, veja o que já está ocupado nesta máquina, porque o mesmo servidor pode rodar vários SaaS:
 
@@ -84,7 +84,7 @@ CRUD da organização, listagem/alteração de papel/remoção de membros, convi
 → Leia as seções "Papéis" e "Membros e convites" de `references/05-multi-tenant.md`.
 
 ### Fase 5 — Billing
-`config/plans.ts`, cliente Stripe, checkout, portal, webhook com body cru + assinatura + idempotência, assinatura espelhada no banco, guards de feature e limite.
+`config/plans.ts` com preços, **modos de cobrança** (`stripe`, `fake` em dev sem chave, `disabled` em produção sem chave), assinatura espelhada no banco, checkout, **troca de plano dentro do app** (com prévia e valor proporcional), cancelar/retomar, portal, webhook (body cru + assinatura + idempotência), guards de feature e limite, e o script `billing:sync` (de `templates/billing-sync.ts`). Ao fim desta fase, sem nenhuma Stripe configurada, o owner já consegue assinar e trocar de plano (modo de teste).
 → Leia `references/06-billing.md`.
 
 ### Fase 6 — Plataforma
@@ -126,7 +126,8 @@ Termine com uma mensagem curta contendo:
 | `references/03-api-padrao.md` | Fase 1 e em toda rota — REST, erros, paginação, OpenAPI |
 | `references/04-auth.md` | Fase 3 — tokens, cookies, fluxos |
 | `references/05-multi-tenant.md` | Fase 2 — schema, RLS, `withTenant` |
-| `references/06-billing.md` | Fase 5 — planos, Stripe, guards |
+| `references/06-billing.md` | Fase 5 — planos, modos de cobrança, Stripe, troca de plano, guards |
+| `templates/billing-sync.ts` | Fase 5 — script de sincronização com a Stripe (copiar para `api/scripts/`) |
 | `references/07-seguranca.md` | Fase 1 e 6 — pipeline de hooks e checklist de segurança |
 | `references/08-modulos.md` | Fase 7 — anatomia de um módulo |
 | `references/09-testes-e-checklist.md` | Fase 8 — testes obrigatórios e checklist final |

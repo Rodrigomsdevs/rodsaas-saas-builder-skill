@@ -50,7 +50,15 @@ const check = (group, ids) => {
 for (const [group, ids] of Object.entries(contract.testids)) check(group, ids);
 
 const hasProjects = existsSync(join(projectDir, "web/src/app/(app)/projetos")) || /\/v1\/projects/.test(source);
-if (hasProjects) for (const [group, def] of Object.entries(contract.optionalTestids)) check(group, def.ids);
+const warnings = {};
+for (const [group, def] of Object.entries(contract.optionalTestids)) {
+  if (group === "modulo-exemplo") {
+    if (hasProjects) check(group, def.ids);
+    continue;
+  }
+  // recomendados: só avisam
+  for (const id of def.ids) if (!literal(id)) (warnings[group] ??= []).push(id);
+}
 
 // ------------------------------------------------------------------ rotas (App Router)
 const appDir = [join(webSrc, "app"), join(projectDir, "web/app")].find((p) => existsSync(p));
@@ -98,6 +106,7 @@ for (const [group, ids] of Object.entries(missing)) {
   problems += ids.length;
   console.log(`✗ data-testid faltando (${group}): ${ids.join(", ")}`);
 }
+for (const [group, ids] of Object.entries(warnings)) console.log(`! recomendados ausentes (${group}): ${ids.join(", ")}`);
 if (missingRoutes.length) {
   problems += missingRoutes.length;
   console.log(`✗ rotas faltando no painel: ${missingRoutes.join(", ")}`);

@@ -1,61 +1,253 @@
 {
-  "version": 1,
+  "version": 2,
   "routes": [
-    "/entrar", "/cadastro", "/esqueci-senha", "/redefinir-senha", "/verificar-email", "/convite",
-    "/inicio", "/sem-empresa", "/configuracoes/empresa", "/configuracoes/membros", "/configuracoes/plano", "/perfil"
+    "/entrar",
+    "/cadastro",
+    "/esqueci-senha",
+    "/redefinir-senha",
+    "/verificar-email",
+    "/convite",
+    "/inicio",
+    "/sem-empresa",
+    "/configuracoes/empresa",
+    "/configuracoes/membros",
+    "/configuracoes/plano",
+    "/perfil"
   ],
   "testids": {
     "auth": [
-      "login-email", "login-password", "login-submit", "login-error",
-      "signup-name", "signup-email", "signup-password", "signup-org-name", "signup-submit",
-      "forgot-email", "forgot-submit", "forgot-success",
-      "reset-password", "reset-submit", "reset-success",
+      "login-email",
+      "login-password",
+      "login-submit",
+      "login-error",
+      "signup-name",
+      "signup-email",
+      "signup-password",
+      "signup-org-name",
+      "signup-submit",
+      "forgot-email",
+      "forgot-submit",
+      "forgot-success",
+      "reset-password",
+      "reset-submit",
+      "reset-success",
       "verify-email-success",
-      "invite-org-name", "invite-create-account", "invite-login", "invite-accept"
+      "invite-org-name",
+      "invite-create-account",
+      "invite-login",
+      "invite-accept"
     ],
     "casca": [
-      "app-shell", "sidebar", "sidebar-toggle",
-      "org-switcher", "org-switcher-current", "org-switcher-item", "org-switcher-create",
-      "create-org-name", "create-org-submit",
-      "user-menu", "user-menu-logout", "theme-toggle"
+      "app-shell",
+      "sidebar",
+      "sidebar-toggle",
+      "org-switcher",
+      "org-switcher-current",
+      "org-switcher-item",
+      "org-switcher-create",
+      "create-org-name",
+      "create-org-submit",
+      "user-menu",
+      "user-menu-logout",
+      "theme-toggle"
     ],
     "estados": [
-      "page-not-found", "error-state", "error-retry", "error-request-id",
-      "empty-state", "empty-state-action", "skeleton", "forbidden-state", "confirm-dialog", "confirm-dialog-confirm"
+      "page-not-found",
+      "error-state",
+      "error-retry",
+      "error-request-id",
+      "empty-state",
+      "empty-state-action",
+      "skeleton",
+      "forbidden-state",
+      "confirm-dialog",
+      "confirm-dialog-confirm"
     ],
-    "empresa": ["org-settings-name", "org-settings-save"],
+    "empresa": [
+      "org-settings-name",
+      "org-settings-save"
+    ],
     "membros": [
-      "members-table", "member-row", "member-role-select", "member-remove",
-      "role-option-ADMIN", "role-option-MEMBER",
-      "invite-button", "invite-email", "invite-role", "invite-submit", "invitation-row"
+      "members-table",
+      "member-row",
+      "member-role-select",
+      "member-remove",
+      "role-option-ADMIN",
+      "role-option-MEMBER",
+      "invite-button",
+      "invite-email",
+      "invite-role",
+      "invite-submit",
+      "invitation-row"
     ],
-    "plano": ["plan-card", "plan-current", "usage-bar"]
+    "plano": [
+      "plan-card",
+      "plan-current",
+      "plan-subscribe",
+      "usage-bar",
+      "billing-mode-banner",
+      "plan-change-dialog",
+      "plan-change-confirm",
+      "billing-cancel",
+      "billing-resume",
+      "billing-owner-only"
+    ]
   },
   "optionalTestids": {
     "modulo-exemplo": {
       "when": "GET /v1/projects existe",
       "ids": [
-        "page-header-action", "data-table-row", "row-actions", "row-action-edit", "row-action-delete",
-        "form-sheet", "form-submit", "search-input", "field-*", "field-error-*", "upgrade-dialog"
+        "page-header-action",
+        "data-table-row",
+        "row-actions",
+        "row-action-edit",
+        "row-action-delete",
+        "form-sheet",
+        "form-submit",
+        "search-input",
+        "field-*",
+        "field-error-*",
+        "upgrade-dialog"
+      ],
+      "level": "error"
+    },
+    "cobranca-stripe": {
+      "when": "recomendado (modo stripe e preço anual)",
+      "level": "warn",
+      "ids": [
+        "billing-portal",
+        "billing-pending",
+        "billing-cycle-toggle"
       ]
     }
   },
   "api": [
-    { "method": "get", "path": "/health" },
-    { "method": "post", "path": "/v1/auth/register", "body": ["name", "email", "password", "organizationName", "invitationToken"] },
-    { "method": "post", "path": "/v1/auth/login", "body": ["email", "password"] },
-    { "method": "post", "path": "/v1/auth/refresh" },
-    { "method": "post", "path": "/v1/auth/logout" },
-    { "method": "post", "path": "/v1/auth/forgot-password", "body": ["email"] },
-    { "method": "post", "path": "/v1/auth/reset-password" },
-    { "method": "post", "path": "/v1/auth/verify-email" },
-    { "method": "post", "path": "/v1/auth/switch-organization", "body": ["organizationId"] },
-    { "method": "get", "path": "/v1/me" },
-    { "method": "post", "path": "/v1/organizations", "body": ["name"] },
-    { "method": "get", "path": "/v1/members" },
-    { "method": "patch", "path": "/v1/members/{id}", "body": ["role"] },
-    { "method": "post", "path": "/v1/members/leave" },
-    { "method": "post", "path": "/v1/invitations", "body": ["email", "role"] },
-    { "method": "get", "path": "/v1/billing/plans" }
+    {
+      "method": "get",
+      "path": "/health"
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/register",
+      "body": [
+        "name",
+        "email",
+        "password",
+        "organizationName",
+        "invitationToken"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/login",
+      "body": [
+        "email",
+        "password"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/refresh"
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/logout"
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/forgot-password",
+      "body": [
+        "email"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/reset-password"
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/verify-email"
+    },
+    {
+      "method": "post",
+      "path": "/v1/auth/switch-organization",
+      "body": [
+        "organizationId"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/me"
+    },
+    {
+      "method": "post",
+      "path": "/v1/organizations",
+      "body": [
+        "name"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/members"
+    },
+    {
+      "method": "patch",
+      "path": "/v1/members/{id}",
+      "body": [
+        "role"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/members/leave"
+    },
+    {
+      "method": "post",
+      "path": "/v1/invitations",
+      "body": [
+        "email",
+        "role"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/billing/plans"
+    },
+    {
+      "method": "get",
+      "path": "/v1/billing/subscription"
+    },
+    {
+      "method": "post",
+      "path": "/v1/billing/checkout-sessions",
+      "body": [
+        "plan",
+        "interval"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/billing/change-plan/preview"
+    },
+    {
+      "method": "post",
+      "path": "/v1/billing/change-plan",
+      "body": [
+        "plan",
+        "interval"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/billing/cancel"
+    },
+    {
+      "method": "post",
+      "path": "/v1/billing/resume"
+    },
+    {
+      "method": "post",
+      "path": "/v1/billing/portal-sessions"
+    }
   ]
 }
