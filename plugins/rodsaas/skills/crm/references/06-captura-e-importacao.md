@@ -64,7 +64,7 @@ model CrmCaptureLookup {                 // SEM RLS (precisa ser lido antes de s
 | `POST /v1/public/crm/forms/:token` | `public: true`, CORS só para `allowedOrigins` (sem credenciais), rate limit 10/min por IP e 300/h por formulário, body ≤ 32 KB | JSON ou `application/x-www-form-urlencoded`; resposta JSON `{ ok: true }` para `fetch`, ou **303** para `_redirect`/`redirectUrl` em envio de formulário comum (sem redirect: página de obrigado simples com a marca) |
 | `OPTIONS /v1/public/crm/forms/:token` | — | preflight com as origens autorizadas |
 
-Regras da captura (service único `captureLead(key, payload, meta)`, usado pelas duas rotas e pelo botão "testar"):
+Regras da captura (service único `captureLead(key, payload, meta)`, usado pelas duas rotas, pelo botão "testar" e, sem chave, por outros presets como o **Forms**, que passa a origem e a distribuição da configuração dele; as regras 1 a 3 valem só para as rotas públicas):
 
 1. Chave/token inexistente ou revogado → **401 `CAPTURE_KEY_INVALID`** (mesma resposta nos dois casos, sem dizer qual). Empresa sem a feature (rebaixou o plano) → 403 `FEATURE_NOT_IN_PLAN` com mensagem clara para quem integrou.
 2. FORM: `Origin` (ou, sem ele, `Referer`) precisa estar em `allowedOrigins` → senão 403 `FORM_ORIGIN_NOT_ALLOWED`. `_redirect` só é seguido se tiver a mesma origem de uma origem autorizada (evita redirecionamento aberto).

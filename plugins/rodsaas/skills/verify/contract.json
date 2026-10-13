@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -477,6 +477,107 @@
         {
           "method": "post",
           "path": "/v1/public/crm/leads"
+        }
+      ]
+    },
+    "forms": {
+      "when": "rodsaas.json → presets inclui \"forms\"",
+      "routes": [
+        "/forms",
+        "/forms/respostas",
+        "/forms/modelos",
+        "/forms/f/[id]/editar",
+        "/forms/f/[id]/respostas",
+        "/forms/f/[id]/resumo",
+        "/forms/f/[id]/compartilhar",
+        "/forms/f/[id]/configuracoes",
+        "/forms/f/[id]/integracoes",
+        "/f/[slug]"
+      ],
+      "testids": [
+        "forms-new",
+        "forms-template-blank",
+        "forms-template",
+        "forms-title-input",
+        "forms-add-field",
+        "forms-field-type-*",
+        "forms-field",
+        "forms-field-label",
+        "forms-field-required",
+        "forms-save-status",
+        "forms-publish",
+        "forms-public-link",
+        "forms-status",
+        "forms-responses-table",
+        "forms-response-row",
+        "forms-summary",
+        "public-form",
+        "public-field",
+        "public-field-error",
+        "public-form-next",
+        "public-form-submit",
+        "public-form-thanks",
+        "public-form-closed"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/forms"
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms",
+          "body": [
+            "title",
+            "templateId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/forms/{id}",
+          "body": [
+            "title",
+            "settings"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/forms/{id}/draft",
+          "body": [
+            "version",
+            "schema"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms/{id}/publish"
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms/{id}/close"
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms/{id}/reopen"
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/responses"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/forms/{slug}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/forms/{slug}/responses",
+          "body": [
+            "answers"
+          ]
         }
       ]
     }

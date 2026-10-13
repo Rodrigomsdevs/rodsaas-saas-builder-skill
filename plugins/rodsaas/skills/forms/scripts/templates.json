@@ -1,0 +1,152 @@
+[
+  {
+    "id": "contato",
+    "name": "Fale conosco",
+    "description": "Contato do site com nome, e-mail, WhatsApp e mensagem",
+    "settings": { "layout": "classic" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_nome", "type": "short_text", "label": "Seu nome", "required": true },
+        { "id": "f_email", "type": "email", "label": "Seu e-mail", "required": true },
+        { "id": "f_whats", "type": "phone", "label": "WhatsApp", "placeholder": "(00) 00000-0000" },
+        { "id": "f_assunto", "type": "dropdown", "label": "Assunto", "required": true, "options": [{ "id": "o_duvida", "label": "Dúvida" }, { "id": "o_orcamento", "label": "Orçamento" }, { "id": "o_suporte", "label": "Suporte" }, { "id": "o_outro", "label": "Outro" }] },
+        { "id": "f_msg", "type": "long_text", "label": "Mensagem", "required": true },
+        { "id": "f_lgpd", "type": "consent", "label": "Concordo com o uso dos meus dados para retorno do contato, conforme a política de privacidade.", "required": true }
+      ],
+      "hidden": [{ "key": "utm_source" }, { "key": "utm_medium" }, { "key": "utm_campaign" }]
+    }
+  },
+  {
+    "id": "orcamento",
+    "name": "Pedido de orçamento",
+    "description": "Pessoa ou empresa, com CNPJ só quando for empresa (lógica condicional)",
+    "settings": { "layout": "classic" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_tipo", "type": "single_choice", "label": "Você é", "required": true, "options": [{ "id": "o_pf", "label": "Pessoa física" }, { "id": "o_pj", "label": "Empresa" }] },
+        { "id": "f_nome", "type": "short_text", "label": "Nome completo", "required": true },
+        { "id": "f_empresa", "type": "short_text", "label": "Nome da empresa", "required": true, "visibleIf": { "match": "all", "rules": [{ "field": "f_tipo", "op": "eq", "value": "o_pj" }] } },
+        { "id": "f_cnpj", "type": "cnpj", "label": "CNPJ", "visibleIf": { "match": "all", "rules": [{ "field": "f_tipo", "op": "eq", "value": "o_pj" }] } },
+        { "id": "f_email", "type": "email", "label": "E-mail", "required": true },
+        { "id": "f_whats", "type": "phone", "label": "WhatsApp", "required": true },
+        { "id": "p_detalhes", "type": "page", "label": "Sobre o pedido" },
+        { "id": "f_servicos", "type": "multiple_choice", "label": "O que você precisa?", "required": true, "allowOther": true, "options": [{ "id": "o_site", "label": "Site" }, { "id": "o_loja", "label": "Loja virtual" }, { "id": "o_sistema", "label": "Sistema" }, { "id": "o_app", "label": "Aplicativo" }] },
+        { "id": "f_verba", "type": "money", "label": "Quanto pretende investir?" },
+        { "id": "f_prazo", "type": "date", "label": "Para quando?", "validation": { "min": "today" } },
+        { "id": "f_detalhes", "type": "long_text", "label": "Conte um pouco mais" }
+      ],
+      "hidden": [{ "key": "utm_source" }, { "key": "utm_campaign" }]
+    }
+  },
+  {
+    "id": "nps",
+    "name": "Pesquisa NPS",
+    "description": "Nota de 0 a 10 e o motivo, uma pergunta por vez",
+    "settings": { "layout": "one_by_one" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_nps", "type": "nps", "label": "De 0 a 10, quanto você recomendaria a gente para um amigo ou colega?", "required": true },
+        { "id": "f_motivo_baixo", "type": "long_text", "label": "Que pena! O que podemos melhorar?", "visibleIf": { "match": "all", "rules": [{ "field": "f_nps", "op": "lte", "value": 6 }] } },
+        { "id": "f_motivo_medio", "type": "long_text", "label": "O que faltou para ser nota 10?", "visibleIf": { "match": "all", "rules": [{ "field": "f_nps", "op": "gte", "value": 7 }, { "field": "f_nps", "op": "lte", "value": 8 }] } },
+        { "id": "f_motivo_alto", "type": "long_text", "label": "Que ótimo! O que você mais gosta?", "visibleIf": { "match": "all", "rules": [{ "field": "f_nps", "op": "gte", "value": 9 }] } },
+        { "id": "f_contato", "type": "yes_no", "label": "Podemos entrar em contato sobre a sua resposta?" },
+        { "id": "f_email", "type": "email", "label": "Seu e-mail", "required": true, "visibleIf": { "match": "all", "rules": [{ "field": "f_contato", "op": "eq", "value": true }] } }
+      ],
+      "hidden": [{ "key": "cliente" }]
+    }
+  },
+  {
+    "id": "satisfacao",
+    "name": "Satisfação do atendimento",
+    "description": "Estrelas, escala e comentário depois de um atendimento",
+    "settings": { "layout": "one_by_one" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_nota", "type": "rating", "label": "Como você avalia o atendimento?", "required": true, "settings": { "max": 5 } },
+        { "id": "f_rapidez", "type": "scale", "label": "Rapidez para resolver", "settings": { "min": 1, "max": 5, "minLabel": "Muito lento", "maxLabel": "Muito rápido" } },
+        { "id": "f_resolvido", "type": "yes_no", "label": "Seu problema foi resolvido?", "required": true },
+        { "id": "f_comentario", "type": "long_text", "label": "Quer deixar um comentário?" }
+      ],
+      "hidden": [{ "key": "chamado" }]
+    }
+  },
+  {
+    "id": "evento",
+    "name": "Inscrição em evento",
+    "description": "Dados do participante, empresa, cargo e preferências",
+    "settings": { "layout": "classic" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_nome", "type": "short_text", "label": "Nome completo", "required": true },
+        { "id": "f_email", "type": "email", "label": "E-mail", "required": true },
+        { "id": "f_whats", "type": "phone", "label": "WhatsApp" },
+        { "id": "f_empresa", "type": "short_text", "label": "Empresa" },
+        { "id": "f_cargo", "type": "short_text", "label": "Cargo" },
+        { "id": "f_turno", "type": "single_choice", "label": "Turno preferido", "required": true, "options": [{ "id": "o_manha", "label": "Manhã" }, { "id": "o_tarde", "label": "Tarde" }] },
+        { "id": "f_alimentacao", "type": "multiple_choice", "label": "Restrição alimentar", "allowOther": true, "options": [{ "id": "o_vegetariano", "label": "Vegetariano" }, { "id": "o_vegano", "label": "Vegano" }, { "id": "o_sem_gluten", "label": "Sem glúten" }] },
+        { "id": "f_lgpd", "type": "consent", "label": "Autorizo o uso dos meus dados para a organização do evento.", "required": true }
+      ],
+      "hidden": []
+    }
+  },
+  {
+    "id": "cadastro-cliente",
+    "name": "Cadastro de cliente",
+    "description": "Ficha com CPF/CNPJ e endereço por CEP",
+    "settings": { "layout": "classic" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_tipo", "type": "single_choice", "label": "Tipo de cadastro", "required": true, "options": [{ "id": "o_pf", "label": "Pessoa física" }, { "id": "o_pj", "label": "Pessoa jurídica" }] },
+        { "id": "f_nome", "type": "short_text", "label": "Nome ou razão social", "required": true },
+        { "id": "f_cpf", "type": "cpf", "label": "CPF", "required": true, "visibleIf": { "match": "all", "rules": [{ "field": "f_tipo", "op": "eq", "value": "o_pf" }] } },
+        { "id": "f_cnpj", "type": "cnpj", "label": "CNPJ", "required": true, "visibleIf": { "match": "all", "rules": [{ "field": "f_tipo", "op": "eq", "value": "o_pj" }] } },
+        { "id": "f_email", "type": "email", "label": "E-mail", "required": true },
+        { "id": "f_tel", "type": "phone", "label": "Telefone", "required": true },
+        { "id": "f_endereco", "type": "address", "label": "Endereço", "required": true },
+        { "id": "f_nasc", "type": "date", "label": "Data de nascimento", "validation": { "max": "today" }, "visibleIf": { "match": "all", "rules": [{ "field": "f_tipo", "op": "eq", "value": "o_pf" }] } }
+      ],
+      "hidden": []
+    }
+  },
+  {
+    "id": "feedback-interno",
+    "name": "Feedback interno da equipe",
+    "description": "Pesquisa só para membros da empresa (anônima por padrão)",
+    "settings": { "layout": "one_by_one", "access": "members" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_humor", "type": "scale", "label": "Como você está se sentindo no trabalho esta semana?", "required": true, "settings": { "min": 1, "max": 5, "minLabel": "Muito mal", "maxLabel": "Muito bem" } },
+        { "id": "f_carga", "type": "single_choice", "label": "Sua carga de trabalho está", "required": true, "options": [{ "id": "o_baixa", "label": "Leve" }, { "id": "o_ok", "label": "Equilibrada" }, { "id": "o_alta", "label": "Pesada" }] },
+        { "id": "f_ajuda", "type": "long_text", "label": "O que ajudaria você a trabalhar melhor?" }
+      ],
+      "hidden": []
+    }
+  },
+  {
+    "id": "candidatura",
+    "name": "Candidatura a vaga",
+    "description": "Dados, LinkedIn, pretensão e currículo em PDF",
+    "settings": { "layout": "classic" },
+    "schema": {
+      "version": 1,
+      "fields": [
+        { "id": "f_nome", "type": "short_text", "label": "Nome completo", "required": true },
+        { "id": "f_email", "type": "email", "label": "E-mail", "required": true },
+        { "id": "f_whats", "type": "phone", "label": "WhatsApp", "required": true },
+        { "id": "f_cidade", "type": "short_text", "label": "Cidade / UF" },
+        { "id": "f_linkedin", "type": "short_text", "label": "LinkedIn (link)" },
+        { "id": "f_pretensao", "type": "money", "label": "Pretensão salarial" },
+        { "id": "f_cv", "type": "file", "label": "Currículo (PDF)", "required": true, "settings": { "maxFiles": 1, "accept": ["pdf"], "maxSizeMB": 10 } },
+        { "id": "f_lgpd", "type": "consent", "label": "Autorizo o uso dos meus dados neste processo seletivo.", "required": true }
+      ],
+      "hidden": [{ "key": "vaga" }]
+    }
+  }
+]

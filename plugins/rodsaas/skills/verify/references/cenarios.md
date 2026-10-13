@@ -127,3 +127,20 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | Todos os apps | fixados só no `localStorage` (não chama `PUT /v1/me/preferences`); estrela abrindo o app em vez de só fixar; busca só pelo nome exato |
 | app desligado | desligar só esconde do trilho (rota ainda abre); `disabledApps` fora do `/v1/me`; com 2 apps não volta ao menu clássico |
 | celular | trilho só escondido por CSS (continua no DOM); gaveta sem `data-app`; barra de apps ausente |
+
+## Forms (`11-forms.spec.ts`, preset `forms`)
+
+| Teste | Causas comuns |
+|---|---|
+| link público só com o publicado | rota pública lendo `draft` em vez da versão publicada; publicar sem copiar o esquema para `FormVersion` |
+| envio sem Origin | checagem de Origin/CSRF da base aplicada à rota pública; rota pública exigindo cookie |
+| erro em cada campo | validação só no front; erro sem `path: "answers.<id>"`; e-mail não normalizado; campos ocultos não declarados gravados |
+| lógica condicional | backend validando com todos os campos (ignora `visibleIf`); resposta de pergunta escondida gravada |
+| limite e encerrar | contagem sem trava (corrida passa do limite); `maxResponses` só checado no front; encerrado respondendo 404 em vez de 410 `FORM_CLOSED` |
+| campo isca | isca ignorada ou respondendo erro (o robô aprende) |
+| respostas só para quem pode ver | rota de respostas sem o helper `canSeeResponses`; 403 em vez de 404 |
+| construtor | salvamento automático só mudando o indicador (não chama `PUT /draft`); título não salvo; publicar sem salvar antes |
+| formulário público | `<label>` sem ligação com o campo (`for`/`id`); erro da API mostrado só em toast; sem `data-field-id` no bloco |
+| uma pergunta por vez | Enter não avança; mostra todas as perguntas |
+| lógica ao vivo | condição calculada só no envio; opções sem `<input type="radio">` acessível |
+| encerrado | tela branca ou formulário aberto em formulário encerrado |
