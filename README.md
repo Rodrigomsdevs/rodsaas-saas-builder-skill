@@ -11,7 +11,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white" alt="Claude Code plugin" />
-  <img src="https://img.shields.io/badge/versão-0.3-7C3AED?style=for-the-badge" alt="versão 0.3" />
+  <img src="https://img.shields.io/badge/versão-0.4-7C3AED?style=for-the-badge" alt="versão 0.4" />
   <img src="https://img.shields.io/badge/status-rascunho-F59E0B?style=for-the-badge" alt="status rascunho" />
 </p>
 
@@ -63,6 +63,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 1️⃣ | **`/rodsaas:backend`** | Cria a API completa na pasta `api/` (já prepara o banco sozinho) |
 | 2️⃣ | **`/rodsaas:frontend`** | Cria o painel na pasta `web/`, com a sua cor, logo e estilo |
 | 3️⃣ | **`/rodsaas:domain`** | Coloca no ar no seu domínio, com nginx e HTTPS |
+| 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
 | 🗄️ | **`/rodsaas:db`** | Cria o banco e os usuários do Postgres (o backend já chama; use sozinho para o banco de produção) |
 
 > [!TIP]
@@ -77,7 +78,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   (/rodsaas:notion)   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -99,6 +100,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
 | 🧪 | **Testado** | Testes automáticos de login, permissões, cobrança e isolamento entre clientes |
+| 📝 | **Réplica do Notion** *(opcional)* | Páginas aninhadas, editor com "/", autosave, favoritos, lixeira, busca, databases em tabela e quadro e página pública |
 | 🧩 | **Pronto para crescer** | Um módulo de exemplo serve de molde: peça as funções do seu produto e o Claude segue o padrão |
 
 ---
@@ -146,6 +148,7 @@ plugins/rodsaas/skills/
 ├── backend/    SKILL.md + references/       → API em 8 fases
 ├── db/         SKILL.md + scripts/          → provision.sh
 ├── frontend/   SKILL.md + references/ + scripts/brand.mjs
+├── notion/     SKILL.md + references/       → preset réplica do Notion
 └── domain/     SKILL.md + scripts/          → domain.sh + template do nginx
 ```
 

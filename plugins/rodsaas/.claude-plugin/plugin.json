@@ -1,7 +1,7 @@
 {
   "name": "rodsaas",
-  "version": "0.3.0",
-  "description": "Kit para iniciar e publicar SaaS B2B multi-tenant: Postgres, backend Fastify + Prisma + Stripe, frontend Next.js + shadcn/ui e domínio com nginx + HTTPS.",
+  "version": "0.4.0",
+  "description": "Kit para iniciar e publicar SaaS B2B multi-tenant: Postgres, backend Fastify + Prisma + Stripe, frontend Next.js + shadcn/ui, domínio com nginx + HTTPS e preset réplica do Notion.",
   "author": {
     "name": "Rodrigo"
   },
@@ -11,6 +11,7 @@
     "multi-tenant",
     "nextjs",
     "nginx",
+    "notion",
     "postgres",
     "prisma",
     "saas",
