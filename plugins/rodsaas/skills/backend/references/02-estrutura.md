@@ -108,10 +108,11 @@ Regras:
 
 ```bash
 NODE_ENV=development
-PORT=3333
-APP_URL=http://localhost:3000            # front (CORS, links de e-mail)
+HOST=127.0.0.1                           # só a própria máquina; acesso externo via nginx
+PORT=3333                                # = ports.api do rodsaas.json
+APP_URL=http://localhost:3000            # front (CORS, links de e-mail) — porta = ports.web
 API_URL=http://localhost:3333
-COOKIE_DOMAIN=localhost                  # em produção: .seusaas.com
+COOKIE_DOMAIN=                           # vazio em dev; em produção o /rodsaas:domain grava (ex.: meusaas.com.br)
 
 # Gravadas no .env (e .env.test) pelo /rodsaas:db. No .env.example ficam só os formatos:
 DATABASE_URL=postgresql://NOME_app:SENHA@localhost:5432/NOME          # aplicação (sem privilégios)
@@ -128,7 +129,7 @@ STRIPE_PRICE_PRO=                        # um por plano pago de plans.ts
 STRIPE_PRICE_BUSINESS=
 
 DOCS_ENABLED=true                        # false por padrão em produção
-TRUST_PROXY=false                        # true atrás de proxy/load balancer
+TRUST_PROXY=false                        # true atrás do nginx (o /rodsaas:domain liga)
 
 SMTP_HOST=localhost
 SMTP_PORT=1025                           # mailpit em dev

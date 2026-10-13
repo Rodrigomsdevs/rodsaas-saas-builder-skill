@@ -47,6 +47,10 @@ Arquivo na raiz do projeto, lido por todas as skills rodsaas. O backend cria com
     "theme": "system",
     "logo": "web/public/logo.svg"
   },
+  "ports": {
+    "api": 3333,
+    "web": 3000
+  },
   "domains": {
     "app": "http://localhost:3000",
     "api": "http://localhost:3333"

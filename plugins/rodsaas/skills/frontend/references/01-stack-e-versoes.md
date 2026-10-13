@@ -53,8 +53,8 @@ Componentes do shadcn são código do projeto: ajuste à vontade, mas mantenha o
 
 | Script | Faz |
 |---|---|
-| `dev` | `next dev` (porta 3000) |
-| `build` / `start` | build e produção |
+| `dev` | `next dev -p <ports.web>` |
+| `build` / `start` | build e `next start -p <ports.web> -H 127.0.0.1` (acesso externo via nginx) |
 | `typecheck` | `tsc --noEmit` |
 | `lint` / `format` | Biome |
 | `test` | Vitest |
@@ -67,8 +67,10 @@ Componentes do shadcn são código do projeto: ajuste à vontade, mas mantenha o
 ## Variáveis de ambiente (`web/.env.example`)
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:3333
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3333   # domains.api do rodsaas.json
+NEXT_PUBLIC_APP_URL=http://localhost:3000   # domains.app
 ```
 
-Nada secreto no front: tudo com `NEXT_PUBLIC_` vai para o navegador.
+As portas vêm de `ports` no `rodsaas.json` (definidas pelo `/rodsaas:backend`); não invente outras. Se o arquivo não tiver `ports`, pergunte e grave, com a mesma checagem de porta livre do backend.
+
+Nada secreto no front: tudo com `NEXT_PUBLIC_` vai para o navegador. **Essas variáveis entram no build**: mudou o domínio, precisa rodar `npm run build` de novo (o `/rodsaas:domain` avisa).

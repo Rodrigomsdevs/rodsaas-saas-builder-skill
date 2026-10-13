@@ -41,7 +41,7 @@ Se a doc atual contradiz um exemplo desta skill, a doc vence; anote no relatóri
 ## Antes de começar
 
 1. **Precisa do backend.** Procure `api/` com `openapi.json` (ou o script `openapi:export` para gerá-lo). Sem backend, pare e sugira `/rodsaas:backend` primeiro: o front é gerado a partir do contrato da API.
-2. Leia o **`rodsaas.json`** na raiz do projeto, se existir (o backend cria com nome e domínios). As respostas de marca vão para ele.
+2. Leia o **`rodsaas.json`** na raiz do projeto, se existir (o backend cria com nome, portas e domínios). As respostas de marca vão para ele. O front roda em `ports.web` e fala com a API em `domains.api`.
 
 ## Fases
 

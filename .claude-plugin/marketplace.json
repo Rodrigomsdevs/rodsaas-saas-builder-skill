@@ -8,7 +8,7 @@
     {
       "name": "rodsaas",
       "source": "./plugins/rodsaas",
-      "description": "Banco Postgres, backend Fastify + Prisma + Stripe e frontend Next.js para SaaS B2B multi-tenant"
+      "description": "Banco Postgres, backend Fastify + Prisma + Stripe, frontend Next.js e domínio com nginx + HTTPS para SaaS B2B multi-tenant"
     }
   ]
 }

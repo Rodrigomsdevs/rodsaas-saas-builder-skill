@@ -47,7 +47,17 @@ Pergunte só o que não dá para deduzir (em uma única mensagem):
 - **Onde criar** — padrão: pasta `api/` no diretório atual (o front vai depois em `web/`, pela skill de frontend).
 - **Planos iniciais** — nomes, limites e features. Se o usuário não souber ainda, use o padrão `free` / `pro` / `business` com limites de exemplo e deixe claro que é placeholder.
 
-Grave as respostas em **`rodsaas.json`** na raiz do projeto (crie se não existir, preserve o que já houver): `product.name`, `domains.app` e `domains.api` (em dev, `http://localhost:3000` e `http://localhost:3333`). Todas as skills rodsaas leem desse arquivo; o `/rodsaas:frontend` completa a parte de marca. Use `product.name` nos e-mails transacionais e no título da documentação da API.
+- **Portas** — da API e do frontend. Padrão: API `3333`, front `3000`. Antes de sugerir, veja o que já está ocupado nesta máquina, porque o mesmo servidor pode rodar vários SaaS:
+
+  ```bash
+  ss -ltnH | awk '{print $4}' | grep -oE '[0-9]+$' | sort -un          # portas escutando agora
+  grep -rhoE 'proxy_pass https?://(127\.0\.0\.1|localhost):[0-9]+' /etc/nginx 2>/dev/null \
+    | grep -oE '[0-9]+$' | sort -un                                    # portas já apontadas por outros sites
+  ```
+
+  Se a padrão estiver em uso ou reservada por outro site no nginx, sugira a próxima livre (API: 3334, 3335…; front: 3001, 3002…) e diga por quê ("a 3333 já é usada pelo RodTicket no nginx"). API e front nunca na mesma porta.
+
+Grave as respostas em **`rodsaas.json`** na raiz do projeto (crie se não existir, preserve o que já houver): `product.name`, `ports.api`, `ports.web`, e `domains.app` / `domains.api` com os endereços locais (`http://localhost:<ports.web>` e `http://localhost:<ports.api>`) até o `/rodsaas:domain` trocar pelos domínios reais. A API escuta em `HOST` (padrão `127.0.0.1`: só a própria máquina; em produção o acesso externo passa pelo nginx) e `PORT` = `ports.api`. Todas as skills rodsaas leem desse arquivo; o `/rodsaas:frontend` completa a parte de marca. Use `product.name` nos e-mails transacionais e no título da documentação da API.
 
 Confira também que existe Docker disponível (o Postgres e o Mailpit de dev rodam no docker compose). Se não houver, avise e peça uma connection string de um Postgres acessível.
 

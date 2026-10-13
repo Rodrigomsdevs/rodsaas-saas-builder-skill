@@ -4,7 +4,7 @@
 
 Você descreve o seu SaaS e o Claude monta o backend e o painel inteiros seguindo um padrão testado. Você foca no que o seu produto faz de diferente.
 
-> **Status: rascunho (v0.2).** Banco, backend e frontend prontos para teste.
+> **Status: rascunho (v0.3).** Banco, backend, frontend e domínio prontos para teste.
 
 ---
 
@@ -28,6 +28,7 @@ Rodando as skills, você termina com uma API e um painel funcionando, com:
 - ✅ **Painel com a cara do seu produto:** você escolhe nome, cor, logo e estilo, vê uma prévia e aprova antes
 - ✅ Todos os detalhes de tela prontos: carregando, vazio, erro, página não encontrada, confirmações, botões com loading
 - ✅ Máscaras e validações brasileiras (CPF, CNPJ — inclusive o novo alfanumérico —, telefone, CEP com busca de endereço)
+- ✅ **No ar com o seu domínio:** nginx e HTTPS (Let's Encrypt) configurados e renovando sozinhos
 - ✅ Testes automáticos já prontos
 
 A stack usada: **Node.js + TypeScript + Fastify + PostgreSQL + Prisma + Stripe** no backend e **Next.js + Tailwind + shadcn/ui** no painel. Você não precisa dominar nada disso para começar.
@@ -45,6 +46,7 @@ Você precisa de:
 | **Node.js** (versão LTS) | roda o backend | [nodejs.org](https://nodejs.org) |
 | **PostgreSQL** ou **Docker** | o banco de dados | `sudo apt install postgresql` (Ubuntu/Debian) ou [docker.com](https://www.docker.com) |
 | **Conta na Stripe** (modo teste) | pagamentos | [stripe.com](https://stripe.com) — é grátis no modo teste |
+| **Um domínio** *(só para colocar no ar)* | endereço do seu SaaS | Registro.br, Cloudflare, Hostinger… |
 
 Não tem o Postgres? Tudo bem: a skill de banco percebe e pergunta se você quer instalar.
 
@@ -94,6 +96,7 @@ O Claude vai te fazer algumas perguntas antes de começar:
 
 - **Nome do projeto** (ex.: `agendafacil`)
 - **Quais planos você quer** e o que cada um permite. Se ainda não sabe, ele usa planos de exemplo (Free / Pro / Business) e você muda depois.
+- **Portas** em que a API e o painel vão rodar. O padrão é 3333 e 3000; se já tiver outro sistema usando, ele percebe e sugere outra.
 - Dados do **banco de dados**: nome do banco e dos usuários, e se você quer que ele **gere as senhas**.
 
 > 💡 **Dica:** deixe ele gerar as senhas. Elas vão direto para o arquivo `.env` e nunca aparecem no chat. Tudo o que você digita no chat fica salvo no histórico da conversa.
@@ -141,7 +144,27 @@ npm run dev
 
 E abra **http://localhost:3000** (com a API rodando em outro terminal). Crie uma conta e explore: convites, troca de empresa, planos, tudo funcionando.
 
-### 6. Agora é com o seu produto
+### 6. Coloque no ar com o seu domínio
+
+No servidor onde o SaaS vai rodar, digite:
+
+```
+/rodsaas:domain
+```
+
+Ele pergunta:
+
+- **Domínio do painel** — ex.: `app.meusaas.com.br`
+- **Domínio da API** — ex.: `api.meusaas.com.br`
+- **Seu e-mail** — para avisos do certificado
+
+> ⚠️ **Os dois precisam ser do mesmo domínio** (`app.` e `api.` do mesmo `meusaas.com.br`). É isso que faz o login funcionar entre o painel e a API.
+
+Antes de mexer em qualquer coisa, ele confere se os domínios já apontam para o servidor (registro **A** no painel do seu domínio), se não tem outro programa (como o Apache) ocupando o lugar, e se o firewall está certo. Se faltar algo, ele explica o que fazer.
+
+Depois configura o **nginx**, emite o **HTTPS** (cadeado no navegador, renovando sozinho) e atualiza as configurações da API e do painel com os endereços novos. No final, ele te diz o que falta: reiniciar a API, refazer o build do painel e cadastrar o endereço de produção na Stripe.
+
+### 7. Agora é com o seu produto
 
 A base está pronta. Daqui pra frente, peça ao Claude as funcionalidades do **seu** SaaS, em português normal mesmo:
 
@@ -158,6 +181,7 @@ O projeto já vem com um módulo de exemplo (`projects`) na API e no painel, que
 | `/rodsaas:backend` | Cria a pasta `api/` com o backend completo | No começo de um SaaS novo |
 | `/rodsaas:db` | Cria o banco de dados e os usuários do Postgres, e grava a conexão no `.env` | O `backend` já chama sozinho. Use direto para preparar o banco de **produção** ou de um projeto que já existe |
 | `/rodsaas:frontend` | Cria a pasta `web/` com o painel completo, com a sua marca | Depois do backend |
+| `/rodsaas:domain` | Configura nginx + HTTPS para o domínio do painel e da API, e ajusta as configurações | Para colocar no ar, no servidor |
 | `/rodsaas:module` | *(em breve)* Adiciona um módulo novo no padrão | — |
 | `/rodsaas:audit` | *(em breve)* Revisa a segurança de um projeto | — |
 
@@ -166,6 +190,7 @@ O projeto já vem com um módulo de exemplo (`projects`) na API e no painel, que
 - "quero começar um SaaS novo com login e planos"
 - "configura o banco postgres desse projeto"
 - "agora cria o painel com a cor do meu logo"
+- "coloca no ar no domínio app.meusaas.com.br"
 - "prepara o banco de produção no meu servidor"
 
 ---
@@ -195,6 +220,12 @@ A skill de banco precisa agir como administrador do Postgres. Rode o Claude com 
 
 **"O usuário do banco não consegue conectar"**
 Normalmente é a configuração de acesso do Postgres (`pg_hba.conf`). A skill identifica isso e te explica o que mudar.
+
+**"O site abre com erro 502"**
+O nginx está funcionando, mas a API ou o painel não estão rodando na porta configurada. Suba as aplicações e teste de novo.
+
+**"O certificado (HTTPS) não foi emitido"**
+Quase sempre é DNS: o domínio ainda não aponta para o servidor (pode levar algumas horas para propagar) ou existe um registro AAAA (IPv6) apontando para outro lugar. Rode `/rodsaas:domain` de novo que ele mostra o que está errado.
 
 **"Quero trocar a cor ou o estilo depois"**
 Edite a parte `brand` do arquivo `rodsaas.json` (na raiz do projeto) e peça ao Claude: *"aplica a marca de novo"*.
@@ -234,11 +265,17 @@ rodsaas-saas-builder-skill/
             │       ├── provision.sh   # provisionamento testado e idempotente
             │       ├── config.example
             │       └── sql/
-            └── frontend/
-                ├── SKILL.md      # fluxo em 8 fases, começando pela marca
-                ├── references/   # marca, API e sessão, estados, formulários, tabelas, overlays, telas
+            ├── frontend/
+            │   ├── SKILL.md      # fluxo em 8 fases, começando pela marca
+            │   ├── references/   # marca, API e sessão, estados, formulários, tabelas, overlays, telas
+            │   └── scripts/
+            │       └── brand.mjs # cor → tema claro/escuro + prévia, com checagem de contraste
+            └── domain/
+                ├── SKILL.md
                 └── scripts/
-                    └── brand.mjs # cor → tema claro/escuro + prévia, com checagem de contraste
+                    ├── domain.sh            # check · nginx · ssl · env · verify
+                    ├── nginx-site.conf.tpl
+                    └── config.example
 ```
 
 Novas skills entram em `plugins/rodsaas/skills/<nome>/` e viram `/rodsaas:<nome>` automaticamente.
