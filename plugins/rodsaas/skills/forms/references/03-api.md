@@ -63,7 +63,7 @@ Os formatos marcados com ★ fazem parte do **contrato testável** (`skills/veri
 | `POST /v1/public/forms/:slug/uploads` · `.../uploads/:id/complete` | upload para pergunta de arquivo (fluxo do add-on `uploads`, `purpose: form_upload`, tipos e tamanho da pergunta, máx. 25 MB); o arquivo fica pendente e só é ligado à resposta no envio; sem envio, some em 24 h |
 
 Regras do envio (service `submitResponse`, numa transação com trava na linha do formulário):
-1. **Anti-spam**: `_gotcha` preenchido ou `_ts` com menos de 2 s → responde 201 com um id falso e **não grava** (o robô não aprende). Rate limit: 10 envios/min por IP por formulário e 100/h por IP no total; body até 256 KB.
+1. **Anti-spam**: `_gotcha` preenchido ou `_ts` com menos de 2 s → responde 201 com um id falso e **não grava** (o robô não aprende). Rate limit: 10 envios/min por IP por formulário e 100/h por IP no total; body até 256 KB. A checagem de `_ts` só acontece **depois** da validação: quem clica em enviar com campos vazios logo ao abrir a página vê os erros, nunca um sucesso falso.
 2. Formulário publicado e aberto (status, `closeAt`, `maxResponses`, limite mensal) → senão 410 `FORM_CLOSED`.
 3. Acesso "só membros": exige sessão de um membro da empresa (cookies normais, **com** checagem de Origin) → senão 401; grava `respondentUserId`.
 4. `validateAnswers(schemaPublicado, answers, { now, timeZone, fileCheck })` → erros como **400 `VALIDATION_ERROR` com `errors: [{ path: "answers.<fieldId>", message }]`** (o front mostra no campo certo). `fileCheck` confere que cada arquivo foi enviado por este formulário, está pronto e não pertence a outra resposta.

@@ -1,0 +1,53 @@
+# Checklist final
+
+Confira **usando o app** (API e front rodando), com um owner, um MEMBER atendente, um MEMBER que não é atendente, uma segunda empresa e uma aba anônima para o portal. Use o Mailpit para os e-mails.
+
+## Base e integração
+- [ ] typecheck, lint, build e todos os testes (base + presets + helpdesk, com os do `helpdesk-lib` portados) verdes
+- [ ] `unaccent` e a configuração `pt_unaccent` criadas pela migration (ou o desvio registrado no README)
+- [ ] `rodsaas.json` com `helpdesk` em `presets` e o app em `apps`
+- [ ] app Suporte no trilho só para atendentes, menu com visões e contadores, contador no trilho, widgets no Início, busca no Ctrl+K (por número, assunto, contato, artigo)
+- [ ] empresa nova nasce com portal, fila Suporte, owner atendente, macros e artigo de exemplo em rascunho
+
+## Chamados e caixa de entrada
+- [ ] criar pelo portal, pela equipe (pedido do cliente e mensagem para o cliente), pela API com chave e por e-mail
+- [ ] números sequenciais por empresa, sem repetir (20 simultâneos)
+- [ ] visões, filtros, busca por `#N`/texto/e-mail, ordenação por prazo, visões salvas, ações em massa, mesclar, spam
+- [ ] resposta pública (e-mail com `[#N]`), nota interna (nunca sai), menção, macro com variáveis e ações, anexos, colar imagem, rascunho que sobrevive a recarregar, colisão
+
+## E-mail
+- [ ] caixa IMAP real (Gmail com senha de app ou outra) lendo e respondendo; caixa por webhook com o provedor ou `curl`
+- [ ] resposta do cliente pelo cliente de e-mail entra no mesmo chamado (Gmail e Outlook), sem a citação
+- [ ] `[#N]` de quem não participa vira chamado novo; resposta automática e devolução não geram confirmação nem loop; nosso endereço não abre chamado
+- [ ] imagens externas bloqueadas até "mostrar imagens"; HTML perigoso sanitizado; e-mail com problema aparece em "E-mails com problema" e reprocessa
+- [ ] SPF/DKIM explicados no README
+
+## SLA e automação
+- [ ] prazos por prioridade em horário comercial (almoço, fim de semana, feriado) e Urgente 24 h; selo com o estado; pausa em Aguardando cliente e retomada; aviso de prazo vencendo e estourado (rode o job com o relógio adiantado)
+- [ ] distribuição por rodízio e por carga, só disponíveis, limite de abertos
+- [ ] gatilhos com condições e ações; inativo não roda; ordem respeitada
+- [ ] fechamento automático, lembrete ao cliente, resolução automática (se ligada)
+
+## Portal, chamado do cliente e widget
+- [ ] central com busca em português sem acento, categorias, artigo com "isso ajudou?", relacionados; rascunho e interno nunca aparecem
+- [ ] abrir chamado com sugestões, erros nos campos, anexos, confirmação com número; e-mail de confirmação
+- [ ] chamado do cliente: só mensagens públicas, responder (reabre), "isso resolveu", avaliação (GET do e-mail não grava), fechado → chamado novo
+- [ ] meus chamados por link mágico
+- [ ] widget num HTML de teste: abrir, buscar, abrir chamado, `RodsaasHelpdesk.open()`
+
+## Relatórios e integrações
+- [ ] relatórios conferidos com poucos dados (números batem com a lista); CSV
+- [ ] CRM: contato ligado, aba Chamados, abrir chamado do CRM
+- [ ] Forms: campos do chamado; formulário vira chamado
+- [ ] webhooks assinados, sem notas internas por padrão; chave da API mostrada uma vez e revogável
+
+## Segurança
+- [ ] outra empresa não vê nada (404); membro que não é atendente recebe 403; visibilidade por fila
+- [ ] token de um chamado não abre outro; cada destinatário com o seu link; links sem dados de outros clientes
+- [ ] senhas de caixa criptografadas, tokens e chaves só como hash
+
+## Estados e acabamento
+- [ ] cada linha das tabelas de `07-interacoes-e-estados.md` conferida
+- [ ] claro/escuro, 360 px, teclado (atalhos)
+- [ ] `/rodsaas:verify` verde, incluindo a parte do Suporte (`-g "Helpdesk"` roda só ela)
+- [ ] README do projeto atualizado (o que o Suporte faz, tabelas públicas sem RLS, variáveis, como conectar o e-mail, SPF/DKIM, fora da v1)

@@ -164,3 +164,27 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | aprovar e cancelar pelo painel | botão só muda a tela sem chamar a API; cancelar sem `confirm-dialog` |
 | cliente cancela pelo link | falta o passo de confirmação `agenda-manage-cancel-confirm`; tela de cancelado aparece mesmo com erro da API |
 | criar tipo pela tela | `FormSheet` sem `field-name`/`form-submit`; tipo criado sem a pessoa que criou como quem atende; cartão sem o link público |
+
+## Suporte (`13-helpdesk.spec.ts`, preset `helpdesk`)
+
+| Teste | Causas comuns |
+|---|---|
+| chamado pelo portal | checagem de Origin/CSRF da base nas rotas `/v1/public/helpdesk/*`; validação só no front; erro sem `path`; e-mail do solicitante não normalizado; `_ts` checado antes da validação (envio vazio rápido vira sucesso falso) |
+| número sequencial | `max(number) + 1` fora de trava (simultâneos repetem); contador global em vez de por empresa (`HelpdeskSettings.nextNumber` com `UPDATE … RETURNING`) |
+| nota interna nunca vaza | rota pública devolvendo todas as mensagens; e-mail disparado para qualquer mensagem; webhook com notas |
+| resposta por e-mail | e-mail não sai pela fila; assunto sem `[#N]`; link do cliente ausente |
+| cliente responde, resolve e reabre | resposta do cliente sem `onCustomerReply` (status não volta para Aberto); equipe conseguindo fechar à mão (`canSetStatus`) |
+| e-mail recebido | dedupe por `Message-ID` ausente (provedor reenvia e duplica); encadeamento só pelo número (qualquer um escreve num chamado alheio) ou sem conferir o remetente; citação não removida (`stripQuotedReply`); resposta automática abrindo chamado e gerando confirmação (loop) |
+| SLA | prazo calculado em horas corridas em vez de `slaDueDates`; nota contando como primeira resposta; mudança de prioridade sem recalcular; "aguardando cliente" sem pausar (`slaPause`/`slaResume`) |
+| rodízio | distribuição ignorando "disponível"; `lastAssignedAt` não atualizado (sempre o mesmo atendente) |
+| gatilho | comparação sensível a acento/maiúscula (use `fold`); gatilhos rodando depois de gravar sem aplicar; regra inativa rodando |
+| satisfação | avaliação aceita com o chamado aberto; GET do link do e-mail gravando a nota |
+| base de conhecimento | busca sem filtrar status/interno; artigo em rascunho abrindo pelo link; busca sensível a acento (sem `unaccent`) |
+| chave da API | chave comparada em texto puro ou não conferida; `externalId` sem dedupe |
+| membro não atendente / outra empresa | rotas sem checar `HelpdeskAgent`; consulta sem `withTenant`/RLS; 403 em vez de 404 para outra empresa |
+| portal (tela) | erro da API só em toast (sem `helpdesk-portal-field-error` com `data-field`); `<label>` sem ligação ou com outro texto (use **Nome**, **E-mail**, **Assunto**, **Descrição**) |
+| chamado (tela) | editor sem `role="textbox"`; botão de nota enviando como pública; "Atribuir a mim" só mudando a tela; status sem salvar; página do cliente mostrando notas ou sem `data-author` |
+| isso resolveu e avaliação | botão de avaliação gravando sem o "Enviar avaliação" (`helpdesk-csat-submit`) |
+| central de ajuda | resultado sem `data-slug`; "isso ajudou?" sem chamar a API; sugestões não buscam enquanto digita |
+| visões | contadores de todas as visões iguais; "sem responsável" mostrando atribuídos |
+

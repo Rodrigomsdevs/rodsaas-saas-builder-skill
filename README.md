@@ -67,6 +67,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 💼 | **`/rodsaas:crm`** | *Opcional*: soma ao projeto um **CRM de vendas** estilo Pipedrive (funil, leads, contatos, empresas pelo CNPJ, atividades, WhatsApp, captura do site, importação, relatórios) |
 | 📋 | **`/rodsaas:forms`** | *Opcional*: soma o app **Forms** (estilo Typeform/Google Forms): construtor, lógica condicional, link público, respostas com gráficos e NPS, Excel, webhooks e envio para o CRM |
 | 📅 | **`/rodsaas:agenda`** | *Opcional*: soma o app **Agenda** (estilo Calendly + agenda de clínica/salão): link público de agendamento, disponibilidade com feriados, equipe com rodízio, turmas, aprovação, lembretes, `.ics`, Google Agenda/Outlook e CRM |
+| 🎧 | **`/rodsaas:helpdesk`** | *Opcional*: soma o app **Suporte** (estilo Zendesk/Movidesk): chamados por e-mail, portal e widget, caixa de entrada com visões, resposta e nota interna, SLA com horário comercial, distribuição automática, gatilhos, satisfação e base de conhecimento |
 | ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
@@ -86,7 +87,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -108,10 +109,11 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +12 do CRM, +11 do Forms e +15 da Agenda, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +12 do CRM, +11 do Forms, +15 da Agenda e +17 do Suporte, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |
+| 🎧 | **Central de atendimento** *(opcional)* | Cada pedido de cliente vira um chamado com número, dono e prazo: e-mail da empresa conectado (as respostas voltam para o mesmo chamado), portal de ajuda e widget no site, caixa de entrada com visões, notas internas que nunca vazam, respostas prontas, SLA em horário comercial com feriados, rodízio entre atendentes, regras automáticas, pesquisa de satisfação, base de conhecimento com busca em português e relatórios de tempo de resposta |
 | ✅ | **Gestor de tarefas** *(opcional)* | Projetos com código (MKT-123), quadro, lista, calendário, sprints com burndown, subtarefas, comentários com menções, anexos, cronômetro de horas e adição rápida (*"Revisar contrato @ana !alta amanhã"*) |
 | 📝 | **Réplica do Notion** *(opcional)* | Páginas aninhadas, editor com "/", autosave, favoritos, lixeira, busca, databases em tabela e quadro e página pública |
 | 🧩 | **Módulos em minutos** | Descreva o cadastro em português e o `/rodsaas:module` cria API, telas, filtros, quadro, permissões e testes — com campos brasileiros (CPF, CNPJ, CEP, telefone, R$) |
@@ -185,6 +187,7 @@ plugins/rodsaas/skills/
 ├── tarefas/    SKILL.md + references/ + scripts/parsers.mjs (+ testes)
 ├── crm/        SKILL.md + references/ + scripts/crm-lib.mjs (+ testes)
 ├── forms/      SKILL.md + references/ + scripts/forms-lib.mjs (+ testes) + templates.json
+├── helpdesk/   SKILL.md + references/ + scripts/helpdesk-lib.mjs (+ testes)
 ├── agenda/     SKILL.md + references/ + scripts/agenda-lib.mjs (+ testes)
 ├── uploads/    SKILL.md + references/       → add-on de arquivos
 └── domain/     SKILL.md + scripts/          → domain.sh + template do nginx

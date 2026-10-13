@@ -75,7 +75,7 @@ Validações: `validateEventTypeConfig`, `forms-lib validateSchema` nas pergunta
 | `GET /v1/public/agenda/feed/:token.ics` | feed da pessoa: próximos 90 dias e últimos 30 (`method: PUBLISH`), sem dados sensíveis das respostas; token da `AgendaFeedToken` (regenerável) |
 
 Regras do agendamento público (service `bookAppointment`, numa transação):
-1. Anti-spam: `_gotcha` preenchido ou `_ts` (quando a página abriu) com menos de 2 s → 201 falso (com um `manageUrl` que não abre nada), nada gravado; sem `_ts` segue normal. Limites: 10 agendamentos/h por IP em cada página, 100/h por IP no total e 3 por e-mail por dia no mesmo tipo (contas diferentes de teste não se atrapalham; a bateria do verify cabe folgada).
+1. Anti-spam: `_gotcha` preenchido ou `_ts` (quando a página abriu) com menos de 2 s → 201 falso (com um `manageUrl` que não abre nada), nada gravado; sem `_ts` segue normal. Limites: 10 agendamentos/h por IP em cada página, 100/h por IP no total e 3 por e-mail por dia no mesmo tipo (contas diferentes de teste não se atrapalham; a bateria do verify cabe folgada). A checagem de `_ts` só acontece **depois** da validação: quem clica em enviar com campos vazios logo ao abrir a página vê os erros, nunca um sucesso falso.
 2. Tipo ativo, página disponível (plano), limite mensal.
 3. `validateAnswers` das perguntas; nome, e-mail (e telefone, se obrigatório) válidos → senão 400 `VALIDATION_ERROR` com `path` (`name`, `email`, `phone`, `answers.<id>`).
 4. Recalcula os horários com `isSlotAvailable` (mesmos dados que a página usou, dentro da transação, com os compromissos e ocupados externos atuais) → senão 409 `SLOT_TAKEN`.

@@ -52,6 +52,7 @@ export type AppDef = {
   useBadge?: () => number | 'dot' | undefined                         // contador no ícone do trilho (TanStack Query)
   feature?: string                   // feature do plano que libera o app (sem ela: selo "Pro" e UpgradeDialog)
   roles?: Role[]                     // papéis que veem o app
+  visible?: (me: Me) => boolean      // regra extra de visibilidade (ex.: Suporte só para atendentes: me.helpdesk?.isAgent)
   widgets?: HomeWidget[]             // blocos do Início
   search?: SearchProvider            // provedor do Ctrl+K
   settings?: { label: string; href: string }   // aba em Configurações (ex.: Configurações do CRM)
@@ -66,7 +67,7 @@ export const apps: AppDef[] = [cadastrosApp /*, paginasApp, tarefasApp, crmApp �
 - `config/home-widgets.ts` e `config/search-providers.ts` (de projetos antigos) passam a ser **derivados** do registro (`apps.flatMap(a => a.widgets ?? [])`).
 - **App ativo** = o app cujo `match` tem o prefixo mais longo que casa com a URL atual. Rotas globais (`/inicio`, `/configuracoes/*`, `/perfil`, `/notificacoes`, `/sem-empresa`) não pertencem a app nenhum.
 - Grave a lista em `rodsaas.json → apps` (`[{ id, name, home }]`) sempre que o registro mudar: o `/rodsaas:verify` usa essa lista.
-- Hook `useApps()` devolve os apps **visíveis** (registro − desligados pela empresa − sem papel), os fixados do usuário, o app ativo e `mode: 'single' | 'rail'`.
+- Hook `useApps()` devolve os apps **visíveis** (registro − desligados pela empresa − sem papel − `visible` falso), os fixados do usuário, o app ativo e `mode: 'single' | 'rail'`.
 
 ### App Cadastros (todo projeto nasce com ele)
 

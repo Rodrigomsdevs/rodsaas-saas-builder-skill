@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -754,6 +754,280 @@
           "path": "/v1/public/agenda/manage/{token}/reschedule",
           "body": [
             "start"
+          ]
+        }
+      ]
+    },
+    "helpdesk": {
+      "when": "rodsaas.json → presets inclui \"helpdesk\"",
+      "routes": [
+        "/suporte",
+        "/suporte/chamados/[id]",
+        "/suporte/novo",
+        "/suporte/contatos",
+        "/suporte/contatos/[id]",
+        "/suporte/artigos",
+        "/suporte/artigos/[id]",
+        "/suporte/relatorios",
+        "/suporte/configuracoes",
+        "/ajuda/[portal]",
+        "/ajuda/[portal]/busca",
+        "/ajuda/[portal]/c/[categoria]",
+        "/ajuda/[portal]/artigo/[slug]",
+        "/ajuda/[portal]/novo",
+        "/ajuda/[portal]/meus-chamados",
+        "/ajuda/[portal]/widget",
+        "/chamado/[token]"
+      ],
+      "testids": [
+        "helpdesk-view",
+        "helpdesk-view-count",
+        "helpdesk-ticket-list",
+        "helpdesk-ticket-row",
+        "helpdesk-sla-badge",
+        "helpdesk-ticket-new",
+        "helpdesk-ticket",
+        "helpdesk-ticket-number",
+        "helpdesk-ticket-status",
+        "helpdesk-ticket-priority",
+        "helpdesk-ticket-assignee",
+        "helpdesk-assign-me",
+        "helpdesk-message",
+        "helpdesk-reply-editor",
+        "helpdesk-reply-mode-public",
+        "helpdesk-reply-mode-note",
+        "helpdesk-reply-submit",
+        "helpdesk-macro-open",
+        "helpdesk-macro-item",
+        "helpdesk-article-new",
+        "helpdesk-article-row",
+        "helpdesk-portal",
+        "helpdesk-portal-search",
+        "helpdesk-portal-article",
+        "helpdesk-article-view",
+        "helpdesk-article-helpful",
+        "helpdesk-portal-new",
+        "helpdesk-portal-form",
+        "helpdesk-portal-field-error",
+        "helpdesk-portal-submit",
+        "helpdesk-portal-created",
+        "helpdesk-portal-suggestions",
+        "helpdesk-customer-ticket",
+        "helpdesk-customer-message",
+        "helpdesk-customer-reply",
+        "helpdesk-customer-reply-submit",
+        "helpdesk-customer-solve",
+        "helpdesk-csat-good",
+        "helpdesk-csat-bad",
+        "helpdesk-csat-submit",
+        "helpdesk-csat-thanks"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/settings"
+        },
+        {
+          "method": "put",
+          "path": "/v1/helpdesk/sla",
+          "body": [
+            "policy"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/queues"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/queues",
+          "body": [
+            "name"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/helpdesk/queues/{id}",
+          "body": [
+            "assignment",
+            "agentIds"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/agents"
+        },
+        {
+          "method": "put",
+          "path": "/v1/helpdesk/agents/{userId}",
+          "body": [
+            "active"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/helpdesk/me/availability",
+          "body": [
+            "available"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/views/counts"
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/tickets"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets",
+          "body": [
+            "subject",
+            "requester",
+            "body"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/tickets/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/helpdesk/tickets/{id}",
+          "body": [
+            "status",
+            "priority",
+            "assigneeId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/messages",
+          "body": [
+            "kind",
+            "body",
+            "status"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/rules"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/rules",
+          "body": [
+            "name",
+            "on",
+            "conditions",
+            "actions"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/inboxes"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/inboxes",
+          "body": [
+            "name",
+            "address",
+            "mode"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/kb/articles"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/kb/articles",
+          "body": [
+            "title",
+            "bodyHtml",
+            "status",
+            "internal"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/kb/articles/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/helpdesk/kb/articles/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/api-keys",
+          "body": [
+            "name"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/{portal}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/{portal}/articles"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/{portal}/articles/{slug}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/{portal}/tickets",
+          "body": [
+            "name",
+            "email",
+            "subject",
+            "description"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/tickets/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/tickets/{token}/replies",
+          "body": [
+            "body"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/tickets/{token}/solve"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/tickets/{token}/csat",
+          "body": [
+            "rating",
+            "comment"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/inbound/{key}",
+          "body": [
+            "from",
+            "to",
+            "subject",
+            "messageId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/api/tickets",
+          "body": [
+            "subject",
+            "description",
+            "requester"
           ]
         }
       ]
