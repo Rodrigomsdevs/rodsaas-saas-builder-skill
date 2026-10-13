@@ -59,16 +59,16 @@ Next.js, Tailwind, shadcn/ui com os componentes da lista, tema gerado, fontes do
 Tipos gerados do OpenAPI, client com cookies + refresh único + `Idempotency-Key`, `ApiError` e mensagens por `code`, QueryClient, providers, guard de rota, sessão (`/v1/me`), troca de empresa.
 → `references/04-api-e-sessao.md`
 
-### Fase 4 — Casca e componentes do app
-Layout logado (menu lateral, topo, seletor de empresa, menu do usuário, banners), `not-found`/`error`/`global-error`/`loading`, e os componentes base: `PageHeader`, `EmptyState`, `LoadingButton`, `ConfirmDialog`, `FormSheet`, `DataTable`, `PlanGate`/`UpgradeDialog`, `Can`.
-→ `references/05-estados-e-feedback.md`, `references/07-tabelas.md`, `references/08-overlays.md`
+### Fase 4 — Casca de apps e componentes
+A casca do modelo de **apps**: registro `config/apps.ts` (o projeto nasce com o app **Cadastros**), menu clássico quando há um app só e **trilho de apps + menu do app** quando há dois ou mais (recolher, menu flutuante com o mouse por cima, "Todos os apps", fixados, barra de apps no celular, Configurações → Apps), topo, seletor de empresa, menu do usuário, banners, `not-found`/`error`/`global-error`/`loading`, e os componentes base: `PageHeader`, `EmptyState`, `LoadingButton`, `ConfirmDialog`, `FormSheet`, `DataTable`, `PlanGate`/`UpgradeDialog`, `Can`. Abra `assets/simulador-navegacao.html` no navegador antes de começar: é a referência de comportamento.
+→ `references/12-casca-e-apps.md`, `references/05-estados-e-feedback.md`, `references/07-tabelas.md`, `references/08-overlays.md`
 
 ### Fase 5 — Telas de autenticação
 Login, cadastro, esqueci/redefinir senha, verificar e-mail, aceitar convite, "sem empresa".
 → `references/06-formularios.md`, `references/09-telas.md`
 
 ### Fase 6 — Home e configurações
-Home com dados reais (primeiros passos, uso do plano, atividade recente), configurações da empresa, membros, convites, perfil e **plano e cobrança completo** (assinar, trocar com prévia, cancelar, retomar, portal, modo de teste, plano escolhido no cadastro). A tela de plano tem que permitir mudar de plano já nesta fase, mesmo sem Stripe (modo de teste).
+Início com dados reais (primeiros passos, uso do plano, atividade recente, widgets dos apps), configurações da empresa, membros, convites, **apps**, perfil e **plano e cobrança completo** (assinar, trocar com prévia, cancelar, retomar, portal, modo de teste, plano escolhido no cadastro). A tela de plano tem que permitir mudar de plano já nesta fase, mesmo sem Stripe (modo de teste).
 → `references/09-telas.md`, `references/11-plano-e-cobranca.md`
 
 ### Fase 7 — Módulo de exemplo
@@ -80,10 +80,11 @@ Checklist de `references/10-checklist.md` item a item, README do `web/`, e entã
 
 ## Contrato testável (desde a Fase 4)
 
-Todo elemento-chave recebe o `data-testid` definido em `skills/verify/references/contrato.md` (lista em `skills/verify/contract.json`): campos e botões de login/cadastro/convite, casca (`app-shell`, `org-switcher`, `org-switcher-current`, `user-menu`…), estados (`page-not-found`, `error-state`, `empty-state`, `skeleton`…), membros, plano e o módulo de exemplo. As rotas e os formatos da API do contrato também são fixos. Coloque os testids **ao criar** cada componente, não no fim. `LoadingButton` fica `disabled` + `aria-busy="true"` durante a ação; `ErrorState` mostra o `requestId` em `error-request-id`.
+Todo elemento-chave recebe o `data-testid` definido em `skills/verify/references/contrato.md` (lista em `skills/verify/contract.json`): campos e botões de login/cadastro/convite, casca (`app-shell`, `app-rail`, `app-rail-item`, `sidebar`, `org-switcher`, `org-switcher-current`, `user-menu`…), estados (`page-not-found`, `error-state`, `empty-state`, `skeleton`…), membros, plano e o módulo de exemplo. As rotas e os formatos da API do contrato também são fixos. Coloque os testids **ao criar** cada componente, não no fim. `LoadingButton` fica `disabled` + `aria-busy="true"` durante a ação; `ErrorState` mostra o `requestId` em `error-request-id`.
 
 ## Princípios
 
+- **Apps, não seções.** Cada conjunto de funcionalidades é um app no registro; o menu mostra só o app atual. Nada de empilhar seções de presets diferentes no mesmo menu.
 - **Todo estado tem tela.** Carregando, vazio, vazio por filtro, erro, sem permissão, não encontrado. Se você criou um bloco que busca dado e não tratou os quatro primeiros, não terminou.
 - **Toda ação tem feedback.** Botão com loading e sem clique duplo, toast de resultado, erro traduzido pelo `code` da API, confirmação no que destrói.
 - **O backend é a fonte da verdade.** Esconder um botão por papel ou plano é usabilidade; a segurança é da API. Nunca duplique regra de negócio no front além do necessário para a experiência.
@@ -111,4 +112,6 @@ Mensagem curta com: como subir (`npm run dev` no `web/` com a API rodando), URL 
 | `references/09-telas.md` | Fases 5 a 7 — o que cada tela tem |
 | `references/10-checklist.md` | Fase 8 |
 | `references/11-plano-e-cobranca.md` | Fase 6 — tela de plano: estados, botões por papel, fluxos de assinar/trocar/cancelar |
+| `references/12-casca-e-apps.md` | Fase 4 — registro de apps, modo clássico × trilho, menu do app, recolher e flutuante, "Todos os apps", fixados, celular, Configurações → Apps |
+| `assets/simulador-navegacao.html` | Fase 4 — abra no navegador: referência de comportamento da casca |
 | `skills/verify/references/contrato.md` | desde a Fase 4 — data-testid, rotas e formatos fixos |

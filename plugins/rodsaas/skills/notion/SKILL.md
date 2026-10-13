@@ -1,11 +1,11 @@
 ---
 name: notion
-description: Preset que transforma um projeto rodsaas já criado numa réplica do Notion — workspaces (as organizações do SaaS), árvore de páginas aninhadas com arrastar e soltar, editor de blocos com menu "/", autosave com controle de conflito, favoritos, recentes, lixeira, busca em todo o conteúdo (Ctrl+K), databases com visão de tabela e quadro (kanban) e páginas públicas por link. Use depois do /rodsaas:backend e do /rodsaas:frontend, quando o usuário pedir "réplica do Notion", "clone do Notion", "app de notas/documentos estilo Notion", ou chamar /rodsaas:notion.
+description: Preset que soma a um projeto rodsaas o app Páginas, uma réplica do Notion — workspaces (as organizações do SaaS), árvore de páginas aninhadas com arrastar e soltar, editor de blocos com menu "/", autosave com controle de conflito, favoritos, recentes, lixeira, busca em todo o conteúdo (Ctrl+K), databases com visão de tabela e quadro (kanban) e páginas públicas por link. Use depois do /rodsaas:backend e do /rodsaas:frontend, quando o usuário pedir "réplica do Notion", "clone do Notion", "app de notas/documentos estilo Notion", ou chamar /rodsaas:notion.
 ---
 
 # rodsaas · notion
 
-Transforma um projeto rodsaas existente (API em `api/`, painel em `web/`) num app no estilo Notion. Tudo o que a base já tem continua valendo e é reaproveitado: auth, multi-tenant com RLS, membros, convites, planos, Stripe, padrão REST, estados de tela, marca. O preset **acrescenta** o produto em cima.
+Acrescenta a um projeto rodsaas (API em `api/`, painel em `web/`) o app **Páginas**, no estilo Notion, como mais um app da casca de apps (`skills/frontend/references/12-casca-e-apps.md`): ele não troca a casca nem o menu dos outros apps. Tudo o que a base já tem continua valendo e é reaproveitado: auth, multi-tenant com RLS, membros, convites, planos, Stripe, padrão REST, estados de tela, marca. O preset **acrescenta** o produto em cima.
 
 | Na base rodsaas | No Notion |
 |---|---|
@@ -24,16 +24,16 @@ Transforma um projeto rodsaas existente (API em `api/`, painel em `web/`) num ap
 
 ## Perguntas (uma rodada, com padrões)
 
-- **Remover o módulo de exemplo `projects`?** Padrão: **sim** (API, tabela, telas, item de menu e limite de plano). O módulo `pages` passa a ser o molde.
+- **Remover o módulo de exemplo `projects`?** Padrão: **sim**, se o projeto ainda só tiver o exemplo (API, tabela, telas, item no app Cadastros e limite de plano). Sem nenhum módulo, o app Cadastros sai do registro e o Páginas fica sendo o único app (menu clássico) até entrar outro.
 - **Planos:** padrão `free` com 3 membros e 100 páginas; `pro` com 10 membros, páginas ilimitadas e a feature `public_pages`; `business` com 50 membros, ilimitado, `public_pages` e `audit_log`.
-- **Nome do tenant:** padrão **Workspace** (masculino: "Novo workspace"). Grave em `rodsaas.json`.
+- **Nome do tenant:** padrão **manter o atual**. Se o Páginas for o produto principal (único app), sugira **Workspace** (masculino: "Novo workspace"). Grave em `rodsaas.json`.
 
 ## Fases
 
 Cada fase termina com typecheck, lint, build, testes da fase passando e commit (`feat(notion): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
 ### Fase 1 — Ajustes de produto
-`tenantLabel` = Workspace, planos novos em `config/plans.ts` (limite `pages`, feature `public_pages`), remoção do `projects` (migration que remove a tabela, rotas, telas, menu, contador de uso), códigos de erro novos (`VERSION_CONFLICT`, `INVALID_MOVE`).
+`tenantLabel` (se mudou), planos novos em `config/plans.ts` (limite `pages`, feature `public_pages`), remoção do `projects` se confirmada (migration que remove a tabela, rotas, telas, item no app Cadastros, contador de uso), códigos de erro novos (`VERSION_CONFLICT`, `INVALID_MOVE`).
 → `references/01-escopo-e-modelo.md`
 
 ### Fase 2 — API de páginas
@@ -44,8 +44,8 @@ Models e migrations (com RLS), árvore, criar/editar/mover/duplicar, autosave co
 Propriedades tipadas, linhas (que são páginas), valores validados por tipo, visões de tabela e quadro com filtro/ordenação/agrupamento.
 → `references/02-api.md`
 
-### Fase 4 — Casca estilo Notion
-Menu lateral com seletor de workspace, busca, favoritos, árvore de páginas com arrastar e soltar, lixeira, configurações; início com recentes.
+### Fase 4 — App Páginas na casca
+Registro do app **Páginas** (`/paginas`) em `config/apps.ts`: menu do app com busca, favoritos, árvore de páginas com arrastar e soltar e lixeira; tela inicial do app com recentes; widgets no Início global. Projeto com menu antigo: rode antes o `/rodsaas:apps`.
 → `references/04-frontend.md`
 
 ### Fase 5 — Página e editor
@@ -82,5 +82,5 @@ O que foi criado, o que foi removido (`projects`), os planos novos, como testar 
 | `references/01-escopo-e-modelo.md` | Fases 1 e 2 — escopo, models, RLS, regras de árvore/lixeira/versão |
 | `references/02-api.md` | Fases 2, 3 e 7 — todas as rotas, busca, databases, link público |
 | `references/03-editor.md` | Fase 5 — editor de blocos, autosave, conflito, segurança do conteúdo |
-| `references/04-frontend.md` | Fases 4, 6 e 7 — casca, árvore, busca, lixeira, databases, página pública |
+| `references/04-frontend.md` | Fases 4, 6 e 7 — app Páginas na casca de apps, árvore, busca, lixeira, databases, página pública |
 | `references/05-checklist.md` | Fase 8 |

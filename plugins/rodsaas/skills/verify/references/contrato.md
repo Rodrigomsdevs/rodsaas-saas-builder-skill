@@ -6,7 +6,7 @@ Para a mesma bateria de testes funcionar em qualquer projeto rodsaas — gerado 
 
 ## Rotas do painel
 
-`/entrar` · `/cadastro` · `/esqueci-senha` · `/redefinir-senha?token=` · `/verificar-email?token=` · `/convite?token=` · `/inicio` · `/sem-empresa` · `/configuracoes/empresa` · `/configuracoes/membros` · `/configuracoes/plano` · `/perfil` · módulo de exemplo `/projetos` e `/projetos/[id]`.
+`/entrar` · `/cadastro` · `/esqueci-senha` · `/redefinir-senha?token=` · `/verificar-email?token=` · `/convite?token=` · `/inicio` · `/sem-empresa` · `/configuracoes/empresa` · `/configuracoes/membros` · `/configuracoes/plano` · `/configuracoes/apps` · `/perfil` · módulo de exemplo `/projetos` e `/projetos/[id]`.
 
 ## data-testid
 
@@ -26,7 +26,7 @@ Para a mesma bateria de testes funcionar em qualquer projeto rodsaas — gerado 
 | testid | Elemento |
 |---|---|
 | `app-shell` | contêiner da área logada (existe em todas as telas do app, inclusive 404 interno) |
-| `sidebar` | menu lateral (no celular, só existe/visível quando aberto) |
+| `sidebar` | menu do app atual (no celular, só existe quando a gaveta está aberta); detalhes em "Casca de apps" abaixo |
 | `sidebar-toggle` | botão que abre o menu no celular |
 | `org-switcher` | gatilho do seletor de empresa |
 | `org-switcher-current` | texto com o **nome da empresa ativa** |
@@ -34,7 +34,21 @@ Para a mesma bateria de testes funcionar em qualquer projeto rodsaas — gerado 
 | `org-switcher-create` | "Criar nova empresa" |
 | `create-org-name`, `create-org-submit` | diálogo de criar empresa |
 | `user-menu`, `user-menu-logout` | menu do usuário e "Sair" |
-| `theme-toggle` | alternar tema (se abrir um menu, as opções usam `theme-option-light` / `theme-option-dark`) |
+| `theme-toggle` | alternar tema, clicável direto no topo (se abrir um menu, as opções usam `theme-option-light` / `theme-option-dark`) |
+
+### Casca de apps (`skills/frontend/references/12-casca-e-apps.md`)
+| testid | Elemento |
+|---|---|
+| `app-rail` | trilho de apps (só no modo trilho, no desktop) |
+| `app-rail-item` | botão de app no trilho, com `data-app` (inclui `inicio`) e `aria-current="page"` no ativo |
+| `sidebar` | menu do app atual (coluna no desktop, gaveta no celular, menu clássico com 1 app), com `data-app` |
+| `sidebar-collapse`, `sidebar-expand` | recolher (no menu) e abrir (no trilho e no menu flutuante) |
+| `app-flyout` | menu flutuante (recolhido + mouse por cima), com `data-app` |
+| `app-launcher-open`, `app-launcher`, `app-launcher-search`, `app-launcher-item`, `app-pin` | "Todos os apps": botão, painel, busca, cartão (`data-app`) e estrela (`aria-pressed`) |
+| `app-tabbar`, `app-tabbar-item` | barra de apps do celular, com `data-app` |
+| `app-toggle` | interruptor do app em `/configuracoes/apps`, com `data-app` e `aria-checked` |
+
+`org-switcher-current` pode ser texto só para leitor de tela (`sr-only`) no trilho. **Nenhum testid aparece duas vezes no DOM**: desktop e celular renderizam peças diferentes. A lista de apps do projeto fica em `rodsaas.json → apps` (`[{ id, name, home }]`); é dela que os testes tiram quais apps esperar.
 
 ### Estados
 | testid | Elemento |
@@ -88,7 +102,9 @@ Os módulos gerados pelo `/rodsaas:module` seguem o mesmo padrão de testids.
 | `POST /v1/auth/register` | `{ name, email, password, organizationName }` ou `{ name, email, password, invitationToken }` (sem `organizationName`: entra na empresa do convite, não cria outra) | cookies de sessão |
 | `POST /v1/auth/login` | `{ email, password }` | cookies |
 | `POST /v1/auth/switch-organization` | `{ organizationId }` | novo access token |
-| `GET /v1/me` | — | `{ user: { id, name, email, emailVerified }, organization: { id, name, role } \| null, organizations: [{ id, name, role }], plan: { id, name, limits, features, usage, cancelAtPeriodEnd }, billing: { mode, canManage } }` |
+| `GET /v1/me` | — | `{ user: { id, name, email, emailVerified }, organization: { id, name, role, disabledApps } \| null, organizations: [{ id, name, role }], preferences: { pinnedApps }, plan: { id, name, limits, features, usage, cancelAtPeriodEnd }, billing: { mode, canManage } }` |
+| `PUT /v1/me/preferences` | `{ pinnedApps: string[] \| null }` | fixados do usuário na empresa ativa |
+| `PATCH /v1/organizations/current` | `{ name?, disabledApps? }` | apps desligados para a empresa (owner/admin) |
 | `POST /v1/organizations` | `{ name }` | `{ id, name }` e a nova empresa vira a ativa |
 | `GET /v1/members` | — | `{ data: [{ id, role, user: { id, name, email } }], meta }` |
 | `PATCH /v1/members/:id` | `{ role }` | — |

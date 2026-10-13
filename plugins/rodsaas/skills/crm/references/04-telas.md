@@ -1,6 +1,6 @@
 # Telas
 
-Todas dentro da casca existente, seguindo os componentes, estados e formulários da skill `frontend` (máscaras de CPF/CNPJ/telefone/CEP/moeda, `LoadingButton`, `FormSheet`, `ConfirmDialog`, `PlanGate`, `UpgradeDialog`, `DataTable` com cards no celular). Estados detalhados em `05-interacoes-e-estados.md`. Código em `web/src/features/crm/`.
+Todas dentro do app CRM na casca de apps (`skills/frontend/references/12-casca-e-apps.md`), seguindo os componentes, estados e formulários da skill `frontend` (máscaras de CPF/CNPJ/telefone/CEP/moeda, `LoadingButton`, `FormSheet`, `ConfirmDialog`, `PlanGate`, `UpgradeDialog`, `DataTable` com cards no celular). Estados detalhados em `05-interacoes-e-estados.md`. Código em `web/src/features/crm/`.
 
 ## Rotas
 

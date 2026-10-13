@@ -55,4 +55,4 @@ Aberto pelo `PLAN_LIMIT_REACHED` ou ao clicar num recurso com selo do plano:
 
 ## Seletor de empresa (`OrgSwitcher`)
 
-Dropdown no topo do menu lateral: logo/inicial e nome da empresa ativa, lista das outras com papel em cada uma, "Criar nova {empresa}". Trocar mostra loading no próprio item e limpa todo o cache (ver sessão). Com uma empresa só, mostra só o nome (sem lista vazia).
+Dropdown no topo do trilho (no menu clássico e na gaveta do celular, no topo do menu): logo/inicial e nome da empresa ativa, lista das outras com papel em cada uma, "Criar nova {empresa}". Trocar mostra loading no próprio item e limpa todo o cache (ver sessão). Com uma empresa só, mostra só o nome (sem lista vazia).

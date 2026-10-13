@@ -5,7 +5,7 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER e uma se
 ## Base e integração
 - [ ] typecheck, lint, build e todos os testes (base + presets + crm) verdes
 - [ ] `rodsaas.json` com `crm` em `presets` e `uploads` em `addons`
-- [ ] seção "Vendas" no menu sem quebrar o resto (inclusive com `tarefas`/`notion` instalados); contadores de leads e atividades
+- [ ] app CRM no trilho (e na grade "Todos os apps"), menu do app sem misturar com outros apps; contador no trilho; com o CRM como único app, menu clássico
 - [ ] widgets na home, provedor no Ctrl+K (e-mail, telefone e CNPJ inteiros abrem direto), sino
 - [ ] empresa nova nasce com funil "Vendas", motivos e origens; empresas antigas receberam o mesmo na instalação
 - [ ] dados de exemplo carregam e apagam sem deixar resto

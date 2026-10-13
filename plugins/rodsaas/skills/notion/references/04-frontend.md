@@ -1,30 +1,47 @@
-# Frontend: casca, árvore, databases e página pública
+# Frontend: app Páginas, árvore, databases e página pública
 
-A casca da base (`(app)/layout.tsx`) é **substituída** por uma no estilo Notion. Continuam iguais: sessão, guard de rota, banners, `UpgradeDialog`, toasts, estados de tela, tema.
+O preset **não troca a casca**. Ele registra o app **Páginas** na casca de apps (`skills/frontend/references/12-casca-e-apps.md`; comportamento no `skills/frontend/assets/simulador-navegacao.html`). Continuam iguais: sessão, guard de rota, trilho, banners, `UpgradeDialog`, toasts, estados de tela, tema.
+
+```ts
+// web/src/features/pages/app.tsx
+export const paginasApp: AppDef = {
+  id: 'paginas', name: 'Páginas', description: 'Documentos e databases (estilo Notion)',
+  icon: FileText, category: 'conhecimento', order: 10, defaultPinned: true,
+  match: ['/paginas'], home: '/paginas',
+  Sidebar: PagesSidebar,                        // "Menu do app" abaixo
+  action: { label: 'Nova página', onSelect: createRootPage },
+  widgets: [recentPagesWidget, favoritePagesWidget],
+  search: pagesSearchProvider,
+}
+```
+
+Acrescente em `config/apps.ts` e em `rodsaas.json → apps`.
 
 ## Rotas
 
 | Rota | Tela |
 |---|---|
-| `/inicio` | recentes e favoritos em cards, botão "Nova página" |
-| `/pagina/[id]` | página (documento ou database) |
+| `/paginas` | início do app: recentes e favoritos em cards, botão "Nova página" |
+| `/paginas/[id]` | página (documento ou database) |
+| `/pagina/[id]` | **redireciona** para `/paginas/[id]` (links antigos e conteúdo já salvo) |
 | `/publico/[token]` | página pública, fora do app (sem login, sem casca) |
-| `/configuracoes/*`, `/perfil` | os da base, dentro da casca nova |
+| `/inicio` | o Início global da casca, com os widgets "Páginas recentes" e "Favoritos" |
 
 Remova `/projetos` (se o usuário confirmou a remoção do exemplo).
 
-## Menu lateral
+## Menu do app
 
-De cima para baixo:
+De cima para baixo (no menu clássico, quando é o único app, abaixo do "Início"):
 
-1. **Seletor de workspace** (o `OrgSwitcher` da base, com ícone/inicial e nome).
-2. **Buscar** (Ctrl+K) · **Início** · **Configurações** · **Nova página**.
-3. **Favoritos** (some se vazio), reordenáveis.
-4. **Páginas**: a árvore do workspace.
-5. **Lixeira** (abre um popover/painel) · convite rápido de membros (owner/admin).
+1. **Buscar** (abre o Ctrl+K já filtrado em páginas) · **Atualizações** (opcional, páginas editadas por outros).
+2. **Favoritos** (some se vazio), reordenáveis.
+3. **Páginas**: a árvore do workspace, com **+** no título da seção.
+4. **Modelos** (se houver) · **Lixeira** (abre um popover/painel).
+
+O seletor de workspace, o Início, as configurações e o usuário ficam no trilho (casca), não aqui.
 
 Comportamento:
-- Largura redimensionável arrastando a borda; recolher com Ctrl+\\ ou botão; no celular vira drawer.
+- Recolher com `[` ou « (padrão da casca); dentro do editor, `Ctrl+\\` também recolhe. Abrir uma página em "largura total" pode recolher sozinho e restaurar ao sair.
 - Estado aberto/fechado de cada item da árvore guardado no `localStorage` por workspace (em try/catch).
 - Página atual destacada e com os ancestrais abertos.
 
@@ -36,14 +53,14 @@ Comportamento:
 - **Arrastar e soltar** (dnd-kit ou equivalente atual): soltar entre itens reordena; soltar sobre um item torna filha. Indicador visual de onde vai cair. Bloqueie no front o que o backend recusaria (soltar dentro de um descendente). Erro da API → desfaz e toast.
 - "Mover para…" (alternativa por teclado e celular): `Command` com busca de páginas destino.
 
-## Busca (Ctrl+K)
+## Busca (provedor do Ctrl+K global)
 
-`Command` do shadcn em diálogo:
+O Ctrl+K é da casca (busca em todos os apps); o Páginas registra o provedor `pagesSearchProvider` no `AppDef`. Os resultados do grupo "Páginas":
 - Vazio → páginas recentes.
 - Digitando (debounce 250 ms) → `GET /v1/search`, cada resultado com ícone, título, caminho (pais) e trecho com o termo destacado (escapando o texto; só as marcas viram `<mark>`).
 - Enter abre; setas navegam; estados de carregando, nada encontrado e erro.
 
-## Início (`/inicio`)
+## Início do app (`/paginas`)
 
 "Bom dia, Ana" (saudação pela hora), **Visitadas recentemente** (cards com capa/ícone e título, rolagem horizontal), **Favoritos**, e "Nova página". Workspace novo mostra "Comece aqui" em destaque.
 

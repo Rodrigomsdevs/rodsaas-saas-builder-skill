@@ -57,9 +57,14 @@ Arquivo na raiz do projeto, lido por todas as skills rodsaas. O backend cria com
   },
   "locale": "pt-BR",
   "timezone": "America/Sao_Paulo",
-  "currency": "BRL"
+  "currency": "BRL",
+  "apps": [
+    { "id": "cadastros", "name": "Cadastros", "home": "/projetos" }
+  ]
 }
 ```
+
+`apps` espelha o registro `web/src/config/apps.ts` (`12-casca-e-apps.md`): a skill frontend grava o app Cadastros, e cada preset acrescenta o seu.
 
 `tenantGender` existe para a concordância: "Nova clínica" / "Novo escritório", "Configurações da clínica" / "do escritório". Centralize isso em `src/config/product.ts` com helpers (`tenant.new`, `tenant.of`, etc.) e use em todos os textos.
 
@@ -102,11 +107,11 @@ Fontes via `next/font/google`. Guarde altura de controle e linha de tabela em `s
 
 - Com logo: copie para `web/public/logo.svg` (ou `.png`), gere `favicon` e `apple-icon` a partir dele (o App Router aceita `app/icon.*`/`app/apple-icon.*`).
 - Sem logo: componente `Logo` com monograma (inicial do produto em `--primary` com `--primary-foreground`), e o mesmo para o ícone. Deixe claro no relatório que é provisório.
-- O logo aparece no menu lateral (versão recolhida só com o ícone), nas telas de auth e nos e-mails do backend (passe a URL pública no relatório).
+- O logo aparece no seletor de empresa do trilho/menu (versão só com o ícone), nas telas de auth e nos e-mails do backend (passe a URL pública no relatório).
 
 ## Prévia
 
-Gere `web/brand-preview.html` e peça para o usuário abrir no navegador (se houver comando para abrir arquivos no sistema, ofereça abrir). Ela mostra a escala, botões (incluindo o estado carregando), badges de status, um card com barra de uso, uma tabela com linha selecionada, inputs com foco, links e o menu lateral, **no claro e no escuro lado a lado**.
+Gere `web/brand-preview.html` e peça para o usuário abrir no navegador (se houver comando para abrir arquivos no sistema, ofereça abrir). Ela mostra a escala, botões (incluindo o estado carregando), badges de status, um card com barra de uso, uma tabela com linha selecionada, inputs com foco, links, o trilho de apps e o menu do app, **no claro e no escuro lado a lado**.
 
 Mostre também o relatório de contraste em linguagem simples ("o texto nos botões fica bem legível"; "no escuro clareei um pouco a cor para não sumir").
 

@@ -22,13 +22,28 @@
 
 O mesmo do `tarefas` (`skills/tarefas/references/01-escopo-e-integracao.md`, seção "Contrato de preset"). Se algum ponto de extensão ainda não existir (projeto sem o `tarefas`), crie-o aqui seguindo aquela seção, convertendo o que já existe sem mudar o visual.
 
-1. **Registro**: `rodsaas.json` ganha `"presets": [..., "crm"]`. Leia antes para saber o que existe (`notion`, `tarefas`, módulos, `uploads`).
-2. **Menu** (`web/src/config/navigation.ts`): seção `crm` com rótulo "Vendas" (ou o nome que o usuário preferir):
-   - Negócios · Leads (contador de novos atribuídos a mim) · Atividades (contador de atrasadas em vermelho) · Contatos · Empresas · Produtos (se a feature estiver no plano; senão aparece com selo Pro) · Relatórios.
-   - Configurações do CRM ficam em `/crm/configuracoes`, acessível pelo ⋯ das telas e por Configurações da empresa (owner/admin).
-3. **Home** (`web/src/config/home-widgets.ts`): "Minhas atividades de hoje" (concluir direto), "Negócios parados", "Meu funil" (valor aberto por etapa) e "Leads novos".
-4. **Busca global** (`web/src/config/search-providers.ts`): provedor `crm`, resultados agrupados em Negócios, Leads, Contatos e Empresas.
-5. **Topo**: sino de notificações do módulo genérico `notifications` (criado pelo `tarefas`; crie aqui se não existir, seguindo `tarefas/references/02-modelo.md` e `03-api.md`, seção Notificações).
+1. **Registro**: `rodsaas.json` ganha `"presets": [..., "crm"]` e o app em `"apps"`. Leia antes para saber o que existe (`notion`, `tarefas`, módulos, `uploads`).
+2. **App no registro** (`web/src/config/apps.ts`, casca de `skills/frontend/references/12-casca-e-apps.md`): o preset registra **o app CRM** e não mexe no menu de outro app.
+
+```ts
+// web/src/features/crm/app.tsx
+export const crmApp: AppDef = {
+  id: 'crm', name: 'CRM', description: 'Funil, leads, contatos e atividades',
+  icon: Briefcase, category: 'vendas', order: 30, defaultPinned: true,
+  match: ['/crm'], home: '/crm/negocios',
+  Sidebar: CrmSidebar,      // Negócios · Leads (novos atribuídos a mim) · Atividades (atrasadas em vermelho) · Contatos · Empresas · Produtos (selo Pro sem a feature) · Relatórios · seção Funis · Configurações do CRM (owner/admin)
+  action: { label: 'Negócio', onSelect: openDealForm },
+  useBadge: useCrmBadge,    // atividades atrasadas + leads novos atribuídos a mim
+  widgets: [myActivitiesTodayWidget, staleDealsWidget, myPipelineWidget, newLeadsWidget],
+  search: crmSearchProvider,
+  settings: { label: 'CRM', href: '/crm/configuracoes' },
+}
+```
+
+   O nome exibido pode ser "Vendas" se o usuário preferir. Acrescente em `config/apps.ts` e em `rodsaas.json → apps`. Projeto com menu antigo (lista ou seções): rode antes o `/rodsaas:apps`.
+3. **Início**: os widgets acima, lidos do registro.
+4. **Busca global**: o provedor `crm` do `AppDef`, resultados agrupados em Negócios, Leads, Contatos e Empresas.
+5. **Sino**: o do módulo genérico `notifications` (criado pelo `tarefas`; crie aqui se não existir, seguindo `tarefas/references/02-modelo.md` e `03-api.md`, seção Notificações), que a casca põe no trilho.
 6. **Componentes compartilhados** (`web/src/components/app/`): reutilize `Kanban`, `SidePeek`, `RelationSelect`, `MemberSelect`, `UserAvatar`, `Dropzone`/`FileList`; crie aqui os que faltarem, no mesmo lugar, para os próximos presets usarem. Máscaras, validação de CPF/CNPJ e formatação de moeda vêm de `web/src/lib/masks.ts` e `format.ts` da base; não duplique.
 7. **Backend**: plugin de rotas `modules/crm/` registrado no `app.ts`; contadores em `lib/usage.ts`; limites e features em `config/plans.ts`; códigos de erro no catálogo; notificações pelo `notify()` do módulo `notifications`.
 8. **Relações para módulos futuros**: `GET /v1/crm/contacts?q=` e `GET /v1/crm/companies?q=` seguem o formato que o `RelationSelect` espera, para módulos criados pelo `/rodsaas:module` ("agendamento ligado a contatos") poderem apontar para o CRM.

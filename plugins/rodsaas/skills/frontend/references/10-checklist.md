@@ -5,6 +5,16 @@ Confira item por item antes do relatório. Para os itens de interface, **abra a 
 ## Verificação automática (obrigatória)
 - [ ] `/rodsaas:verify`: auditoria do contrato sem pendências e bateria completa verde (relatório em `rodsaas-verify-report/`)
 
+## Casca de apps (`12-casca-e-apps.md`)
+- [ ] `config/apps.ts` com o app Cadastros; `rodsaas.json → apps` atualizado
+- [ ] com 1 app: menu clássico, sem trilho; registrando um app de teste temporário: o trilho aparece sozinho (remova o app de teste depois)
+- [ ] recolher com « e com `[`; escolha mantida ao recarregar; < 1280 px começa recolhido
+- [ ] recolhido + mouse por cima: menu flutuante abre em ~200 ms, fecha ao sair, `Esc` fecha, alfinete fixa
+- [ ] "Todos os apps": busca, categorias, estrela fixa/desafixa (fica salvo no servidor)
+- [ ] Configurações → Apps: desligar um app tira do trilho, da grade, do Início e da busca; rota dele → não encontrado
+- [ ] celular: sem trilho, ☰ abre a gaveta com o menu do app, barra de apps embaixo; nenhum testid duplicado no DOM
+- [ ] clicar num app volta para a última tela usada nele
+
 ## Plano e cobrança
 - [ ] sem Stripe (modo de teste): owner assina, troca, cancela e retoma; limites e features mudam no app
 - [ ] admin vê sem botões e com o aviso; membro não acessa
@@ -20,7 +30,7 @@ Confira item por item antes do relatório. Para os itens de interface, **abra a 
 ## Marca
 - [ ] `theme.css` gerado pelo script a partir do `rodsaas.json`; relatório de contraste sem falhas
 - [ ] claro e escuro conferidos em todas as telas (inclusive dialogs, toasts e skeletons)
-- [ ] logo no menu (expandido e recolhido), nas telas de auth e no favicon
+- [ ] logo no seletor de empresa (trilho e menu clássico), nas telas de auth e no favicon
 - [ ] `tenantLabel` e concordância corretos em todos os textos ("Nova clínica", "da clínica")
 
 ## Sessão e segurança

@@ -36,6 +36,7 @@ export const cfg = {
   apiURL: trim(process.env.RODSAAS_API_URL ?? rs.domains?.api ?? `http://localhost:${rs.ports?.api ?? 3333}`),
   mailpitURL: trim(process.env.MAILPIT_URL ?? mailpitFromCompose() ?? "http://localhost:8025"),
   presets: rs.presets ?? [],
+  apps: Array.isArray(rs.apps) ? rs.apps : null,
   productName: rs.product?.name ?? null,
   reportDir: join(projectDir, "rodsaas-verify-report"),
 };

@@ -5,6 +5,7 @@ export declare const cfg: {
   apiURL: string;
   mailpitURL: string;
   presets: string[];
+  apps: { id: string; name: string; home: string }[] | null;
   productName: string | null;
   reportDir: string;
 };

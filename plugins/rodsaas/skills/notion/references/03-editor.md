@@ -91,6 +91,6 @@ Sem edição colaborativa em tempo real na v1. Esse diálogo é a proteção.
 
 ## Teclado e acessibilidade
 
-- Ctrl+K: busca (fora do editor). Ctrl+\\: recolher o menu lateral.
+- Ctrl+K: busca (fora do editor). Ctrl+\\: recolher o menu do app (o `[` da casca não funciona dentro do texto).
 - Todos os controles do topo acessíveis por teclado e com rótulo.
 - Diálogo de conflito com foco em "Ver a versão mais nova".

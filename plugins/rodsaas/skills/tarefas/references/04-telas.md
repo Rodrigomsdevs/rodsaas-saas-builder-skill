@@ -18,16 +18,18 @@ Todas dentro da casca existente (base ou notion), seguindo os componentes e esta
 
 Qualquer visão abre a tarefa no **painel lateral** com `?tarefa=MKT-123` na URL (voltar fecha; link abre direto).
 
-## Menu lateral (seção "Tarefas")
+## Menu do app Tarefas
+
+(A coluna do menu do app na casca de apps; no menu clássico, quando é o único app, aparece abaixo do "Início".)
 
 - **Minhas tarefas** (com contador de atrasadas em vermelho) · **Horas**
 - **Projetos**: lista dos projetos visíveis (ícone/cor, nome, contador de abertas atribuídas a mim), recolhível, ordem arrastável (por usuário), "Ver todos", **+ Novo projeto**.
 - Projetos arquivados não aparecem.
 
-## Topo do app
+## Topo e trilho
 
-- **Cronômetro ativo** (quando houver): chip com código da tarefa e tempo correndo (`MKT-12 · 00:42:17`), clique abre a tarefa, botão ■ para parar. Atualiza a cada segundo só na tela; a verdade é o `startedAt` do servidor.
-- **Sino**: contador de não lidas; popover com as 20 mais recentes (agrupadas por Hoje / Anteriores), "Marcar todas como lidas", "Ver todas", e ícone de preferências.
+- **Cronômetro ativo** (quando houver, em `topbarItems`, visível em qualquer app): chip com código da tarefa e tempo correndo (`MKT-12 · 00:42:17`), clique abre a tarefa, botão ■ para parar. Atualiza a cada segundo só na tela; a verdade é o `startedAt` do servidor.
+- **Sino** (no trilho): contador de não lidas; popover com as 20 mais recentes (agrupadas por Hoje / Anteriores), "Marcar todas como lidas", "Ver todas", e ícone de preferências.
 
 ## Minhas tarefas (`/tarefas`)
 

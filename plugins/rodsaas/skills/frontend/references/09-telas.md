@@ -18,8 +18,10 @@ Layout dividido: à esquerda, painel na cor da marca com logo, nome e tagline (s
 
 ## Casca do app (`(app)/layout.tsx`)
 
-- **Menu lateral**: `OrgSwitcher` no topo, itens de `config/navigation.ts`, seção de configurações embaixo, recolhível (só ícones, com tooltip), drawer no celular. Item ativo destacado.
-- **Topo**: breadcrumb/título da página, botão de ajuda (suporte do `rodsaas.json`), alternar tema, `UserMenu` (nome, e-mail, Perfil, Sair).
+Especificação completa em **`12-casca-e-apps.md`** (e o comportamento no `assets/simulador-navegacao.html`). Resumo:
+- **Um app só** (projeto recém-gerado, app Cadastros): menu clássico com `OrgSwitcher` no topo, Início, o menu do app e, no rodapé, busca, sino, configurações e usuário.
+- **Dois ou mais apps**: **trilho** (empresa, Início, apps fixados, "Todos os apps", busca, sino, configurações, usuário) + **menu do app** atual, recolhível (`[`) com menu flutuante ao passar o mouse; no celular, gaveta com o menu do app e barra de apps embaixo.
+- **Topo**: breadcrumb (app › página), busca (Ctrl+K) e alternar tema. Ajuda (suporte do `rodsaas.json`), Perfil e Sair ficam no `UserMenu`.
 - **Banners globais** abaixo do topo.
 - Skeleton da casca enquanto a sessão carrega.
 
@@ -35,7 +37,7 @@ Só dados reais desde o primeiro dia:
 | **Atividade recente** | `GET /v1/audit` (se a feature `audit_log` estiver no plano) | últimas 5–10 ações com quem, o quê e quando (relativo); sem a feature, `PlanGate` |
 | Atalhos | — | botões para as ações mais comuns ("Novo projeto", "Convidar membro") |
 
-Módulos novos podem registrar cards de indicador aqui depois.
+Cada app registrado acrescenta os seus blocos (`widgets` do `AppDef`) depois destes, na ordem dos apps. O menu do Início lista "Visão geral" e **Seus apps**.
 
 ## Configurações (`/configuracoes/*`)
 
@@ -46,6 +48,7 @@ Layout com abas laterais (ou topo no celular), itens filtrados por papel.
 | **{Empresa}** `/configuracoes/empresa` | `GET/PATCH /v1/organizations/current` (conforme o backend) | nome e dados da {empresa}; owner vê "Zona de perigo" com excluir {empresa} (confirmação digitando o nome) |
 | **Membros** `/configuracoes/membros` | `GET /v1/members`, `PATCH/DELETE /v1/members/:id`, convites | duas abas: **Membros** (nome, e-mail, papel, desde quando; ações: mudar papel, remover — respeitando as regras: não mexer no último owner, admin não mexe em owner, ninguém altera a si mesmo) e **Convites pendentes** (reenviar, revogar). Botão **Convidar** abre dialog com e-mail + papel (sem OWNER). Uso do limite visível ("3 de 5"); no limite, o botão abre o `UpgradeDialog`. "Sair da {empresa}" para quem não é o último owner |
 | **Plano e cobrança** `/configuracoes/plano` | `GET /v1/billing/plans`, `GET /v1/billing/subscription`, checkout, troca, cancelar/retomar, portal | **especificação completa em `11-plano-e-cobranca.md`**: aviso de modo (teste/não configurado), resumo e uso, ciclo mensal/anual, cards com o botão certo para cada papel e situação (Assinar / Mudar para / Voltar para o Free), diálogo de troca com prévia do valor, cancelar e retomar, gerenciar cobrança, retorno do pagamento. Owner age; admin vê sem botões e com o aviso; membro não acessa |
+| **Apps** `/configuracoes/apps` | `GET /v1/me`, `PATCH /v1/organizations/current { disabledApps }`, `PUT /v1/me/preferences { pinnedApps }` | apps da empresa com interruptor (owner/admin) e "Meu trilho" (fixados em ordem, todos); detalhes em `12-casca-e-apps.md` |
 | **Atividade** `/configuracoes/atividade` | `GET /v1/audit` | feed com "Carregar mais", filtro por tipo de ação e por pessoa; sem a feature → `PlanGate` |
 
 ## Perfil `/perfil`
@@ -62,4 +65,4 @@ Layout com abas laterais (ou topo no celular), itens filtrados por papel.
 | **Excluir** | `DELETE /v1/projects/:id` | `ConfirmDialog` destrutivo; no detalhe, volta para a lista |
 | **Arquivar** | `PATCH` status | otimista + toast com "Desfazer" |
 
-Quando o `/rodsaas:module` criar um módulo novo, ele copia esta estrutura (`features/projects` + `app/(app)/projetos`) e adiciona o item no menu.
+Quando o `/rodsaas:module` criar um módulo novo, ele copia esta estrutura (`features/projects` + `app/(app)/projetos`) e registra o módulo no app **Cadastros** (item no menu + rota em `match`), ou no app que o usuário escolher.

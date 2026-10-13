@@ -31,6 +31,7 @@ Lista `data-testid` faltando por área, rotas do painel ausentes e divergências
 - testids: acrescente o atributo no elemento certo (`references/contrato.md` diz qual é cada um). É uma mudança sem efeito visual; faça direto.
 - rota ou campo de API com outro nome: ajuste para o nome do contrato (backend + front + `openapi:export` + `api:types`). Se a mudança for grande, mostre o que vai mudar antes.
 - se o projeto não tem uma funcionalidade inteira (ex.: não existe tela de convite), **não invente às pressas**: registre como falha conhecida e pergunte se é para implementar seguindo a skill `frontend`/`backend`.
+- faltando quase todo o grupo `apps` (trilho, "Todos os apps"…): o projeto é anterior à casca de apps. A correção é a skill **`apps`** (`/rodsaas:apps`), não testids soltos; pergunte se é para rodar.
 
 Rode a auditoria até sair "✓ contrato completo".
 
@@ -71,6 +72,7 @@ Tabela curta por área (API, autenticação, sessão, empresas, membros, módulo
 | **Estados** | 404 dentro do app; erro da API com código e "tentar de novo"; skeleton com API lenta; API inacessível sem tela branca nem stack |
 | **Plano e cobrança** | API: preços, modo de cobrança no `/v1/me`, free não comprável, membro não assina; no modo de teste: assinar, já-assina (409), mesmo plano (400), prévia, trocar, cancelar e retomar. Tela: cards, selo do atual, uso, **botão de assinar sempre visível para o owner**, aviso de modo; assinar → trocar (diálogo com prévia) → cancelar → retomar; admin sem botões e com aviso; cadastro com `?plano=` já sai assinando |
 | **Celular e tema** | menu vira gaveta; sem rolagem horizontal nas telas principais; claro/escuro |
+| **Casca de apps** | menu clássico com 1 app e trilho com 2+; cada app abre o próprio menu e fica ativo no trilho (e depois de recarregar); recolher com escolha salva; menu flutuante com o mouse por cima; "Todos os apps" com busca e estrela salva no servidor; app desligado pela empresa some e a rota dá não encontrado (com 2 apps, volta ao menu clássico); celular sem trilho no DOM, barra de apps e gaveta com o menu do app. Usa `rodsaas.json → apps`; sem essa lista, a parte é pulada com o aviso de rodar `/rodsaas:apps` |
 | **CRM** (preset `crm`) | API: funil padrão, criar e mover negócio, totais do quadro, ganhar/reabrir/perder com motivo obrigatório, isolamento entre empresas, modo "cada vendedor vê os seus" (404 e quadro), contato duplicado (409 com o existente), captura por chave **sem Origin**, chave errada/revogada, conversão reaproveitando o contato. Tela: criar negócio com erro no campo e total da coluna, barra de etapas, ganhar/reabrir/perder com motivo, agendar atividade → selo no card → concluir pela agenda, aviso de duplicado com link, converter lead, membro sem o negócio do owner no quadro e no link direto |
 
 Testes que dependem de algo opcional (módulo `projects`, limite de plano baixo, preset `crm`) são **pulados** com o motivo, não reprovados. Presets instalados (`rodsaas.json → presets`) acrescentam a parte deles ao contrato e à auditoria (`contract.json → presets`); `-g "CRM"` roda só a do CRM.

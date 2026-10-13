@@ -5,7 +5,7 @@ Confira **usando o app** (API e front rodando), com dois usuários de papéis di
 ## Base e integração
 - [ ] typecheck, lint, build e todos os testes (base + presets + tarefas) verdes
 - [ ] `rodsaas.json` com `tarefas` em `presets` e `uploads` em `addons`
-- [ ] seção "Tarefas" no menu sem quebrar o resto (inclusive com o notion instalado)
+- [ ] app Tarefas no trilho e na grade "Todos os apps", menu do app sem misturar com outros apps; contador no trilho
 - [ ] widgets na home, provedor no Ctrl+K, cronômetro e sino no topo
 - [ ] workspace novo nasce com o projeto "Primeiros passos"
 

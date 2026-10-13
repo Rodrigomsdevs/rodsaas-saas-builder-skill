@@ -11,7 +11,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white" alt="Claude Code plugin" />
-  <img src="https://img.shields.io/badge/versão-0.9-7C3AED?style=for-the-badge" alt="versão 0.9" />
+  <img src="https://img.shields.io/badge/versão-0.10-7C3AED?style=for-the-badge" alt="versão 0.10" />
   <img src="https://img.shields.io/badge/status-rascunho-F59E0B?style=for-the-badge" alt="status rascunho" />
 </p>
 
@@ -69,6 +69,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
 | 🧪 | **`/rodsaas:verify`** | Testa o projeto **de verdade no navegador**: cadastro, login, criar e trocar de empresa, convites, papéis, estados de tela… e corrige até ficar tudo verde |
+| 🧭 | **`/rodsaas:apps`** | Atualiza um projeto já gerado para o **menu novo com trilho de apps** (cada módulo no seu app, sem misturar) |
 | 🗄️ | **`/rodsaas:db`** | Cria o banco e os usuários do Postgres (o backend já chama; use sozinho para o banco de produção) |
 
 > [!TIP]
@@ -97,6 +98,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🔐 | **Contas e login** | Cadastro, login, "esqueci a senha", confirmação de e-mail e sessão segura |
 | 🏢 | **Várias empresas** | Cada cliente tem a sua conta, com equipe, convites e papéis (dono, admin, membro) |
 | 💳 | **Planos e Stripe** | Assinar, trocar de plano (com o valor proporcional), cancelar e retomar **dentro do app**, limites por plano. Sem Stripe configurada, funciona em **modo de teste**; com Stripe, um comando (`billing:sync`) cria produtos, preços e portal |
+| 🧭 | **Trilho de apps** | Cada módulo (Páginas, Tarefas, CRM…) é um app: o menu mostra só o app em que você está, recolhe com `[`, abre flutuando com o mouse por cima, tem "Todos os apps" com busca e ⭐ para fixar, e barra de apps no celular. [Veja o simulador](plugins/rodsaas/skills/frontend/assets/simulador-navegacao.html) |
 | 🎨 | **Painel com a sua marca** | Você escolhe cor, logo e estilo, vê uma prévia e aprova antes de gerar as telas |
 | 🧱 | **Telas caprichadas** | Carregando, vazio, erro, página não encontrada, confirmações e botões com loading em tudo |
 | 🛡️ | **Segurança de verdade** | Um cliente nunca vê dados de outro — com trava no próprio banco de dados |
@@ -104,7 +106,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+12 do CRM, quando instalado). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps e +12 do CRM, quando instalado). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | ✅ | **Gestor de tarefas** *(opcional)* | Projetos com código (MKT-123), quadro, lista, calendário, sprints com burndown, subtarefas, comentários com menções, anexos, cronômetro de horas e adição rápida (*"Revisar contrato @ana !alta amanhã"*) |
 | 📝 | **Réplica do Notion** *(opcional)* | Páginas aninhadas, editor com "/", autosave, favoritos, lixeira, busca, databases em tabela e quadro e página pública |
@@ -133,6 +135,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | O HTTPS não foi emitido | O domínio ainda não aponta para o servidor (registro **A**) ou há um registro **AAAA** errado |
 | Quero trocar a cor depois | Edite `brand` no `rodsaas.json` e peça *"aplica a marca de novo"* |
 | Quero mudar um plano | Peça: *"muda o plano Pro para permitir 20 usuários"* |
+| O menu está misturando módulos (projeto antigo) | Rode **`/rodsaas:apps`** para passar para o trilho de apps |
 
 </details>
 
@@ -170,7 +173,8 @@ claude plugin marketplace update rodsaas
 plugins/rodsaas/skills/
 ├── backend/    SKILL.md + references/       → API em 8 fases
 ├── db/         SKILL.md + scripts/          → provision.sh
-├── frontend/   SKILL.md + references/ + scripts/brand.mjs
+├── frontend/   SKILL.md + references/ + scripts/brand.mjs + assets/simulador-navegacao.html
+├── apps/       SKILL.md                     → migra projetos antigos para o trilho de apps
 ├── module/     SKILL.md + references/ + scripts/validate-spec.mjs
 ├── notion/     SKILL.md + references/       → preset réplica do Notion
 ├── verify/     SKILL.md + contract.json + suite/ (Playwright) + scripts/run.sh

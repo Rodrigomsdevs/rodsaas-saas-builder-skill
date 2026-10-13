@@ -75,7 +75,7 @@ Em ordem de prioridade, no máximo um por vez, cada um com ação:
 - Tudo operável por teclado; foco visível (o `--ring` do tema).
 - Ícone sem texto sempre com `aria-label` ou tooltip.
 - Skeleton com `aria-busy` no container; toasts são anunciados pelo sonner.
-- Menu lateral vira drawer no celular; alvos de toque com pelo menos 40px.
+- No celular, o menu do app vira gaveta e os apps vão para a barra de baixo (`12-casca-e-apps.md`); alvos de toque com pelo menos 40px.
 - Respeitar `prefers-reduced-motion` nas animações.
 
 ## Formatação BR (`lib/format.ts`)

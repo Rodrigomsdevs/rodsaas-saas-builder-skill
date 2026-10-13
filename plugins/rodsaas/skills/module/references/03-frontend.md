@@ -21,7 +21,7 @@ web/src/app/(app)/<route>/
 └── [id]/page.tsx             # detalhe
 ```
 
-E: item em `config/navigation.ts` (rótulo plural, ícone, `roles` se nem todos podem ver), e as abas de relação no detalhe dos módulos alvo.
+E: registro do módulo no app **Cadastros** (`features/cadastros/app.tsx`: item no menu com rótulo plural, ícone e `roles` se nem todos podem ver, e a rota em `match`) ou, se o usuário pediu, no app de um preset (ex.: agendamento dentro do CRM: item no `Sidebar` e rota no `match` daquele app). Veja `skills/frontend/references/12-casca-e-apps.md`. Também as abas de relação no detalhe dos módulos alvo. Projeto com `config/navigation.ts` antigo: rode antes o `/rodsaas:apps`.
 
 ## Componente por tipo
 

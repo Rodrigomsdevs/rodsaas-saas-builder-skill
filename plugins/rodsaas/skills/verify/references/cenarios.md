@@ -114,3 +114,16 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | aviso de duplicado | formulário fecha ou mostra só um toast genérico no 409 |
 | converter lead pela tela | conversão sem navegar para o negócio; lead continua `OPEN` |
 | modo restrito na tela | quadro buscando de uma rota sem o filtro de visibilidade; página do negócio mostrando erro genérico em vez de "não encontrado" |
+
+## Casca de apps (`10-apps.spec.ts`)
+
+| Teste | Causas comuns |
+|---|---|
+| pulado: "rodsaas.json sem apps" | projeto anterior ao modelo de apps; rode `/rodsaas:apps` (ou o registro não grava `rodsaas.json → apps`) |
+| modo certo | trilho aparecendo com um app só (ou o contrário); seções de vários presets empilhadas num menu só; dois `sidebar`/`org-switcher` no DOM |
+| cada app abre o próprio menu | `match` do app sem a rota da tela (app ativo errado); menu montado por seções e não pelo app ativo; `aria-current` ausente no trilho |
+| recolher | estado só em `useState` (perde ao recarregar); `localStorage` sem try/catch quebrando a casca |
+| menu flutuante | sem atraso de abertura/fechamento; flutuante e coluna aparecendo juntos; só abre com clique |
+| Todos os apps | fixados só no `localStorage` (não chama `PUT /v1/me/preferences`); estrela abrindo o app em vez de só fixar; busca só pelo nome exato |
+| app desligado | desligar só esconde do trilho (rota ainda abre); `disabledApps` fora do `/v1/me`; com 2 apps não volta ao menu clássico |
+| celular | trilho só escondido por CSS (continua no DOM); gaveta sem `data-app`; barra de apps ausente |

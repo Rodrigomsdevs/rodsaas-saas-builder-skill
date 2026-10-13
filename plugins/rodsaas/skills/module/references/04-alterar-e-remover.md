@@ -31,5 +31,5 @@ Sempre na mesma ordem:
 1. Liste o que depende dele: relações de outros módulos para ele, itens de plano, menu, audit, dados existentes (quantidade).
 2. Se outro módulo tem `relation` para ele, isso precisa ser resolvido primeiro (remover o campo de relação lá, com a mesma confirmação).
 3. Confirmação explícita do usuário, com a quantidade de registros que serão apagados.
-4. Remova: rotas, service, repository, schemas, testes, registro no app, contador e chave de plano, telas, feature do front, item de menu, abas de relação em outros módulos, e a tabela (migration com `DROP TABLE` e do enum de status, se houver).
+4. Remova: rotas, service, repository, schemas, testes, registro no app, contador e chave de plano, telas, feature do front, item no menu do app (e a rota em `match`; app Cadastros sem módulos sai do registro), abas de relação em outros módulos, e a tabela (migration com `DROP TABLE` e do enum de status, se houver).
 5. Apague a especificação e tire o módulo de `rodsaas.json`.

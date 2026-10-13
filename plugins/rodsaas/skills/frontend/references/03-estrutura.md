@@ -23,7 +23,7 @@ web/
 │   │   │   ├── verificar-email/page.tsx
 │   │   │   └── convite/page.tsx     # ?token=
 │   │   └── (app)/
-│   │       ├── layout.tsx           # casca: menu lateral, topo, banners
+│   │       ├── layout.tsx           # casca de apps (12-casca-e-apps.md): trilho, menu do app, topo, banners
 │   │       ├── loading.tsx          # skeleton genérico da casca
 │   │       ├── error.tsx            # erro dentro do app (mantém a casca)
 │   │       ├── not-found.tsx        # 404 dentro do app (mantém a casca)
@@ -38,12 +38,22 @@ web/
 │   │       │   ├── empresa/page.tsx
 │   │       │   ├── membros/page.tsx
 │   │       │   ├── plano/page.tsx
+│   │       │   ├── apps/page.tsx    # apps da empresa + meu trilho
 │   │       │   └── atividade/page.tsx
 │   │       └── perfil/page.tsx
 │   ├── components/
 │   │   ├── ui/                      # shadcn (gerados, ajustáveis)
 │   │   └── app/                     # componentes do produto
-│   │       ├── app-sidebar.tsx
+│   │       ├── shell/               # casca de apps
+│   │       │   ├── app-shell.tsx        # escolhe modo clássico × trilho, desktop × celular
+│   │       │   ├── app-rail.tsx         # trilho
+│   │       │   ├── app-sidebar.tsx      # coluna do menu do app (e menu clássico)
+│   │       │   ├── app-flyout.tsx       # menu flutuante (recolhido + mouse por cima)
+│   │       │   ├── app-launcher.tsx     # "Todos os apps"
+│   │       │   ├── mobile-topbar.tsx
+│   │       │   ├── mobile-tabbar.tsx
+│   │       │   ├── mobile-drawer.tsx
+│   │       │   └── sidebar-blocks.tsx   # SidebarSection, SidebarItem, SidebarTree
 │   │       ├── app-topbar.tsx
 │   │       ├── org-switcher.tsx
 │   │       ├── user-menu.tsx
@@ -60,7 +70,7 @@ web/
 │   │       ├── upgrade-dialog.tsx
 │   │       ├── can.tsx              # mostra filhos se o papel permitir
 │   │       └── theme-toggle.tsx
-│   ├── features/                    # um diretório por módulo da API
+│   ├── features/                    # um diretório por módulo da API (cada app tem features/<app>/app.tsx)
 │   │   ├── auth/
 │   │   ├── session/                 # useSession, troca de empresa
 │   │   ├── organizations/
@@ -68,6 +78,8 @@ web/
 │   │   ├── invitations/
 │   │   ├── billing/
 │   │   ├── audit/
+│   │   ├── apps/                    # useApps(), fixados, apps desligados, última rota por app
+│   │   ├── cadastros/app.tsx        # AppDef do app Cadastros (lista os módulos)
 │   │   └── projects/                # módulo de exemplo (molde)
 │   │       ├── api.ts               # query keys + hooks (useProjects, useCreateProject…)
 │   │       ├── schemas.ts           # Zod dos formulários
@@ -85,7 +97,8 @@ web/
 │   │   └── utils.ts                 # cn() do shadcn
 │   ├── config/
 │   │   ├── product.ts               # nome, tenantLabel e concordância (de rodsaas.json)
-│   │   ├── navigation.ts            # itens do menu lateral (com papel/feature exigidos)
+│   │   ├── apps.ts                  # registro de apps (12-casca-e-apps.md)
+│   │   ├── settings-navigation.ts   # abas de Configurações (com papel/feature exigidos)
 │   │   └── ui.ts                    # densidade: alturas de controle e de linha
 │   ├── styles/
 │   │   ├── globals.css              # tailwind + base shadcn + import do theme.css
@@ -106,7 +119,7 @@ URLs em **português** (o usuário vê), código em **inglês**.
 |---|---|
 | `/entrar`, `/cadastro`, `/esqueci-senha`, `/redefinir-senha`, `/verificar-email`, `/convite` | pública; logado em `/entrar` ou `/cadastro` → `/inicio` |
 | `/` | redireciona: logado → `/inicio`, deslogado → `/entrar` |
-| `/inicio`, `/projetos`, `/configuracoes/*`, `/perfil` | logado com empresa ativa |
+| `/inicio`, `/projetos`, `/configuracoes/*` (inclui `/configuracoes/apps`), `/perfil` | logado com empresa ativa |
 | `/sem-empresa` | logado sem empresa ativa |
 
 ## Convenções
@@ -118,20 +131,28 @@ URLs em **português** (o usuário vê), código em **inglês**.
 - Nada de cor fixa (`#...`, `bg-blue-500`): só tokens (`bg-primary`, `text-muted-foreground`, `bg-success/15`).
 - Textos com o nome do tenant sempre via `config/product.ts`.
 
-## Menu lateral (`config/navigation.ts`)
+## Apps e configurações
+
+O menu é montado pelo **registro de apps** (`config/apps.ts`), descrito em `12-casca-e-apps.md`. O projeto nasce com um app só (**Cadastros**, com o módulo de exemplo), então começa no menu clássico; o trilho aparece quando o segundo app é registrado.
 
 ```ts
-export const navigation = [
-  { label: 'Início', href: '/inicio', icon: Home },
-  { label: 'Projetos', href: '/projetos', icon: FolderKanban },
-  // módulos novos entram aqui
-] satisfies NavItem[]
+// features/cadastros/app.tsx
+export const cadastrosApp: AppDef = {
+  id: 'cadastros', name: 'Cadastros', description: 'Cadastros e módulos da empresa',
+  icon: Database, category: 'geral', order: 0, defaultPinned: true,
+  match: ['/projetos'],                 // o /rodsaas:module acrescenta a rota de cada módulo novo
+  home: '/projetos',
+  Sidebar: CadastrosSidebar,            // SidebarItem por módulo: { label: 'Projetos', href: '/projetos', icon: FolderKanban }
+}
 
+// config/settings-navigation.ts (abas de Configurações)
 export const settingsNavigation = [
   { label: tenant.settingsTitle, href: '/configuracoes/empresa', icon: Building2, roles: ['OWNER', 'ADMIN'] },
   { label: 'Membros', href: '/configuracoes/membros', icon: Users },
   { label: 'Plano e cobrança', href: '/configuracoes/plano', icon: CreditCard, roles: ['OWNER', 'ADMIN'] },
+  { label: 'Apps', href: '/configuracoes/apps', icon: LayoutGrid },
   { label: 'Atividade', href: '/configuracoes/atividade', icon: History, feature: 'audit_log' },
+  // apps com `settings` acrescentam a aba deles aqui, lida do registro
 ] satisfies NavItem[]
 ```
 

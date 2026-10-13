@@ -24,6 +24,7 @@ Leia o pedido e proponha a especificação completa, preenchendo o que der para 
 | Nome na interface | português, singular/plural e gênero (`Agendamento`/`Agendamentos`, masculino) |
 | Rota | português, kebab-case (`/agendamentos`) |
 | Ícone do menu | um ícone do lucide coerente |
+| App onde entra | **Cadastros**; ou o app de um preset quando o módulo é parte dele (ex.: agendamento → CRM) |
 | Campos | os que o usuário citou, com o tipo mais específico (`references/01-especificacao.md`) |
 | Campo de título | o primeiro campo de texto (aparece no detalhe, na busca, nos selects de relação) |
 | Busca | campos de texto principais |

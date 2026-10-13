@@ -43,6 +43,7 @@ model Organization {
   id          String   @id @default(uuid(7)) @db.Uuid
   name        String
   slug        String   @unique
+  disabledApps String[] @default([])        // apps da interface desligados pela empresa (ids do registro de apps do front)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   memberships Membership[]
@@ -56,6 +57,7 @@ model Membership {
   userId         String       @db.Uuid
   role           Role
   tokenVersion   Int          @default(0)
+  pinnedApps     Json?                     // string[] de apps fixados no trilho por esta pessoa nesta empresa; null = padrão do front
   createdAt      DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -191,8 +193,13 @@ Não use `findUnique({ where: { id } })` em tabela de tenant: troque por `findFi
 | `GET /v1/organizations` | autenticado · `tenant: false` | organizações do usuário com o papel em cada |
 | `POST /v1/organizations` | autenticado · `tenant: false` | cria `{ name }`, o usuário vira owner e ela vira a organização ativa (novo access token) |
 | `GET /v1/organizations/current` | todos | dados da organização ativa |
-| `PATCH /v1/organizations/current` | owner, admin | atualiza nome e dados |
+| `PATCH /v1/organizations/current` | owner, admin | atualiza nome e dados; aceita `disabledApps` (lista de ids de app, cada um `^[a-z0-9-]{2,40}$`, até 100, sem repetidos; nunca `inicio`) |
+| `PUT /v1/me/preferences` | todos | `{ pinnedApps: string[] \| null }` (mesma validação; `null` volta ao padrão) grava na **membership** da organização ativa; devolve as preferências |
 | `DELETE /v1/organizations/current` | owner | `{ confirmName }` precisa bater com o nome; cancela a assinatura na Stripe antes de excluir; o usuário fica sem organização ativa (ou cai na próxima que tiver) |
+
+### Apps da interface (desligados e fixados)
+
+O front organiza as telas em **apps** (`skills/frontend/references/12-casca-e-apps.md`). A API só guarda duas listas de ids, sem conhecer os apps: `Organization.disabledApps` (o owner/admin desliga um app para a empresa) e `Membership.pinnedApps` (o que cada pessoa fixou no trilho, por empresa). As duas saem no `GET /v1/me`. Desligar um app é organização da interface, **não** segurança: as rotas continuam protegidas por papel, plano e RLS. `pinnedApps` é `Json?` porque o Prisma não aceita lista opcional e aqui `null` (padrão) é diferente de `[]` (nada fixado); valide com Zod na entrada e na saída.
 
 ## Membros e convites
 

@@ -39,6 +39,8 @@ loginAs(user, orgId?) // devolve os cookies para usar no app.inject
 - switch-organization para org em que não é membro → 403
 - `session_hint` gravado em login/cadastro/refresh e apagado em logout e em refresh inválido
 - `GET /v1/me` de um `MEMBER` traz plano efetivo, features, limites e uso (sem dados de cobrança)
+- `disabledApps`: owner/admin alteram, membro recebe 403; ids inválidos/repetidos/`inicio` → 400; aparece em `organization.disabledApps` no `/v1/me`
+- `PUT /v1/me/preferences`: grava por empresa (trocar de empresa traz os fixados da outra), `null` volta ao padrão, validação dos ids
 
 ### Organizações, membros e convites
 - não remove/rebaixa o último owner

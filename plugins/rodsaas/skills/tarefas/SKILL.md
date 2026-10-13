@@ -5,7 +5,7 @@ description: Preset que soma ao projeto rodsaas um gestor de tarefas completo (e
 
 # rodsaas · tarefas
 
-Acrescenta a um projeto rodsaas um **gestor de tarefas de verdade**, para qualquer equipe (marketing, RH, operação) e com sprints opcionais para equipes de software. Ele **soma** ao que já existe: não troca a casca do app, entra como uma seção nova do menu, widgets na home e resultados na busca global — e convive com o preset `notion` e com os módulos criados pelo `/rodsaas:module`.
+Acrescenta a um projeto rodsaas um **gestor de tarefas de verdade**, para qualquer equipe (marketing, RH, operação) e com sprints opcionais para equipes de software. Ele **soma** ao que já existe: não troca a casca do app, entra como um **app** na casca (trilho), com widgets no Início e resultados na busca global — e convive com o preset `notion` e com os módulos criados pelo `/rodsaas:module`.
 
 Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos, Stripe, padrão REST, erros RFC 9457, cursor, OpenAPI → tipos do front, estados de tela, marca.
 
@@ -34,7 +34,7 @@ Fora da v1 (registre no README como próximos passos): recorrência, modelos de 
 
 Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(tarefas): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
-1. **Integração e contrato** — registrar o preset, seção no menu, widgets da home, provedor da busca global, componentes compartilhados. → `references/01-escopo-e-integracao.md`
+1. **Integração e contrato** — registrar o preset e o **app Tarefas** no registro de apps (menu do app, widgets do Início, provedor da busca, contador no trilho), componentes compartilhados. → `references/01-escopo-e-integracao.md`
 2. **Modelo e regras** — models, migrations com RLS, sequência de código, posições, fluxo de status, projeto inicial. → `references/02-modelo.md`
 3. **API de projetos e tarefas** — CRUD, quadro, filtros, minhas tarefas, edição em massa, descrição com versão, subtarefas, checklist, vínculos, lixeira, busca. → `references/03-api.md`
 4. **Colaboração** — comentários, reações, histórico, seguidores, notificações (sino, e-mail, resumo diário, lembretes de prazo). → `references/03-api.md`
@@ -46,7 +46,7 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(tar
 
 ## Princípios
 
-- **Soma, não substitui.** Nenhum arquivo da casca é reescrito; o preset se registra nos pontos de extensão (menu, home, busca). Se o `notion` existir, a seção entra no menu dele.
+- **Soma, não substitui.** Nenhum arquivo da casca é reescrito; o preset registra o app dele (`config/apps.ts`) e a casca de apps faz o resto: o menu do Tarefas nunca se mistura com o de outro app.
 - **Rápido como app nativo.** Mudar status, arrastar card, atribuir, marcar checklist, reagir, ligar/desligar cronômetro: tudo otimista, com desfazer automático e aviso se a API recusar.
 - **Nada se perde.** Descrição com autosave e controle de versão; rascunho de comentário guardado; cronômetro vive no servidor (sobrevive a recarregar e trocar de aparelho).
 - **Uma fonte de verdade.** Código da tarefa, posições, categorias de status, horas e uso do plano são calculados no servidor; o front nunca inventa número.

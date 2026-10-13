@@ -28,7 +28,7 @@ Regras de cada operação: `01-escopo-e-modelo.md`.
 
 - `content` é a lista de blocos do editor (JSON). Valide como **array de objetos** com tamanho máximo, sem tentar espelhar o schema inteiro do editor (ele evolui).
 - No save, o backend:
-  1. **sanitiza links**: qualquer `href`/`url` que não seja `http:`, `https:`, `mailto:` ou link interno (`/pagina/<id>`) é removido;
+  1. **sanitiza links**: qualquer `href`/`url` que não seja `http:`, `https:`, `mailto:` ou link interno (`/paginas/<id>`, e o antigo `/pagina/<id>`) é removido;
   2. extrai `contentText` para a busca;
   3. atualiza `lastEditedById`.
 - Menções de página guardam o id; a resposta do `GET` não precisa resolver títulos (o front resolve pelo cache da árvore).

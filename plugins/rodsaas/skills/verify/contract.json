@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -12,7 +12,8 @@
     "/configuracoes/empresa",
     "/configuracoes/membros",
     "/configuracoes/plano",
-    "/perfil"
+    "/perfil",
+    "/configuracoes/apps"
   ],
   "testids": {
     "auth": [
@@ -91,6 +92,21 @@
       "billing-cancel",
       "billing-resume",
       "billing-owner-only"
+    ],
+    "apps": [
+      "app-rail",
+      "app-rail-item",
+      "app-launcher-open",
+      "app-launcher",
+      "app-launcher-search",
+      "app-launcher-item",
+      "app-pin",
+      "sidebar-collapse",
+      "sidebar-expand",
+      "app-flyout",
+      "app-tabbar",
+      "app-tabbar-item",
+      "app-toggle"
     ]
   },
   "optionalTestids": {
@@ -180,10 +196,24 @@
       "path": "/v1/me"
     },
     {
+      "method": "put",
+      "path": "/v1/me/preferences",
+      "body": [
+        "pinnedApps"
+      ]
+    },
+    {
       "method": "post",
       "path": "/v1/organizations",
       "body": [
         "name"
+      ]
+    },
+    {
+      "method": "patch",
+      "path": "/v1/organizations/current",
+      "body": [
+        "disabledApps"
       ]
     },
     {

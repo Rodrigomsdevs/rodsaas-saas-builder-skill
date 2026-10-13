@@ -20,30 +20,38 @@
 Este preset é o primeiro escrito neste formato; os próximos (forms, crm, helpdesk…) seguem o mesmo contrato.
 
 ### 1. Registro
-`rodsaas.json` ganha `"presets": [..., "tarefas"]`. Leia antes para saber o que existe (`notion`, módulos, `uploads`).
+`rodsaas.json` ganha `"presets": [..., "tarefas"]` e o app em `"apps"`. Leia antes para saber o que existe (`notion`, módulos, `uploads`).
 
-### 2. Menu (`web/src/config/navigation.ts`)
-Navegação por **seções**. Se o arquivo ainda for uma lista simples (projeto anterior a este contrato), converta para seções sem mudar o que já aparece:
+### 2. App no registro (`web/src/config/apps.ts`)
+O preset registra **o app Tarefas** na casca de apps (`skills/frontend/references/12-casca-e-apps.md`; abra `skills/frontend/assets/simulador-navegacao.html` para ver o comportamento). Ele **não** mexe no menu de outro app nem acrescenta seções no menu de ninguém.
 
 ```ts
-export const navigationSections: NavSection[] = [
-  { id: 'base', items: [{ label: 'Início', href: '/inicio', icon: Home }] },
-  // presets e módulos acrescentam seções aqui, nunca reescrevem as outras
-  { id: 'tarefas', label: 'Tarefas', items: [...], dynamic: TasksSidebarSection },
-]
+// web/src/features/tasks/app.tsx
+export const tarefasApp: AppDef = {
+  id: 'tarefas', name: 'Tarefas', description: 'Projetos, quadro, sprints e horas',
+  icon: ListChecks, category: 'trabalho', order: 20, defaultPinned: true,
+  match: ['/tarefas'], home: '/tarefas',
+  Sidebar: TasksSidebar,                       // menu do app (04-telas.md, "Menu do app")
+  action: { label: 'Nova tarefa', onSelect: openQuickAdd },
+  useBadge: useOverdueMineCount,               // atrasadas atribuídas a mim
+  widgets: [todayWidget, overdueWidget, activeSprintWidget],
+  search: tasksSearchProvider,
+}
 ```
 
-- Se o preset `notion` existir, o menu lateral dele (`app-sidebar`) passa a renderizar `navigationSections` entre os favoritos e a árvore de páginas, em vez de itens fixos. Faça essa adaptação mínima no componente do notion (sem mudar o resto dele).
-- `dynamic` permite que a seção tenha conteúdo próprio (a lista de projetos com contadores).
+- Acrescente `tarefasApp` em `config/apps.ts` e `{ id, name, home }` em `rodsaas.json → apps`.
+- Projeto que ainda tem `config/navigation.ts` em lista ou em seções (anterior ao modelo de apps): rode antes o `/rodsaas:apps`, que converte a casca. Não acrescente seções no menu antigo.
+- Com o segundo app registrado, a casca troca sozinha do menu clássico para o trilho.
 
-### 3. Home (`web/src/config/home-widgets.ts`)
-Lista de widgets ordenados; a página de início renderiza todos. O tarefas acrescenta "Minhas tarefas de hoje", "Atrasadas" e "Sprint ativa". Se a home atual for fixa (da base ou do notion), extraia os blocos dela para widgets nesse registro, sem mudar o visual.
+### 3. Início, busca e notificações
+- **Widgets do Início** e **provedor do Ctrl+K** vão no `AppDef` (`widgets`, `search`); o Início e a busca globais leem do registro.
+- **Sino**: o módulo genérico `notifications` (criado aqui se não existir) fornece o sino, que a casca põe no trilho (ou no rodapé do menu clássico); a página `/notificacoes` é global, fora de qualquer app.
 
-### 4. Busca global (`web/src/config/search-providers.ts`)
-Cada preset registra um provedor `{ id, label, search(q), render(item), href(item) }`. O Ctrl+K mostra os resultados agrupados por provedor. Se o Ctrl+K atual for do notion, adapte para usar os provedores (o notion vira um provedor também).
+### 4. Topo
+O topo da casca tem o ponto de extensão `topbarItems` (à direita, antes da busca): o Tarefas acrescenta ali o **cronômetro ativo**, visível em qualquer app.
 
-### 5. Topo do app
-Pontos de extensão no topo: `topbarItems` (o tarefas adiciona o **cronômetro ativo**) e o **sino de notificações** (do módulo genérico `notifications`, criado aqui se não existir).
+### 5. Configurações
+Se o app tiver configurações próprias, elas ficam dentro do app (configurações do projeto); nada novo em `/configuracoes`.
 
 ### 6. Componentes compartilhados (`web/src/components/app/`)
 Reutilize se existirem, crie aqui se não: `Kanban` (colunas + arrastar, usado pelo database do notion e pelos módulos), `SidePeek`, `RelationSelect`, `MemberSelect`, `UserAvatar`, `Dropzone`/`FileList` (do uploads), editor de blocos (do notion; se não houver notion, instale o mesmo editor aqui seguindo `03-editor.md` da skill notion).

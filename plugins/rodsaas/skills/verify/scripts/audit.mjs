@@ -119,6 +119,7 @@ for (const [group, ids] of Object.entries(missing)) {
   problems += ids.length;
   console.log(`✗ data-testid faltando (${group}): ${ids.join(", ")}`);
 }
+if (missing.apps && missing.apps.length >= 8) console.log("  → casca de apps ausente: projeto anterior ao modelo de apps. Rode /rodsaas:apps (não acrescente esses testids soltos).");
 for (const [group, ids] of Object.entries(warnings)) console.log(`! recomendados ausentes (${group}): ${ids.join(", ")}`);
 if (missingRoutes.length) {
   problems += missingRoutes.length;

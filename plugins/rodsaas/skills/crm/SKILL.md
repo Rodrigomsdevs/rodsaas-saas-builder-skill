@@ -5,7 +5,7 @@ description: Preset que soma ao projeto rodsaas um CRM de vendas completo (estil
 
 # rodsaas · crm
 
-Acrescenta a um projeto rodsaas um **CRM de vendas de verdade**, pensado para PMEs brasileiras: o vendedor abre o funil de manhã, vê o que está atrasado, liga ou chama no WhatsApp, registra o que aconteceu e move o negócio, e o gestor acompanha números confiáveis. O preset **soma** ao projeto: entra como uma seção nova do menu, com widgets na home e resultados na busca global, e convive com `tarefas`, `notion` e os módulos do `/rodsaas:module`.
+Acrescenta a um projeto rodsaas um **CRM de vendas de verdade**, pensado para PMEs brasileiras: o vendedor abre o funil de manhã, vê o que está atrasado, liga ou chama no WhatsApp, registra o que aconteceu e move o negócio, e o gestor acompanha números confiáveis. O preset **soma** ao projeto: entra como um **app** na casca (trilho de apps), com widgets no Início e resultados na busca global, e convive com `tarefas`, `notion` e os módulos do `/rodsaas:module`.
 
 Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos, Stripe, padrão REST, erros RFC 9457, cursor, OpenAPI → tipos do front, estados de tela, marca, contrato de testids.
 
@@ -34,7 +34,7 @@ Fora da v1 (registre no README do projeto como próximos passos): sincronizar e-
 
 Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(crm): ...`). Não avance com fase quebrada. Use a lista de tarefas.
 
-1. **Integração e contrato**: registrar o preset, seção no menu, widgets da home, provedor da busca, notificações, planos. → `references/01-escopo-e-integracao.md`
+1. **Integração e contrato**: registrar o preset e o **app CRM** no registro de apps (menu do app, widgets do Início, provedor da busca, contador no trilho), notificações, planos. → `references/01-escopo-e-integracao.md`
 2. **Modelo e regras**: models, migrations com RLS e triggers, funil inicial, visibilidade, histórico de etapas, campos personalizados, deduplicação. → `references/02-modelo.md`
 3. **API de cadastros e funil**: empresas (com CNPJ), contatos, negócios, quadro, ganhar/perder, produtos, configurações. → `references/03-api.md`
 4. **Leads, atividades e histórico**: caixa de leads e conversão, atividades e agenda, anotações, anexos, linha do tempo, notificações. → `references/03-api.md`
@@ -46,7 +46,7 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(crm
 
 ## Princípios
 
-- **Soma, não substitui.** Nenhum arquivo da casca é reescrito; o preset se registra nos pontos de extensão (menu, home, busca, topo), os mesmos do `tarefas` (`references/01-escopo-e-integracao.md`).
+- **Soma, não substitui.** Nenhum arquivo da casca é reescrito; o preset registra o app dele em `config/apps.ts` e a casca de apps faz o resto (`references/01-escopo-e-integracao.md`).
 - **O vendedor não pode perder tempo.** Mover etapa, concluir atividade, ganhar, atribuir, etiquetar: tudo otimista e com desfazer. Ligar ou chamar no WhatsApp é um clique e já oferece registrar a atividade.
 - **Número confiável.** Totais do funil, valor ponderado, previsão, taxa de conversão e tempo por etapa são calculados no servidor a partir do histórico de etapas, nunca no front. O valor do negócio com produtos é recalculado no servidor.
 - **Sem duplicidade.** E-mail, CPF e CNPJ não se repetem na empresa (garantido no banco); telefone igual gera aviso. Importação, captura e conversão de lead reaproveitam o contato existente.
