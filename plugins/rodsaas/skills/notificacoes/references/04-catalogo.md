@@ -136,6 +136,26 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 
 `canSee`: ter papel no Financeiro. Tirar o papel → `retract` das notificações do app dessa pessoa. Nunca coloque saldo de conta no aviso.
 
+### Comercial (`comercial`)
+
+| Tipo | Evento | Destinatários | entity · groupKey | url |
+|---|---|---|---|---|
+| `com.approval.requested` | vendedor salvou proposta acima do limite de desconto/valor | `COM_ADMIN` | proposal · `to_approve` (`groupUrl` `/comercial/propostas?status=PENDING_APPROVAL`) | `/comercial/propostas/<id>` |
+| `com.approval.decided` | admin aprovou/recusou | dono da proposta | proposal | idem |
+| `com.proposal.viewed` | primeira visualização do cliente (no máximo 1 por dia por proposta) | dono da proposta | proposal | idem |
+| `com.proposal.commented` | cliente deixou dúvida na página pública (ator nulo) | dono da proposta | proposal | idem |
+| `com.proposal.accepted` | aceite online (ator nulo) | dono da proposta e `COM_ADMIN` | proposal | idem |
+| `com.proposal.rejected` | recusa com motivo (ator nulo) | dono da proposta | proposal | idem |
+| `com.proposal.expiring` | job 9 h: vence hoje/amanhã sem decisão | dono da proposta | proposal · `expiring` (`groupUrl` `/comercial/propostas?status=SENT,VIEWED`) | `/comercial/propostas/<id>` |
+| `com.envelope.completed` | último signatário assinou | quem enviou e dono do contrato | envelope | `/comercial/assinaturas/<id>` |
+| `com.envelope.refused` | signatário recusou | quem enviou e dono do contrato | envelope | idem |
+| `com.envelope.expired` | job: prazo do envelope terminou | quem enviou | envelope | idem |
+| `com.contract.expiring` | job 8 h: contrato entrou no aviso prévio (ou faz aniversário de reajuste) | dono do contrato e `COM_ADMIN` | contract · `expiring` (`groupUrl` `/comercial/contratos?status=EXPIRING`) | `/comercial/contratos/<id>` |
+| `com.contract.renewed` | renovação automática | dono do contrato | contract | idem |
+| `com.integration.failed` | falha ao ganhar o negócio no CRM ou criar as contas a receber | `COM_ADMIN` | proposal | `/comercial?integracoes=1` |
+
+`canSee`: ter papel no Comercial e, para `SELLER`, ser o dono da proposta/contrato. Tirar o papel → `retract`. Os e-mails para **clientes e signatários** (proposta, código, convite para assinar, lembretes, PDF final) não passam por aqui: saem pelo app com a marca da empresa.
+
 ## Regras que valem para todos os apps
 
 - Nunca gravar `Notification` direto nem mandar e-mail de aviso para membro por conta própria: tudo por `notify()`. (E-mails para **clientes** — confirmação de agendamento, resposta do chamado, resposta automática do formulário — continuam no app, porque cliente não é membro.)

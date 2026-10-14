@@ -290,3 +290,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | cobranças | cobrança marcada como paga ao criar ou pelo retorno do navegador (deveria ser só pelo pagamento confirmado); boleto sem CPF/CNPJ aceito; pagar duas vezes; página pública devolvendo ids internos; cobrar uma despesa |
 | papéis e aprovação | admin da empresa vendo o financeiro sem papel; `VIEWER` escrevendo; pagamento acima do limite sem aprovação; `FIN` aprovando; recusa sem motivo |
 | telas | campo de valor com `parseFloat` ("1.500,00" vira R$ 1,50); lista que não atualiza depois de baixar; conciliação sem sugestão na tela; página pública sem o modo de teste |
+
+## Comercial (`22-comercial.spec.ts`, `/rodsaas:comercial`)
+
+| Teste | Causas comuns |
+|---|---|
+| totais e validação | total calculado no front e só gravado; desconto geral aplicado também nos recorrentes (ou ignorado); opcional somado sem o cliente marcar; quantidade com mais de 3 casas aceita; desconto em % e R$ ao mesmo tempo; CNPJ do cliente sem dígito verificador; numeração com `count()+1` (repete em concorrência) |
+| aprovação | limite de desconto só como aviso na tela (envia mesmo assim); vendedor aprovando o próprio desconto; recusa sem comentário; aprovar duas vezes |
+| envio, página e aceite | proposta enviada ainda editável (deveria virar nova versão); enviar duas vezes; link sem e-mail ao cliente; visualização não registrada (sem `viewedAt`); página pública devolvendo ids internos; aceite sem validar nome completo/CPF/CNPJ/concordância; aceitar duas vezes (sem `FOR UPDATE`); opcional marcado ignorado no total aceito; aceite sem IP ou sem o SHA-256 do que foi aceito; documento gravado com máscara |
+| vencida, recusa e versões | "vencida" só por job; recusa sem motivo; nova versão com número novo ou sem marcar a anterior como substituída (o link antigo continua aceitando); nova versão de proposta aceita |
+| modelos | variável validada só no front (ou contra a lista de outro tipo); `<script>`/`on*` salvos; valor inserido sem escape; variáveis faltando não listadas na prévia |
+| contratos | fim = início + meses × 30 dias; contrato existente salvo como rascunho (não entra em "vencendo"); aviso prévio ignorado; contrato assinado editável; renovação somando dias; reajuste sem arredondar ao centavo ou sem limite; contrato criado de proposta não aceita |
+| assinatura | ordem ignorada (testemunha assina antes das partes); assinatura só com o link, sem o código do e-mail; qualquer código aceito; e-mail inteiro na resposta do código; assinar sem nome completo/concordância; PDF final igual ao enviado (sem a folha de assinaturas); código de verificação fora do formato; contrato não vira assinado; verificação sensível a maiúsculas/hífen, sem busca pelo hash ou expondo e-mail |
+| recusa e cancelamento | recusa que não encerra o envelope ou não devolve o contrato a rascunho; cancelar que só registra o evento; mesmo e-mail duas vezes; envelope só com testemunhas |
+| papéis | vendedor vendo propostas de outro vendedor; `VIEWER` escrevendo; membro sem papel entrando; vendedor mudando limite ou papéis; owner perdendo o papel; proposta de outra empresa acessível pelo id |
+| telas | total do editor sem a quantidade; erro do aceite fora do campo; erro da assinatura sem o código; verificação sem os signatários |

@@ -1,5 +1,5 @@
 {
-  "version": 14,
+  "version": 15,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2342,6 +2342,328 @@
             "method",
             "categoryId",
             "startDate"
+          ]
+        }
+      ]
+    },
+    "comercial": {
+      "when": "rodsaas.json → presets inclui \"comercial\" (app Comercial)",
+      "routes": [
+        "/comercial",
+        "/comercial/propostas",
+        "/comercial/propostas/nova",
+        "/comercial/propostas/[id]",
+        "/comercial/propostas/[id]/editar",
+        "/comercial/contratos",
+        "/comercial/contratos/[id]",
+        "/comercial/assinaturas",
+        "/comercial/assinaturas/[id]",
+        "/comercial/modelos",
+        "/comercial/configuracoes",
+        "/proposta/[token]",
+        "/assinar/[token]",
+        "/verificar"
+      ],
+      "testids": [
+        "com-home",
+        "com-to-approve",
+        "com-awaiting-signature",
+        "com-expiring",
+        "com-proposals-tab",
+        "com-proposal-form",
+        "com-proposal-title",
+        "com-client-name",
+        "com-client-email",
+        "com-client-document",
+        "com-item-add",
+        "com-item-row",
+        "data-index",
+        "com-item-description",
+        "com-item-qty",
+        "com-item-price",
+        "com-item-discount",
+        "com-item-recurring",
+        "com-item-optional",
+        "com-global-discount",
+        "com-proposal-total",
+        "data-cents",
+        "com-proposal-monthly",
+        "com-approval-warning",
+        "com-field-error",
+        "data-path",
+        "com-proposal-save",
+        "com-proposal-detail",
+        "com-proposal-status",
+        "data-status",
+        "com-proposal-send",
+        "com-send-confirm",
+        "com-public-link",
+        "data-url",
+        "com-copy-link",
+        "com-new-version",
+        "com-approve",
+        "com-reject-approval",
+        "com-views",
+        "com-timeline",
+        "prop-page",
+        "prop-status",
+        "data-code",
+        "prop-total",
+        "prop-optional",
+        "data-id",
+        "prop-accept",
+        "prop-accept-name",
+        "prop-accept-document",
+        "prop-accept-agree",
+        "prop-accept-confirm",
+        "prop-field-error",
+        "prop-accepted",
+        "prop-reject",
+        "com-template-row",
+        "data-kind",
+        "com-template-new",
+        "com-template-editor",
+        "com-template-variable",
+        "com-template-preview",
+        "com-template-error",
+        "com-contract-row",
+        "com-contract-new",
+        "com-contract-form",
+        "com-contract-term",
+        "com-contract-detail",
+        "com-contract-send-signature",
+        "com-contract-renew",
+        "com-contract-readjust",
+        "com-envelope-detail",
+        "com-signer-row",
+        "data-order",
+        "com-signer-copy-link",
+        "com-envelope-remind",
+        "com-envelope-cancel",
+        "com-verification-code",
+        "sign-page",
+        "sign-document",
+        "sign-status",
+        "sign-waiting",
+        "sign-start",
+        "sign-send-code",
+        "sign-code",
+        "sign-name",
+        "sign-document-number",
+        "sign-agree",
+        "sign-confirm",
+        "sign-error",
+        "sign-done",
+        "sign-refuse",
+        "verify-page",
+        "verify-code-input",
+        "verify-file",
+        "verify-result",
+        "data-valid",
+        "verify-signer"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/com/me"
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/com/settings"
+        },
+        {
+          "method": "put",
+          "path": "/v1/com/roles/{userId}",
+          "body": [
+            "role"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/templates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/templates",
+          "body": [
+            "kind",
+            "name",
+            "bodyHtml"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/templates/variables"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/templates/{id}/preview"
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/proposals"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals",
+          "body": [
+            "title",
+            "client",
+            "items",
+            "globalDiscountPct",
+            "paymentPlan"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/proposals/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/com/proposals/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/approval",
+          "body": [
+            "decision",
+            "comment"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/send"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/new-version"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/expire"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/validity",
+          "body": [
+            "validUntil"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/proposals/{id}/cancel"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/com/proposals/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/proposals/{token}/accept",
+          "body": [
+            "name",
+            "document",
+            "agree",
+            "selectedOptionalIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/proposals/{token}/reject",
+          "body": [
+            "reason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/contracts"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts",
+          "body": [
+            "title",
+            "parties",
+            "valueCents",
+            "recurrence",
+            "startDate",
+            "months",
+            "existing",
+            "proposalId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/contracts/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/com/contracts/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts/{id}/renew"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts/{id}/readjust",
+          "body": [
+            "pct"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts/{id}/send-for-signature",
+          "body": [
+            "signers"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/envelopes/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/envelopes/{id}/cancel"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/com/sign/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/sign/{token}/code"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/sign/{token}/sign",
+          "body": [
+            "code",
+            "name",
+            "document",
+            "agree"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/sign/{token}/refuse",
+          "body": [
+            "reason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/com/verify/{code}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/com/verify",
+          "body": [
+            "sha256"
           ]
         }
       ]

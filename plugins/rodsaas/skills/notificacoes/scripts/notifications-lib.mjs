@@ -157,6 +157,20 @@ export const PRESET_TYPES = [
   { type: "fin.import.done", appId: "financeiro", label: "Extrato importado", template: "Extrato de {title} importado: {data.fresh} novas transações, {data.pending} para conciliar", group: { by: "none" } },
   { type: "fin.stripe.account", appId: "financeiro", label: "Conta Stripe", template: "A conta Stripe da empresa {data.status}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "fin.subscription.past_due", appId: "financeiro", label: "Assinatura de cliente atrasada", template: "A assinatura {title} de {data.customer} não foi paga", group: { by: "none" } },
+  // comercial
+  { type: "com.approval.requested", appId: "comercial", label: "Desconto para aprovar", template: { one: "{actor} pediu aprovação de {data.discount} de desconto em {title} ({data.amount})", many: "{count} propostas aguardando a sua aprovação" }, group: { by: "key", windowMinutes: 10 }, defaultEmail: "IMMEDIATE" },
+  { type: "com.approval.decided", appId: "comercial", label: "Desconto aprovado ou recusado", template: "{actor} {data.verb} o desconto de {title}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "com.proposal.viewed", appId: "comercial", label: "Cliente abriu a proposta", template: "{data.client} abriu a proposta {title}", group: { by: "none" } },
+  { type: "com.proposal.commented", appId: "comercial", label: "Dúvida do cliente", template: { one: "{data.client} perguntou na proposta {title}", many: "{count} mensagens do cliente em {title}" }, group: { by: "entity", windowMinutes: 10 }, defaultEmail: "IMMEDIATE" },
+  { type: "com.proposal.accepted", appId: "comercial", label: "Proposta aceita", template: "{data.client} aceitou a proposta {title} ({data.amount})", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "com.proposal.rejected", appId: "comercial", label: "Proposta recusada", template: "{data.client} recusou a proposta {title}: {data.reason}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "com.proposal.expiring", appId: "comercial", label: "Proposta vencendo", template: { one: "A proposta {title} vence {data.when} sem resposta", many: "{count} propostas vencendo sem resposta" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "com.envelope.completed", appId: "comercial", label: "Documento assinado por todos", template: "{title} foi assinado por todos", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "com.envelope.refused", appId: "comercial", label: "Assinatura recusada", template: "{data.signer} recusou assinar {title}: {data.reason}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "com.envelope.expired", appId: "comercial", label: "Prazo de assinatura terminou", template: "O prazo para assinar {title} terminou sem todas as assinaturas", group: { by: "none" } },
+  { type: "com.contract.expiring", appId: "comercial", label: "Contrato vencendo", template: { one: "O contrato {title} {data.what} em {data.when}", many: "{count} contratos entrando no aviso prévio" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "com.contract.renewed", appId: "comercial", label: "Contrato renovado", template: "O contrato {title} foi renovado até {data.until}", group: { by: "none" } },
+  { type: "com.integration.failed", appId: "comercial", label: "Integração com problema", template: "Não deu para {data.action} da proposta {title}: tente de novo", group: { by: "none" } },
 ].map(defineType);
 
 /** Catálogo ativo: tipos base + os dos apps instalados (+ add-ons exigidos). */

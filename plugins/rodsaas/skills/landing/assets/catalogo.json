@@ -89,7 +89,7 @@
    "pricePerUser": 69,
    "minUsers": 3,
    "label": "Completo",
-   "includes": "todos os apps disponíveis, menos os de uso (WhatsApp, Assinatura, E-mail marketing)"
+   "includes": "todos os apps disponíveis, menos os de uso (WhatsApp, E-mail marketing); pacotes extras de envelopes de assinatura à parte"
   },
   "suites": {
    "rh": {
@@ -154,7 +154,7 @@
     "agenda",
     "helpdesk",
     "whatsapp",
-    "propostas"
+    "comercial"
    ],
    "shots": [
     {
@@ -761,7 +761,8 @@
     "crm",
     "agenda",
     "pessoas",
-    "estoque"
+    "estoque",
+    "comercial"
    ],
    "shots": [
     {
@@ -927,50 +928,106 @@
    ]
   },
   {
-   "id": "contratos",
-   "slug": "contratos",
-   "name": "Contratos",
-   "preset": "contratos",
-   "category": "financeiro",
+   "id": "comercial",
+   "slug": "comercial",
+   "name": "Comercial",
+   "preset": "comercial",
+   "category": "vendas",
    "icon": "FileSignature",
    "phase": 3,
-   "tagline": "Todo contrato com vencimento à vista e renovação no prazo.",
-   "description": "Contratos com partes, valores, vigência e anexos, com alertas antes de vencer ou renovar.",
+   "tagline": "Da proposta ao contrato assinado: aceite online, contratos e assinatura eletrônica.",
+   "description": "Propostas com descontos, opcionais e parcelas num link com a sua marca e aceite online; contratos com vigência, renovação e reajuste; assinatura eletrônica com ordem, código por e-mail e PDF verificável.",
    "benefits": [
     {
-     "title": "Nada vence sem aviso",
-     "text": "Alertas antes do fim e da renovação."
+     "title": "Proposta em minutos",
+     "text": "Itens, descontos e parcelas calculados na hora, com o desconto acima do limite indo para aprovação."
     },
     {
-     "title": "Tudo achável",
-     "text": "Busca por parte, valor e status."
+     "title": "Sabe quando o cliente abriu",
+     "text": "Aviso na primeira visualização, tempo de leitura e aceite online que guarda exatamente o que foi aceito."
     },
     {
-     "title": "Histórico",
-     "text": "Aditivos e versões no mesmo lugar."
+     "title": "Assinado sem impressora",
+     "text": "Contrato pelo seu modelo, assinatura pelo celular com código por e-mail e PDF com folha de assinaturas."
     }
    ],
    "features": [
-    "Cadastro com vigência e valores",
-    "Alertas de vencimento",
-    "Anexos e aditivos",
-    "Partes e responsáveis",
-    "Busca e filtros",
-    "Assinatura eletrônica"
+    "Propostas com itens, descontos, opcionais e recorrentes",
+    "Plano de pagamento à vista, parcelado ou com entrada",
+    "Aprovação de desconto acima do limite",
+    "Link com a sua marca, aviso de abertura e aceite online",
+    "Modelos com variáveis e valor por extenso",
+    "Contratos com vigência, aviso prévio, renovação e reajuste",
+    "Assinatura eletrônica com ordem, testemunhas e código por e-mail",
+    "PDF final com manifesto e verificação pública",
+    "Aceite ganha o negócio no CRM e gera as contas a receber"
    ],
-   "replaces": "pasta de contratos e lembrete no calendário",
+   "replaces": "proposta em Word por e-mail, pasta de contratos, imprimir, assinar e escanear",
    "pricing": {
-    "unit": "empresa",
-    "price": 29
+    "unit": "vendedor",
+    "price": 29,
+    "note": "inclui 50 envelopes de assinatura por mês; pacotes extras"
    },
    "integrations": [
-    "assinatura",
     "crm",
+    "financeiro",
     "pessoas"
    ],
-   "shots": [],
-   "video": null,
-   "faq": []
+   "shots": [
+    {
+     "id": "comercial-inicio",
+     "path": "/comercial",
+     "waitFor": "com-home",
+     "caption": "Funil do mês, aprovações, assinaturas e contratos vencendo"
+    },
+    {
+     "id": "comercial-propostas",
+     "path": "/comercial/propostas",
+     "waitFor": "com-proposal-row",
+     "caption": "Propostas com situação, validade e aviso de abertura"
+    },
+    {
+     "id": "comercial-contratos",
+     "path": "/comercial/contratos",
+     "waitFor": "com-contract-row",
+     "caption": "Contratos por situação, com vencimento e renovação"
+    }
+   ],
+   "video": {
+    "id": "comercial-demo",
+    "path": "/comercial/propostas",
+    "steps": [
+     {
+      "waitFor": "com-proposal-row"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "click": "com-proposal-new"
+     },
+     {
+      "waitFor": "com-proposal-form"
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "A assinatura tem validade jurídica?",
+     "a": "Sim, é assinatura eletrônica válida entre as partes (MP 2.200-2/2001), com código por e-mail, CPF/CNPJ, IP, horário e o hash do documento no manifesto. Para atos que a lei exige certificado ICP-Brasil, use um certificado digital."
+    },
+    {
+     "q": "Posso mandar o link pelo WhatsApp?",
+     "a": "Pode copiar o link da proposta ou de cada signatário. O código para assinar continua indo só para o e-mail da pessoa."
+    },
+    {
+     "q": "Funciona com os contratos que já tenho?",
+     "a": "Sim: cadastre os contratos antigos com o PDF (um a um ou por planilha) para receber os avisos de vencimento e renovação."
+    }
+   ]
   },
   {
    "id": "ativos",
@@ -1291,52 +1348,6 @@
    "faq": []
   },
   {
-   "id": "propostas",
-   "slug": "propostas",
-   "name": "Propostas",
-   "preset": "propostas",
-   "category": "vendas",
-   "icon": "FileCheck",
-   "phase": 4,
-   "tagline": "Proposta bonita em minutos, com aceite online.",
-   "description": "Propostas a partir de modelos, com produtos do CRM, link para o cliente aceitar e aviso quando ele abre.",
-   "benefits": [
-    {
-     "title": "Rápido",
-     "text": "Modelo + produtos do negócio = proposta pronta."
-    },
-    {
-     "title": "Profissional",
-     "text": "Página com a sua marca."
-    },
-    {
-     "title": "Fecha mais",
-     "text": "Aceite online e aviso quando o cliente abre."
-    }
-   ],
-   "features": [
-    "Modelos",
-    "Produtos do CRM",
-    "Link de aceite",
-    "Aviso de abertura",
-    "Validade",
-    "Assinatura eletrônica"
-   ],
-   "replaces": "proposta em Word por e-mail",
-   "pricing": {
-    "unit": "vendedor",
-    "price": 19
-   },
-   "integrations": [
-    "crm",
-    "assinatura",
-    "financeiro"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
    "id": "roadmap",
    "slug": "roadmap",
    "name": "Roadmap",
@@ -1646,51 +1657,6 @@
    "integrations": [
     "tarefas",
     "paginas"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "assinatura",
-   "slug": "assinatura",
-   "name": "Assinatura",
-   "preset": "assinatura",
-   "category": "financeiro",
-   "icon": "Signature",
-   "phase": 5,
-   "tagline": "Documentos assinados online, com validade jurídica e trilha de auditoria.",
-   "description": "Envio de documentos para assinatura eletrônica, com ordem de assinantes, lembretes e certificado.",
-   "benefits": [
-    {
-     "title": "Sem impressora",
-     "text": "Assina pelo celular."
-    },
-    {
-     "title": "Seguro",
-     "text": "Trilha de auditoria e certificado."
-    },
-    {
-     "title": "Rápido",
-     "text": "Lembretes até todos assinarem."
-    }
-   ],
-   "features": [
-    "Assinatura eletrônica",
-    "Ordem de assinantes",
-    "Lembretes",
-    "Trilha de auditoria",
-    "Modelos",
-    "Ligação com Contratos e Propostas"
-   ],
-   "replaces": "imprimir, assinar e escanear",
-   "pricing": {
-    "unit": "uso",
-    "note": "pacotes de documentos"
-   },
-   "integrations": [
-    "contratos",
-    "propostas"
    ],
    "shots": [],
    "video": null,
