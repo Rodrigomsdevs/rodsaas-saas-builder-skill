@@ -24,6 +24,9 @@ O boot falha se `validateCatalog(getCatalog())` tiver erro. App novo (`/rodsaas:
 |---|---|---|---|
 | `org.member_joined` | owners e admins | por empresa, 60 min (até 24 h) | resumo |
 | `org.role_changed` | o membro | não | imediato |
+| `org.access_requested` | quem pode aprovar (owners; admins quando cabe nos assentos) | por empresa, 10 min | imediato |
+| `org.access_decided` | quem pediu (ou ganhou o acesso pelo pedido do convite) | não | imediato |
+| `org.access_issue` | quem convidou (ou fez o ajuste) | não | imediato |
 | `billing.payment_failed` | owners | não | imediato, **obrigatório** |
 | `billing.trial_ending` | owners | não | imediato |
 | `files.quota_warning` (com `uploads`) | owners e admins | não | imediato |

@@ -48,6 +48,7 @@ loginAs(user, orgId?) // devolve os cookies para usar no app.inject
 - mudar papel incrementa `tokenVersion` e o token antigo recebe 401 `TOKEN_EXPIRED` em rota com `roles`; membro removido também é barrado nessas rotas
 - convite: criar, aceitar (usuário novo e usuário existente), expirado, revogado, e-mail diferente do convidado
 - convite conta no limite de membros
+- acessos da pessoa (`10-acessos-por-pessoa.md`): convite com acessos aplicado no aceite; o que quem convida não pode dar vira pedido no aceite; falha de um app não impede a entrada (pedido `APPLY_FAILED`); ajuste por pessoa; pedido sem duplicar; `member-access-lib` portado com os testes
 
 ### Billing
 - modo: sem chave em dev → `fake`; sem chave em produção → `disabled` (503 `BILLING_NOT_CONFIGURED`); `BILLING_MODE=fake` + produção → boot falha

@@ -109,7 +109,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | | | |
 |:-:|---|---|
 | 🔐 | **Contas e login** | Cadastro, login, "esqueci a senha", confirmação de e-mail e sessão segura |
-| 🏢 | **Várias empresas** | Cada cliente tem a sua conta, com equipe, convites e papéis (dono, admin, membro) |
+| 🏢 | **Várias empresas** | Cada cliente tem a sua conta, com equipe, convites e papéis (dono, admin, membro). **No convite já se escolhe o que a pessoa vai usar** (apps e o papel em cada um: atendente, vendedor, financeiro…): ela entra usando; o que quem convida não pode dar vira pedido ao dono, aprovado com um clique |
 | 💳 | **Planos e Stripe** | Assinar, trocar de plano (com o valor proporcional), cancelar e retomar **dentro do app**, limites por plano. Sem Stripe configurada, funciona em **modo de teste**; com Stripe, um comando (`billing:sync`) cria produtos, preços e portal |
 | 🧭 | **Trilho de apps** | Cada módulo (Páginas, Tarefas, CRM…) é um app: o menu mostra só o app em que você está, recolhe com `[`, abre flutuando com o mouse por cima, tem "Todos os apps" com busca e ⭐ para fixar, e barra de apps no celular. [Veja o simulador](plugins/rodsaas/skills/frontend/assets/simulador-navegacao.html) |
 | 🎨 | **Painel com a sua marca** | Você escolhe cor, logo e estilo, vê uma prévia e aprova antes de gerar as telas |
@@ -120,7 +120,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações, +2 do e-mail com Resend, +7 da workstation, +10 do RH, +11 do Financeiro e +11 do Comercial, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 58 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites com os acessos de cada app, pedidos de acesso, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações, +2 do e-mail com Resend, +7 da workstation, +10 do RH, +11 do Financeiro e +11 do Comercial, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |
@@ -256,7 +256,7 @@ claude plugin marketplace update rodsaas
 
 ```
 plugins/rodsaas/skills/
-├── backend/    SKILL.md + references/       → API em 8 fases
+├── backend/    SKILL.md + references/ + scripts/member-access-lib.mjs (+ testes) → API em 8 fases, acessos da pessoa
 ├── db/         SKILL.md + scripts/          → provision.sh
 ├── frontend/   SKILL.md + references/ + scripts/brand.mjs + assets/simulador-navegacao.html
 ├── apps/       SKILL.md                     → migra projetos antigos para o trilho de apps

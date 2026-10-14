@@ -125,6 +125,20 @@ Com a `/rodsaas:workstation` (`billing.model: "apps"`):
 - **Acesso**: quem tem `Employee` ligado ao usuário, ou papel do app, tem acesso ao Pessoas automaticamente (não precisa de `AppAccess`; o guard de app consulta `hasPessoasAccess`). Sem a suíte (estado `locked`), o app fica só leitura como os outros: cada um ainda vê os próprios holerites e documentos (GET), nada novo é criado.
 - `registerAppRoutes('pessoas', ['/v1/rh'])` e `registerAppActivation('pessoas', seedRh)` (conteúdo inicial, `02-modelo.md`).
 
+## Acessos no convite (`registerMemberAccess('pessoas', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `role` | select "Papel no RH" (`none`, `RH_ADMIN`, `RH`, `FINANCE`) | `none` | `RhRole` |
+| `employee` | select "Colaborador" (`none` · `link` = ligar a uma ficha sem login · `admission` = iniciar a pré-admissão) | `none` | `link`: `Employee.userId` = a pessoa; `admission`: cria a admissão `INVITED` com o e-mail do convite (a pessoa preenche CPF e documentos pelo link) |
+| `employeeId` | select "Ficha" (`source`: fichas ativas sem login; só com `employee = link`) | — (obrigatório no `link`) | — |
+
+- `canGrant`: `role` só por `RH_ADMIN` ou owner (o admin da empresa não dá papel no RH só por ser admin); `employee` por quem tem papel `RH_ADMIN`/`RH`. Não pode → vira pedido.
+- `countsSeat`: não no convite (a Suíte RH conta colaboradores ativos; a ficha nova só conta quando a admissão é efetivada).
+- **Um caminho só**: "Convidar para o autoatendimento" (`POST /v1/rh/employees` com `invite: true` e `POST /v1/rh/employees/:id/invite`) usa o mesmo serviço de convite da base com `access.pessoas = { employee: "link", employeeId }` e abre a mesma seção "O que essa pessoa vai usar" para escolher os outros apps.
+
 ## Avisos
 
 Os tipos estão no catálogo do add-on `notificacoes` (`skills/notificacoes/references/04-catalogo.md`, seção "Pessoas"; frases em `notifications-lib` → `PRESET_TYPES` com `appId: "pessoas"`). O preset registra com `registerNotificationTypes("pessoas", ...)` e chama `notify()` nos eventos daquela tabela. Nunca coloque salário, CID, motivo de atestado ou nota de avaliação no texto do aviso nem no e-mail.
@@ -137,3 +151,4 @@ E-mails para quem ainda **não é membro** (convite da pré-admissão, lembrete 
 - `/v1/me.rh` correto para colaborador, gestor, RH e owner.
 - Planos: 11º colaborador no Free → 403 `PLAN_LIMIT_REACHED`; feature Pro desligada → 403 `FEATURE_NOT_IN_PLAN` (formato da base).
 - Workstation (se instalada): colaborador acima do comprado → 409 `CONFIRM_REQUIRED`; suíte bloqueada → GET 200, POST 403 `APP_NOT_ACTIVE`.
+- Convite com `pessoas: { employee: "link", employeeId }` liga a ficha no aceite; admin da empresa pedindo `role: RH_ADMIN` vira pedido ao owner.

@@ -66,6 +66,8 @@ Confira item por item antes do relatório. Para os itens de interface, **abra a 
 - [ ] cadastro → início com primeiros passos
 - [ ] entrar / sair / esqueci a senha (e-mail capturado no Mailpit em dev)
 - [ ] convidar membro → aceitar convite com conta nova
+- [ ] convidar marcando apps e opções ("O que essa pessoa vai usar") → a pessoa entra usando; o que não dá para dar aparece como nota e vira pedido; owner confirma o valor quando muda
+- [ ] tela "Acessos da pessoa" ajusta apps e papéis; aba "Pedidos de acesso" aprova e recusa
 - [ ] criar, editar, arquivar e excluir projeto
 - [ ] atingir o limite de projetos do plano Free → `UpgradeDialog`
 - [ ] membro comum não vê ações de admin; owner vê "Plano e cobrança"

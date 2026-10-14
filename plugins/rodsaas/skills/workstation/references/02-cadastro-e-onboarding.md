@@ -47,7 +47,7 @@ Passos (cada um numa tela, com voltar e o progresso no topo):
 1. grava segmento e tamanho no `WorkstationProfile`;
 2. **liga os apps escolhidos**: tira de `disabledApps`; os outros disponíveis entram em `disabledApps` (podem ser ligados depois pela loja); `activateApp()` de cada um (abaixo); acesso padrão (`defaultAccess`: no teste, todos os membros);
 3. fixa os escolhidos no trilho do owner (`pinnedApps`);
-4. cria os convites (fluxo da base, com e-mail), respeitando o limite de pessoas do modelo;
+4. cria os convites pelo serviço da base (`createInvitation`, com `access` = os apps escolhidos, sem papéis de dentro dos apps), respeitando o limite de pessoas do modelo;
 5. `onboardingCompletedAt = agora`;
 6. responde `{ redirectTo: "<home do primeiro app>", apps: [...], invited: n }`.
 

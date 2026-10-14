@@ -59,6 +59,17 @@ Reutilize se existirem, crie aqui se não: `Kanban` (colunas + arrastar, usado p
 ### 7. Backend
 Plugins de rota próprios registrados no `app.ts`; contadores em `lib/usage.ts`; features/limites em `config/plans.ts`; códigos de erro no catálogo; avisos pelo `notify()` do add-on `notificacoes` (`modules/notifications/`), com os tipos registrados no boot do módulo de tarefas.
 
+## Acessos no convite (`registerMemberAccess('tarefas', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `privateProjectIds` | multiselect "Projetos privados" (`source`: projetos `PRIVATE`; só aparece com a feature `private_projects`) | vazio | `TaskProjectMember` em cada projeto |
+
+- `canGrant`: OWNER, ADMIN ou o membro que já participa do projeto (só para aquele projeto). Projetos públicos não precisam de nada.
+- `countsSeat`: sim.
+
 ## Planos
 
 Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe):

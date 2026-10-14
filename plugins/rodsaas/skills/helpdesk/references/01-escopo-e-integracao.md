@@ -61,6 +61,19 @@ O portal (`/ajuda/...`), o chamado do cliente (`/chamado/[token]`) e o widget fi
 
 Owner e admin sempre podem administrar o app, mesmo sem ser atendentes (contam no limite só se forem atendentes). Chamado que a pessoa não pode ver responde **404**.
 
+## Acessos no convite (`registerMemberAccess('helpdesk', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `isAgent` | boolean "É atendente" | sim | `HelpdeskAgent` ativo (sem ele o app fica escondido e as rotas respondem 403 `NOT_AN_AGENT`) |
+| `queueIds` | multiselect "Filas" (`source`: filas da empresa; só com `isAgent`) | vazio = a fila padrão | entra nas filas escolhidas |
+
+- `canGrant`: OWNER e ADMIN. `validate`: limite `helpdeskAgents` do plano (passou → erro no campo; no aceite vira pedido `APPLY_FAILED` com o motivo).
+- `countsSeat`: sim (o app é cobrado por pessoa com acesso; atendente sem `AppAccess` não faz sentido).
+- A tela **Configurações → Filas e atendentes** continua existindo e mostra o mesmo dado; "Pedir para ser atendente" na tela "Você não é atendente" cria o pedido da base com `isAgent: true`.
+
 ## Planos
 
 Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe):

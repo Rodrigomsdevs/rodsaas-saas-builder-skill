@@ -1,5 +1,5 @@
 {
-  "version": 15,
+  "version": 16,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -11,6 +11,7 @@
     "/sem-empresa",
     "/configuracoes/empresa",
     "/configuracoes/membros",
+    "/configuracoes/membros/[id]",
     "/configuracoes/plano",
     "/perfil",
     "/configuracoes/apps"
@@ -107,6 +108,18 @@
       "app-tabbar",
       "app-tabbar-item",
       "app-toggle"
+    ],
+    "acessos": [
+      "invite-access",
+      "invite-access-app",
+      "invite-access-field",
+      "invite-access-note",
+      "invite-access-total",
+      "member-access-open",
+      "member-access-save",
+      "access-request-row",
+      "access-request-approve",
+      "access-request-decline"
     ]
   },
   "optionalTestids": {
@@ -236,7 +249,9 @@
       "path": "/v1/invitations",
       "body": [
         "email",
-        "role"
+        "role",
+        "access",
+        "confirm"
       ]
     },
     {
@@ -278,6 +293,58 @@
     {
       "method": "post",
       "path": "/v1/billing/portal-sessions"
+    },
+    {
+      "method": "get",
+      "path": "/v1/access/options"
+    },
+    {
+      "method": "post",
+      "path": "/v1/invitations/check",
+      "body": [
+        "role",
+        "access"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/members/{id}/access"
+    },
+    {
+      "method": "put",
+      "path": "/v1/members/{id}/access",
+      "body": [
+        "access",
+        "confirm"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/v1/access/requests"
+    },
+    {
+      "method": "post",
+      "path": "/v1/access/requests",
+      "body": [
+        "appId",
+        "options",
+        "message"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/access/requests/{id}/approve",
+      "body": [
+        "options",
+        "confirm"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/v1/access/requests/{id}/decline",
+      "body": [
+        "reason"
+      ]
     }
   ],
   "presets": {

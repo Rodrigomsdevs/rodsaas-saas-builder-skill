@@ -69,6 +69,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | promover a admin | select do papel sem salvar; front com papel em cache (não relê `me`) |
 | remover corta o acesso | `/v1/me` devolvendo a organização do token; front sem ir para `/sem-empresa` quando `organization` é `null` |
 
+## Acessos da pessoa (`23-acessos.spec.ts`, base: `skills/backend/references/10-acessos-por-pessoa.md`)
+
+| Teste | Causas comuns |
+|---|---|
+| opções e validação | `GET /v1/access/options` ausente (projeto anterior aos acessos: rode o backend/frontend em modo revisão); campos sem tipo `boolean`/`select`/`multiselect`; convite aceitando app ou papel inexistente |
+| convite do owner | convite guardando os acessos mas o aceite não aplicando (a pessoa entra sem nada); um app esquecido no aceite; papel de dentro do app (atendente, Financeiro, Comercial) não aplicado; tela da pessoa lendo uma cópia em vez do app |
+| ajuste por pessoa | desmarcar não revoga; membro ajustando os próprios acessos |
+| admin sem poder dar | admin da empresa dando papel que não dá dentro do app; pedido não criado no aceite (ou sem a origem `INVITE`); admin aprovando o próprio pedido; aprovar não aplica |
+| pedido da pessoa | dois pedidos abertos iguais; pedir o que já tem; membro listando os pedidos de todos; recusa que deixa o pedido aberto; aprovar duas vezes |
+| workstation | assento ignorado (admin passa do comprado); owner convidando sem confirmar o valor; convite pendente que não reserva assento ou que reserva o próprio no aceite; assento que não sobe no aceite; aprovação sem confirmar o valor |
+| tela | convite sem a seção "O que essa pessoa vai usar"; seção desenhada mas não enviada; sem o link "Acessos" na linha do membro; desmarcar na tela da pessoa sem mandar `null` |
+
 ## Módulo de exemplo (`05-module.spec.ts`)
 
 | Teste | Causas comuns |

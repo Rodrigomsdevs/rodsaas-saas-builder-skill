@@ -23,11 +23,13 @@
 - [ ] presets sem mudança nos guards (features/limites calculados)
 - [ ] jobs de app bloqueado não mandam nada para fora; `notify()` ignora app bloqueado
 - [ ] `me.workstation` completo
+- [ ] política de concessão: com assento livre vale para owner e admin; sem assento o owner confirma o valor e o admin gera pedido no aceite; convites pendentes reservam assento; cobrança só no aceite; papéis de dentro dos apps nunca automáticos (nem no Completo)
 
 ## Telas
 - [ ] cadastro com o quadro da landing; onboarding; banner do teste e de cobrança
 - [ ] loja (Todos os apps + Configurações → Apps) com estados e ações
 - [ ] pessoas com acesso com o efeito no valor
+- [ ] convite e acessos da pessoa com a nota de assento e o total por app; "Pedir acesso" cria o pedido sem duplicar
 - [ ] Assinatura com calculadora igual à da landing, prévia, cancelar/retomar; `/configuracoes/plano` redireciona
 - [ ] app bloqueado e sem acesso com a faixa e o CTA certo
 - [ ] todos os testids do "Contrato testável" do `05`; celular

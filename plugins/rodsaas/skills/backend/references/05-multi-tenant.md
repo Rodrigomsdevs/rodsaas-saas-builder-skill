@@ -75,6 +75,10 @@ model Invitation {
   expiresAt      DateTime                 // 7 dias
   acceptedAt     DateTime?
   revokedAt      DateTime?
+  access         Json?                    // acessos que valem no aceite (10-acessos-por-pessoa.md)
+  requests       Json?                    // o que quem convidou não podia dar: vira AccessRequest no aceite
+  confirmedById  String?   @db.Uuid       // owner que confirmou o novo valor (workstation)
+  confirmedAt    DateTime?
   createdAt      DateTime  @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   @@index([organizationId])
@@ -212,11 +216,15 @@ Rotas (todas de tenant):
 | `DELETE /v1/members/:id` | owner, admin | remove; como a membership deixa de existir, o `authorize` já barra o token antigo em rotas com `roles` |
 | `POST /v1/members/leave` | todos | sai da organização (último owner não pode) |
 | `GET /v1/invitations` | owner, admin | lista convites pendentes |
-| `POST /v1/invitations` | owner, admin · `limit: 'members'` · idempotente | convida `{ email, role }` (role ≠ OWNER); 409 se já é membro ou já tem convite pendente |
+| `POST /v1/invitations` | owner, admin · `limit: 'members'` · idempotente | convida `{ email, role, access?, confirm? }` (role ≠ OWNER); 409 se já é membro ou já tem convite pendente; `access` = o que a pessoa vai usar (`10-acessos-por-pessoa.md`) |
+| `POST /v1/invitations/check` · `GET /v1/access/options` | owner, admin | prévia do convite com acessos e os campos de cada app (`10-acessos-por-pessoa.md`) |
+| `GET/PUT /v1/members/:id/access` · `/v1/access/requests…` | ver `10-acessos-por-pessoa.md` | acessos da pessoa e pedidos de acesso |
 | `POST /v1/invitations/:id/resend` | owner, admin | gera novo token, renova validade, reenvia |
 | `DELETE /v1/invitations/:id` | owner, admin | revoga |
 | `GET /v1/invitations/preview?token=` | público | nome da organização e e-mail convidado (para a tela de aceite) |
 | `POST /v1/invitations/accept` | autenticado · `tenant: false` | `{ token }`; exige que o e-mail do usuário logado seja o do convite; cria a membership e troca a organização ativa |
+
+O aceite (pelos dois caminhos) aplica os acessos do convite app por app e cria os pedidos do que ficou pendente, na ordem de `10-acessos-por-pessoa.md` ("Aceite do convite").
 
 Quem ainda não tem conta: o front mostra cadastro com o e-mail do convite pré-preenchido e, logo após o `register`, chama `accept`. Nesse caso, o `register` aceita `{ invitationToken }` opcional e **não** cria organização própria: entra direto na organização do convite.
 

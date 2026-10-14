@@ -55,6 +55,18 @@ As páginas públicas (`/agendar/...`, `/agendamento/[token]`) ficam fora do gru
 
 Agendamento que a pessoa não pode ver responde **404**.
 
+## Acessos no convite (`registerMemberAccess('agenda', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `isHost` | boolean "Atende clientes" | não | cria a disponibilidade da pessoa (`AgendaSchedule` com o horário padrão da empresa) |
+| `eventTypeIds` | multiselect "Tipos de atendimento" (`source`: tipos ativos; só com `isHost`) | vazio | entra como anfitrião (`AgendaEventTypeHost`) nos tipos escolhidos |
+
+- `canGrant`: OWNER e ADMIN. `validate`: limite `agendaHosts` (pessoas que atendem em algum tipo ativo).
+- `countsSeat`: sim. Quem só vê a agenda da equipe usa o app sem `isHost`.
+
 ## Planos
 
 Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe):

@@ -70,6 +70,17 @@ Limite atingido → 403 `PLAN_LIMIT_REACHED` no enviar (rascunhos continuam livr
 - Rotas públicas (`/v1/public/com/...`) fora do guard: link de proposta e de assinatura continuam funcionando com o app bloqueado (só leitura do lado de dentro; nada novo é enviado).
 - `registerAppRoutes('comercial', ['/v1/com'])`, `registerAppActivation('comercial', seedComercial)`.
 
+## Acessos no convite (`registerMemberAccess('comercial', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `role` | select "Papel no Comercial" (`COM_ADMIN`, `SELLER`, `VIEWER`) | `SELLER` | `ComRole` |
+
+- `canGrant`: `COM_ADMIN` ou owner; o admin da empresa dá `SELLER`/`VIEWER`, e `COM_ADMIN` só se for `COM_ADMIN`.
+- `countsSeat`: `SELLER` e `COM_ADMIN` (vendedor); `VIEWER` não. Sem assento livre, o admin gera pedido e o owner aprova com o valor.
+
 ## Integrações
 
 | App | Integração |
@@ -89,3 +100,4 @@ Tipos no catálogo do add-on `notificacoes` (`skills/notificacoes/references/04-
 - Sem papel → 403 `NOT_COM_MEMBER` (com a workstation, o guard de app pode responder `APP_ACCESS_DENIED`); `VIEWER` lê e não escreve; vendedor não vê a proposta de outro (404) nem aprova.
 - Free: 11ª proposta enviada no mês → 403 `PLAN_LIMIT_REACHED`; enviar para assinatura sem `com_signatures` → 403 `FEATURE_NOT_IN_PLAN`.
 - Integrações (com CRM e Financeiro instalados): aceite ganha o negócio e cria as contas a receber com os valores do plano.
+- Convite com `comercial: { role: "SELLER" }` → a pessoa entra como vendedora; tirar pelo ajuste da pessoa → 403 no app.

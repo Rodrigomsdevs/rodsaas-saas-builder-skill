@@ -28,13 +28,14 @@ Migration de dados (idempotente, com relatório):
 
 - Cada preset registra: `registerAppRoutes(appId, prefixos)`, `registerAppActivation(appId, gancho)` e as features/limites dele já entram pelo `featureMap` (prefixos de `FEATURE_PREFIXES`; preset novo com feature de outro nome → acrescente o prefixo).
 - **Unidade que não é "pessoa com acesso"**: o preset registra `registerSeatCounter(appId, (tx, orgId) => número)` e a quantidade comprada do item é comparada com esse contador em vez do `AppAccess` (mesmo `CONFIRM_REQUIRED` quando passa). Hoje: Suíte RH (`/rodsaas:rh`) conta **colaboradores ativos** (`countBillableEmployees`) e o acesso ao app Pessoas vem de ser colaborador (`hasPessoasAccess`), sem `AppAccess`. O Financeiro (`/rodsaas:financeiro`, cobrado por empresa) também não usa `AppAccess`: o acesso vem do papel do app (`hasFinanceiroAccess`), e o webhook das cobranças fica fora do guard. O Comercial (`/rodsaas:comercial`, cobrado por vendedor) conta quem tem papel `SELLER` ou `COM_ADMIN` (`countComSellers`), com o acesso pelo papel (`hasComercialAccess`); as páginas públicas de proposta, assinatura e verificação ficam fora do guard.
+- **Acessos da pessoa**: cada preset também registra `registerMemberAccess` (o que dá para escolher para uma pessoa no convite; `skills/backend/references/10-acessos-por-pessoa.md`) com `countsSeat` quando o valor ocupa assento; a workstation registra a política de concessão (`04-acesso-e-direitos.md`).
 - Jobs que mandam algo para fora (lembretes da Agenda, avisos do Suporte, webhooks do Forms) conferem `isAppActive(orgId, appId)`.
 - **Módulos do `/rodsaas:module`** (Cadastros): incluídos em qualquer modelo, sem cobrança própria (vivem no app Cadastros). Se o usuário quiser vender um módulo como app, ele vira entrada nova no catálogo com preço e o módulo registra o `appId` dele.
 - Preset futuro (Fase 3+): já está no catálogo como "em breve"; ao instalar, aparece na loja e na landing como disponível.
 
 ## Notificações
 
-- Tipos novos no catálogo de notificações: `workstation.access_requested` (owners), e os da base `billing.trial_ending`, `billing.payment_failed` passam a ser disparados pela workstation.
+- Pedidos de acesso usam os tipos da base `org.access_requested`, `org.access_decided` e `org.access_issue`; e os da base `billing.trial_ending`, `billing.payment_failed` passam a ser disparados pela workstation.
 - `notify()` não cria aviso de app `locked`.
 
 ## Verify

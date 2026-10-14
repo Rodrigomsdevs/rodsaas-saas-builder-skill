@@ -90,8 +90,8 @@ Cadastro (cria usuário + organização + membership owner), login, refresh com 
 → Leia `references/04-auth.md`.
 
 ### Fase 4 — Organizações, membros e convites
-CRUD da organização, listagem/alteração de papel/remoção de membros, convites por e-mail (criar, reenviar, revogar, aceitar), `tokenVersion` incrementado em remoção ou rebaixamento.
-→ Leia as seções "Papéis" e "Membros e convites" de `references/05-multi-tenant.md`.
+CRUD da organização, listagem/alteração de papel/remoção de membros, convites por e-mail (criar, reenviar, revogar, aceitar), `tokenVersion` incrementado em remoção ou rebaixamento. **Acessos da pessoa**: registro `registerMemberAccess` (cada app declara o que dá para escolher para uma pessoa), convite com os acessos (o que quem convida não pode dar vira pedido criado sozinho no aceite), aceite por app com `SAVEPOINT`, ajuste por pessoa e pedidos de acesso, com `scripts/member-access-lib.mjs` portado.
+→ Leia as seções "Papéis" e "Membros e convites" de `references/05-multi-tenant.md` e `references/10-acessos-por-pessoa.md` inteiro.
 
 ### Fase 5 — Billing
 `config/plans.ts` com preços, **modos de cobrança** (`stripe`, `fake` em dev sem chave, `disabled` em produção sem chave), assinatura espelhada no banco, checkout, **troca de plano dentro do app** (com prévia e valor proporcional), cancelar/retomar, portal, webhook (body cru + assinatura + idempotência), guards de feature e limite, e o script `billing:sync` (de `templates/billing-sync.ts`). Ao fim desta fase, sem nenhuma Stripe configurada, o owner já consegue assinar e trocar de plano (modo de teste).
@@ -141,3 +141,5 @@ Termine com uma mensagem curta contendo:
 | `references/07-seguranca.md` | Fase 1 e 6 — pipeline de hooks e checklist de segurança |
 | `references/08-modulos.md` | Fase 7 — anatomia de um módulo |
 | `references/09-testes-e-checklist.md` | Fase 8 — testes obrigatórios e checklist final |
+| `references/10-acessos-por-pessoa.md` | Fase 4 — acessos escolhidos no convite, aceite por app, ajuste por pessoa, pedidos de acesso |
+| `scripts/member-access-lib.mjs` + `member-access-lib.test.mjs` | Fase 4 — regras puras dos acessos (porte para TS com os testes) |

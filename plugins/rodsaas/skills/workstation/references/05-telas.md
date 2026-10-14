@@ -34,6 +34,7 @@ A grade **Todos os apps** (`app-launcher`) e **Configurações → Apps** passam
 
 - Lista de membros com interruptor (`app-access-member`, `data-user`, `role="switch"`, `aria-checked`), busca e "todos".
 - No por app, rodapé com os assentos e o efeito no valor: "3 de 3 assentos · R$ 117/mês" ou "4 pessoas: +1 assento, +R$ 39/mês" (`app-access-delta`); salvar (`app-access-save`) mostra a prévia com o proporcional quando passa dos assentos comprados e confirma.
+- Esta tela é a visão **por app**; a visão **por pessoa** (todos os apps e papéis de uma pessoa) e o convite com os acessos são da base (`skills/frontend/references/09-telas.md`, seção "O que essa pessoa vai usar"). A workstation só acrescenta ali: os apps `included` travados no teste/Completo, a nota de assento por app (`invite-access-note`: "+1 assento · +R$ 39/mês" para o owner; "Sem assento livre: vai como pedido ao responsável quando a pessoa entrar" para o admin) e o total (`invite-access-total`).
 
 ## Assinatura (`/configuracoes/assinatura`, substitui `/configuracoes/plano`)
 
@@ -49,7 +50,7 @@ A grade **Todos os apps** (`app-launcher`) e **Configurações → Apps** passam
 ## App bloqueado (`app-locked`)
 
 - Ao abrir um app `locked`: o app funciona em leitura, com faixa fixa no topo "Este app está só para leitura: assine para voltar a criar e editar" + **Assinar o <app>** (`app-locked-cta`, owner) ou "Fale com o responsável" (outros). Botões de criar/editar desabilitados com tooltip, e qualquer 403 `APP_NOT_ACTIVE` mostra o mesmo aviso (nunca um erro genérico).
-- Sem acesso (`APP_ACCESS_DENIED`): tela "Você não tem acesso ao <app>" (`app-no-access`) com **Pedir acesso**.
+- Sem acesso (`APP_ACCESS_DENIED`): tela "Você não tem acesso ao <app>" (`app-no-access`) com **Pedir acesso** (`POST /v1/access/requests`; pedido pendente → "Pedido enviado em {data}", sem duplicar). Com pedido criado pelo convite, a pessoa já vê "Seu acesso ao {app} foi pedido ao responsável".
 
 ## Avisos e e-mails
 
@@ -58,7 +59,7 @@ A grade **Todos os apps** (`app-launcher`) e **Configurações → Apps** passam
 | 3 e 1 dia antes do fim do teste | owners | notificação `billing.trial_ending` + e-mail com resumo e botão |
 | teste terminou | owners | notificação + e-mail |
 | app ligado/desligado, pessoas mudaram (com valor) | owners | entrada no `AuditLog` + e-mail de confirmação do novo valor |
-| pedido de acesso a um app | owners | notificação (tipo novo `workstation.access_requested`, registrado no catálogo de notificações) |
+| pedido de acesso a um app (pela pessoa, pelo convite ou pelo ajuste de um admin) | quem pode aprovar | notificação `org.access_requested` (da base, `skills/notificacoes/references/04-catalogo.md`) |
 | pagamento falhou | owners | o da base (`billing.payment_failed`) |
 
 ## Contrato testável

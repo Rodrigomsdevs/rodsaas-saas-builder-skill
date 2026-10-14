@@ -81,6 +81,17 @@ Com a `/rodsaas:workstation` (`billing.model: "apps"`):
 - `registerAppRoutes('financeiro', ['/v1/fin'])` (as rotas públicas `/v1/public/fin/...` e o webhook ficam fora do guard: cobrança pendente de app bloqueado continua dando baixa, o dinheiro é do cliente da empresa), `registerAppActivation('financeiro', seedFinanceiro)`.
 - App bloqueado: só leitura; régua de lembretes e recorrências pausam (`isAppActive`).
 
+## Acessos no convite (`registerMemberAccess('financeiro', …)`)
+
+O registro é da base (`skills/backend/references/10-acessos-por-pessoa.md`): a tela de convite e a de "Acessos da pessoa" desenham estes campos sem conhecer o app; `read` lê da fonte da verdade do app (nunca de uma cópia) e `apply` é idempotente.
+
+| Campo | Tipo | Padrão | Aplica |
+|---|---|---|---|
+| `role` | select "Papel no Financeiro" (`FIN_ADMIN`, `FIN`, `VIEWER`) | `VIEWER` | `FinRole` |
+
+- `canGrant`: só `FIN_ADMIN` ou owner (admin da empresa sem papel no Financeiro não dá acesso a dados financeiros; o pedido vai ao owner).
+- `countsSeat`: não (o app é cobrado por empresa). Nunca entra sozinho: nem no teste nem no Completo.
+
 ## Integrações (quando os outros apps existirem)
 
 | App | Integração |
@@ -103,3 +114,4 @@ E-mails para **clientes da empresa** (cobrança com o link, lembretes da régua,
 - Sem papel → 403 `NOT_FIN_MEMBER`; `VIEWER` lê e não escreve; `FIN` escreve; `FIN_ADMIN` configura.
 - Plano Free: 3ª conta financeira → 403 `PLAN_LIMIT_REACHED`; conciliação sem `fin_reconciliation` → 403 `FEATURE_NOT_IN_PLAN`.
 - Workstation (se instalada): sem papel → `APP_ACCESS_DENIED`; app bloqueado → GET 200, POST 403 `APP_NOT_ACTIVE`; webhook da cobrança continua baixando.
+- Convite com `financeiro: { role: "FIN" }` feito pelo owner → a pessoa entra com o papel; feito por admin sem papel no Financeiro → vira pedido ao owner.

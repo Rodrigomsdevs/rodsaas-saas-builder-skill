@@ -78,7 +78,7 @@ Login, cadastro, esqueci/redefinir senha, verificar e-mail, aceitar convite, "se
 → `references/06-formularios.md`, `references/09-telas.md`
 
 ### Fase 6 — Home e configurações
-Início com dados reais (primeiros passos, uso do plano, atividade recente, widgets dos apps), configurações da empresa, membros, convites, **apps**, perfil e **plano e cobrança completo** (assinar, trocar com prévia, cancelar, retomar, portal, modo de teste, plano escolhido no cadastro). A tela de plano tem que permitir mudar de plano já nesta fase, mesmo sem Stripe (modo de teste).
+Início com dados reais (primeiros passos, uso do plano, atividade recente, widgets dos apps), configurações da empresa, membros, convites **com os acessos de cada app** (seção "O que essa pessoa vai usar"), **acessos da pessoa** e **pedidos de acesso**, **apps**, perfil e **plano e cobrança completo** (assinar, trocar com prévia, cancelar, retomar, portal, modo de teste, plano escolhido no cadastro). A tela de plano tem que permitir mudar de plano já nesta fase, mesmo sem Stripe (modo de teste).
 → `references/09-telas.md`, `references/11-plano-e-cobranca.md`
 
 ### Fase 7 — Módulo de exemplo

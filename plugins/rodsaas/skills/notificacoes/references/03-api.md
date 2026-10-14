@@ -120,6 +120,9 @@ Token assinado (`signUnsubscribe`/`verifyUnsubscribe`, segredo `NOTIFICATIONS_UN
 | Evento (onde) | Quem recebe | Tipo | url |
 |---|---|---|---|
 | convite aceito (cadastro com convite ou `POST /v1/invitations/accept`) | owners e admins | `org.member_joined` (agrupa por empresa, janela 60 min) | `/configuracoes/membros` |
+| pedido de acesso criado (`POST /v1/access/requests`, aceite de convite com pedidos, ajuste de admin sem poder dar) | quem pode aprovar | `org.access_requested` (`data.person`, `data.app`, `data.why`: " (pedido do convite de Ana)", " (sem assento livre)"…; `groupKey` = empresa) | `/configuracoes/membros?aba=pedidos` |
+| pedido aprovado/recusado | a pessoa | `org.access_decided` (`data.verb`: "liberou"/"recusou") | `/inicio` |
+| app do convite que falhou no aceite (`APPLY_FAILED`) | quem convidou | `org.access_issue` | `/configuracoes/membros/<id>` |
 | papel alterado (`PATCH /v1/members/:id`) | o membro alterado | `org.role_changed` (`data.roleLabel`: "Owner", "Admin", "Membro") | `/configuracoes/membros` |
 | cobrança falhou (webhook Stripe `invoice.payment_failed`) | owners | `billing.payment_failed` (obrigatório) | `/configuracoes/plano` |
 | teste acabando (webhook `customer.subscription.trial_will_end`) | owners | `billing.trial_ending` | `/configuracoes/plano` |

@@ -6,7 +6,7 @@ Para a mesma bateria de testes funcionar em qualquer projeto rodsaas — gerado 
 
 ## Rotas do painel
 
-`/entrar` · `/cadastro` · `/esqueci-senha` · `/redefinir-senha?token=` · `/verificar-email?token=` · `/convite?token=` · `/inicio` · `/sem-empresa` · `/configuracoes/empresa` · `/configuracoes/membros` · `/configuracoes/plano` · `/configuracoes/apps` · `/perfil` · módulo de exemplo `/projetos` e `/projetos/[id]`.
+`/entrar` · `/cadastro` · `/esqueci-senha` · `/redefinir-senha?token=` · `/verificar-email?token=` · `/convite?token=` · `/inicio` · `/sem-empresa` · `/configuracoes/empresa` · `/configuracoes/membros` · `/configuracoes/membros/[id]` · `/configuracoes/plano` · `/configuracoes/apps` · `/perfil` · módulo de exemplo `/projetos` e `/projetos/[id]`.
 
 ## data-testid
 
@@ -72,6 +72,10 @@ Botões de ação (`LoadingButton`): durante a ação ficam **`disabled`** e com
 | `member-remove` | remover, dentro da linha (abre `confirm-dialog`) |
 | `invite-button`, `invite-email`, `invite-role`, `invite-submit` | convidar (papel padrão MEMBER) |
 | `invitation-row` | linha de convite pendente (contém o e-mail) |
+| `invite-access`, `invite-access-app` (`data-app`), `invite-access-field` (`data-app`, `data-key`), `invite-access-note` (`data-app`, `data-kind`: `request` \| `confirm`), `invite-access-total` | seção "O que essa pessoa vai usar" no convite e na tela da pessoa (`skills/frontend/references/09-telas.md`) |
+| `member-access-open` | "Acessos", dentro da linha do membro |
+| `member-access-save` | salvar na tela `/configuracoes/membros/[id]` |
+| `access-request-row` (`data-app`), `access-request-approve`, `access-request-decline` | aba "Pedidos de acesso" |
 | `plan-card` | card de plano, com atributo **`data-plan="<id do plano>"`** |
 | `plan-current` | selo "plano atual" dentro do card |
 | `plan-subscribe` | botão de ação do card ("Assinar" / "Mudar para"), com **`data-plan`**; para o owner **nunca some** (desabilitado no modo `disabled`); admin não tem |
@@ -108,7 +112,10 @@ Os módulos gerados pelo `/rodsaas:module` seguem o mesmo padrão de testids.
 | `POST /v1/organizations` | `{ name }` | `{ id, name }` e a nova empresa vira a ativa |
 | `GET /v1/members` | — | `{ data: [{ id, role, user: { id, name, email } }], meta }` |
 | `PATCH /v1/members/:id` | `{ role }` | — |
-| `POST /v1/invitations` | `{ email, role }` | convite + e-mail com link `APP_URL/convite?token=...` |
+| `POST /v1/invitations` | `{ email, role, access?, confirm? }` | convite + e-mail com link `APP_URL/convite?token=...`; com `access`: `{ id, access: { grant: [appId], request: [{ appId, reason }] } }` |
+| `GET /v1/access/options` · `POST /v1/invitations/check` | — · `{ role, access }` | campos de cada app · `{ grant, request, confirm, errors }` (`skills/backend/references/10-acessos-por-pessoa.md`) |
+| `GET/PUT /v1/members/:id/access` | — · `{ access, confirm? }` | `{ memberId, userId, apps, requests }` · `{ applied, removed, requested, access }` |
+| `GET/POST /v1/access/requests` · `POST …/:id/approve` · `…/decline` | `{ appId, options? }` · `{ options?, confirm? }` · `{ reason? }` | pedidos de acesso (`{ data: [{ id, user, appId, options, sources, reason, status }] }`) |
 | `GET /v1/billing/plans` | — | lista (ou `{ data }`) de `{ id, name, prices: { month, year } \| null, limits, features }`; limite ilimitado = `null` |
 | `POST /v1/billing/checkout-sessions` | `{ plan, interval }` | `{ url }`; no modo de teste o plano já muda |
 | `GET /v1/billing/change-plan/preview?plan=&interval=` | — | `{ amountDue, currency, overLimits }` |
