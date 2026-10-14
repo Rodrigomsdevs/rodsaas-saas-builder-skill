@@ -96,6 +96,31 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 
 `canSee`: atendente (e, se a empresa restringe, da fila do chamado). Deixar de ser atendente → `retract` das notificações de chamados dessa pessoa.
 
+### Pessoas (`pessoas`, preset `rh`)
+
+| Tipo | Evento | Destinatários | entity · groupKey | url |
+|---|---|---|---|---|
+| `rh.approval.requested` | pedido entrou na etapa (férias, ausência, despesa, solicitação, alteração de dados) | aprovadores da etapa (já com delegação) | approval · `to_approve` (`groupUrl` `/pessoas/aprovacoes`) | `/pessoas/aprovacoes/<id>` |
+| `rh.approval.reminder` | job 9 h: etapa parada há N dias úteis | quem ainda não decidiu | approval · `reminder` | idem |
+| `rh.approval.decided` | aprovado/recusado (com o comentário em `data.comment`) | quem pediu | approval | idem |
+| `rh.vacation.expiring` | job 8 h: concessivo termina em 60, 30 e 7 dias com saldo | a pessoa, o gestor e o RH | employee | `/pessoas/ferias` (RH: ficha) |
+| `rh.vacation.starting` | job 8 h de segunda | gestor | employee · `vacation-week` | `/pessoas/ausencias` |
+| `rh.document.expiring` | job 8 h: 30 e 7 dias antes, e no dia | RH e a pessoa | document · `expiring` | ficha, aba Documentos |
+| `rh.document.ack_requested` | política publicada pedindo ciência | público-alvo | document | `/pessoas/documentos/<id>` |
+| `rh.payslip.published` | lote publicado | cada pessoa casada | payslip | `/pessoas/holerites` |
+| `rh.admission.submitted` | pré-admissão enviada pelo candidato (ator nulo) | RH | admission | `/pessoas/admissoes/<id>` |
+| `rh.checklist.assigned` | checklist criado/tarefa atribuída | responsável de cada tarefa (RH, gestor, TI, a pessoa) | checklist | `/pessoas/admissoes/<id>` ou `/pessoas` (a pessoa) |
+| `rh.review.assigned` | fase do ciclo começa | cada avaliador | review · cycleId | `/pessoas/desempenho/avaliacoes/<id>` |
+| `rh.review.released` | RH libera o resultado | avaliado | review | idem |
+| `rh.feedback.received` / `rh.feedback.requested` | feedback dado / pedido | destinatário | feedback | `/pessoas/feedback` |
+| `rh.one_on_one.soon` | job 8 h, véspera | os dois | one_on_one | `/pessoas/one-on-ones/<id>` |
+| `rh.goal.checkin_due` | job semanal (dia da empresa) | dono da meta sem check-in na semana | goal · `checkin` | `/pessoas/metas` |
+| `rh.survey.open` | pesquisa lançada / pulso aberto | público-alvo que ainda não respondeu | survey | `/pessoas/clima/<id>/responder` |
+| `rh.expense.paid` | financeiro marca pago | quem pediu | expense_report | `/pessoas/despesas/<id>` |
+| `rh.birthday` | job 8 h | a equipe da pessoa (opção da empresa; quem escondeu o aniversário não entra) | employee · `birthday` | `/pessoas` |
+
+`canSee`: a regra de visibilidade do próprio Pessoas (pedido: quem pediu, aprovadores e RH; ficha: `visibleGroups`). Nunca coloque salário, CID, motivo de atestado ou nota de avaliação no texto do aviso nem no e-mail. A pesquisa nunca avisa "fulano respondeu".
+
 ## Regras que valem para todos os apps
 
 - Nunca gravar `Notification` direto nem mandar e-mail de aviso para membro por conta própria: tudo por `notify()`. (E-mails para **clientes** — confirmação de agendamento, resposta do chamado, resposta automática do formulário — continuam no app, porque cliente não é membro.)

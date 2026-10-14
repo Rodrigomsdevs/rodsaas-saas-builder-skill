@@ -69,6 +69,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 📅 | **`/rodsaas:agenda`** | *Opcional*: soma o app **Agenda** (estilo Calendly + agenda de clínica/salão): link público de agendamento, disponibilidade com feriados, equipe com rodízio, turmas, aprovação, lembretes, `.ics`, Google Agenda/Outlook e CRM |
 | 🎧 | **`/rodsaas:helpdesk`** | *Opcional*: soma o app **Suporte** (estilo Zendesk/Movidesk): chamados por e-mail, portal e widget, caixa de entrada com visões, resposta e nota interna, SLA com horário comercial, distribuição automática, gatilhos, satisfação e base de conhecimento |
 | ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
+| 👥 | **`/rodsaas:rh`** | *Opcional*: soma o app **Pessoas**, um RH completo (estilo Factorial/Sólides): colaboradores com ficha e organograma, **férias pela CLT** (período aquisitivo, faltas, fracionamento, venda de 1/3, coletivas), aprovações com gestor e delegação, pré-admissão pelo celular, documentos com validade, **holerites em lote pelo CPF**, avaliação de desempenho com 9-box, 1:1, metas, **pesquisa de clima anônima** e despesas, com autoatendimento. Folha e ponto ficam de fora (exporta o fechamento para a contabilidade) |
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
 | 📧 | **`/rodsaas:email`** | Todos os e-mails pelo **Resend** (envio, status de entrega, lista de supressão e recebimento), Mailpit em dev — o `backend` já instala sozinho; em projeto antigo, roda em modo revisão. Passo a passo em [E-mails com Resend](#-e-mails-com-resend-envio-e-recebimento) |
 | 🧰 | **`/rodsaas:workstation`** | Transforma o projeto numa **workstation** (estilo Zoho One): cada empresa faz o onboarding, testa tudo grátis por 14 dias, escolhe os apps e paga por app (por pessoa que usa) ou o Completo, com loja de apps, acesso por pessoa e app bloqueado só para leitura. Do cadastro ao cancelamento |
@@ -94,7 +95,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:workstation   →   /rodsaas:landing   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion · /rodsaas:rh)   →   /rodsaas:workstation   →   /rodsaas:landing   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -117,7 +118,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações, +2 do e-mail com Resend e +7 da workstation, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações, +2 do e-mail com Resend, +7 da workstation e +10 do RH, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |
@@ -265,6 +266,7 @@ plugins/rodsaas/skills/
 ├── forms/      SKILL.md + references/ + scripts/forms-lib.mjs (+ testes) + templates.json
 ├── helpdesk/   SKILL.md + references/ + scripts/helpdesk-lib.mjs (+ testes)
 ├── agenda/     SKILL.md + references/ + scripts/agenda-lib.mjs (+ testes)
+├── rh/        SKILL.md + references/ + scripts/rh-lib.mjs (+ testes) → app Pessoas: CLT, aprovações, holerites, clima
 ├── uploads/    SKILL.md + references/       → add-on de arquivos
 ├── workstation/ SKILL.md + references/ + scripts/workstation-lib.mjs (+ testes) → cobrança por app, onboarding, loja
 ├── landing/    SKILL.md + references/ + assets/catalogo.json (todos os apps) + scripts/ (catalog-lib, capture, check-site)

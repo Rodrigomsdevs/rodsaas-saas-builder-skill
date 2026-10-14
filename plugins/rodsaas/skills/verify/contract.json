@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -1791,6 +1791,273 @@
           "body": [
             "event"
           ]
+        }
+      ]
+    },
+    "rh": {
+      "when": "rodsaas.json → presets inclui \"rh\" (app Pessoas)",
+      "routes": [
+        "/pessoas",
+        "/pessoas/ferias",
+        "/pessoas/ausencias",
+        "/pessoas/aprovacoes",
+        "/pessoas/colaboradores",
+        "/pessoas/colaboradores/[id]",
+        "/pessoas/organograma",
+        "/pessoas/documentos",
+        "/pessoas/holerites",
+        "/pessoas/clima",
+        "/pessoas/clima/[id]/responder",
+        "/pre-admissao/[token]"
+      ],
+      "testids": [
+        "rh-home",
+        "vacation-balance",
+        "vacation-request-new",
+        "vacation-request-form",
+        "vacation-segment-start",
+        "vacation-segment-days",
+        "vacation-abono",
+        "vacation-violation",
+        "vacation-warning",
+        "vacation-summary",
+        "vacation-request-submit",
+        "vacation-request-item",
+        "approvals-tab",
+        "approvals-count",
+        "approval-item",
+        "approval-approve",
+        "approval-reject",
+        "approval-comment",
+        "approval-reject-confirm",
+        "approval-select",
+        "approval-bulk-approve",
+        "approval-delegate",
+        "employee-search",
+        "employee-row",
+        "employee-new",
+        "employee-profile",
+        "employee-tab",
+        "employee-salary",
+        "document-item",
+        "org-node",
+        "org-toggle",
+        "absence-calendar",
+        "absence-item",
+        "payslip-item",
+        "payslip-ack",
+        "company-doc-item",
+        "company-doc-ack",
+        "survey-anonymous-note",
+        "survey-question",
+        "survey-scale",
+        "survey-enps",
+        "survey-submit",
+        "survey-done",
+        "preadmission-step",
+        "preadmission-doc",
+        "preadmission-submit"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/rh/me"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/employees"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/employees",
+          "body": [
+            "fullName",
+            "cpf",
+            "contractType",
+            "admissionDate",
+            "managerId",
+            "userId",
+            "salaryCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/employees/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/rh/employees/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/org-chart"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/employees/{id}/vacation"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/vacation-requests/validate",
+          "body": [
+            "periodIndex",
+            "segments",
+            "abonoDays"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/vacation-requests",
+          "body": [
+            "periodIndex",
+            "segments",
+            "abonoDays"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/leaves",
+          "body": [
+            "type",
+            "start",
+            "days"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/absences"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/approvals"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/approvals/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/approvals/{id}/decision",
+          "body": [
+            "decision",
+            "comment"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/expense-categories"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/expenses",
+          "body": [
+            "categoryId",
+            "date",
+            "amountCents",
+            "description",
+            "justification"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/expense-reports",
+          "body": [
+            "title",
+            "expenseIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/expense-reports/{id}/submit"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/employees/{id}/documents"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/employees/{id}/documents",
+          "body": [
+            "categoryId",
+            "name",
+            "fileId",
+            "expiresAt"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/documents/expiring"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/payslip-batches",
+          "body": [
+            "kind",
+            "reference",
+            "label",
+            "files"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/payslip-batches/{id}/publish"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/me/payslips"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/payslips/{id}/ack"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/surveys",
+          "body": [
+            "kind",
+            "title",
+            "questions",
+            "closesAt"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/surveys/{id}/launch"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/surveys/{id}/responses",
+          "body": [
+            "enps",
+            "answers"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/surveys/{id}/results"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/admissions",
+          "body": [
+            "fullName",
+            "cpf",
+            "personalEmail",
+            "contractType",
+            "admissionDate"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/admissions/{id}/complete"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/rh/admissions/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/rh/admissions/{token}/submit"
         }
       ]
     }

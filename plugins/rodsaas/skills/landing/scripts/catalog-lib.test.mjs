@@ -9,8 +9,8 @@ const available = new Set(C.withStatus(catalog, RODSAAS).filter((a) => a.status 
 
 test("catálogo entregue é válido e cobre o roadmap inteiro", () => {
   assert.deepEqual(C.validateCatalog(catalog), []);
-  assert.ok(catalog.apps.length >= 34);
-  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "cobrancas", "ferias", "estoque", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
+  assert.ok(catalog.apps.length >= 28);
+  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "cobrancas", "pessoas", "estoque", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
 });
 
 test("validateCatalog acusa os erros comuns", () => {
@@ -29,7 +29,7 @@ test("withStatus: disponível pelo rodsaas.json (apps, presets ou add-ons), o re
   const list = C.withStatus(catalog, RODSAAS);
   assert.deepEqual([...available].sort(), ["agenda", "crm", "forms", "helpdesk", "paginas", "tarefas"]);
   assert.equal(list[0].status, "disponivel");
-  assert.equal(list.find((a) => a.id === "ferias").status, "em-breve");
+  assert.equal(list.find((a) => a.id === "pessoas").status, "em-breve");
   const withWa = C.withStatus(catalog, { ...RODSAAS, addons: [...RODSAAS.addons, "whatsapp", "pagamento-br"] });
   assert.equal(withWa.find((a) => a.id === "whatsapp").status, "disponivel");
   assert.equal(withWa.find((a) => a.id === "cobrancas").status, "disponivel", "add-on pagamento-br libera Cobranças");
@@ -42,8 +42,8 @@ test("formatBRL e priceLabel", () => {
   const by = (id) => st.find((a) => a.id === id);
   assert.equal(C.priceLabel(by("crm"), catalog), "R$ 39 por vendedor/mês");
   assert.equal(C.priceLabel(by("forms"), catalog), "a partir de R$ 29/mês");
-  assert.equal(C.priceLabel(by("ferias"), catalog), "Preço no lançamento", "em breve não mostra preço");
-  const suite = { ...by("ferias"), status: "disponivel" };
+  assert.equal(C.priceLabel(by("pessoas"), catalog), "Preço no lançamento", "em breve não mostra preço");
+  const suite = { ...by("pessoas"), status: "disponivel" };
   assert.equal(C.priceLabel(suite, catalog), "Suíte RH: R$ 5 por colaborador/mês");
 });
 
@@ -70,16 +70,20 @@ test("quote: grátis com até 2 usuários só nos apps grátis; faixa de Forms p
 });
 
 test("quote: Suíte RH por colaborador com mínimo, app em breve não entra, uso vira nota", () => {
-  const all = new Set([...available, "ferias", "clima", "whatsapp"]);
-  const q = C.quote(catalog, { apps: { ferias: {}, clima: {}, whatsapp: {} }, users: 3, employees: 10 }, { available: all });
+  // um segundo app da suíte (futuro) para conferir que vários apps da suíte viram uma linha só
+  const cat2 = structuredClone(catalog);
+  cat2.apps.push({ ...structuredClone(cat2.apps.find((a) => a.id === "pessoas")), id: "ponto", slug: "ponto", name: "Ponto" });
+  cat2.pricing.suites.rh.apps.push("ponto");
+  const all = new Set([...available, "pessoas", "ponto", "whatsapp"]);
+  const q = C.quote(cat2, { apps: { pessoas: {}, ponto: {}, whatsapp: {} }, users: 3, employees: 10 }, { available: all });
   const suite = q.lines.find((l) => l.appId === "suite:rh");
   assert.equal(suite.total, 79, "10 × 5 = 50, mínimo 79");
   assert.equal(suite.minimumApplied, true);
   assert.equal(q.lines.filter((l) => l.appId === "suite:rh").length, 1, "dois apps da suíte = uma linha");
   assert.ok(q.usageNotes[0].startsWith("WhatsApp:"));
-  const q2 = C.quote(catalog, { apps: { ferias: {} }, users: 3, employees: 40 }, { available: all });
+  const q2 = C.quote(catalog, { apps: { pessoas: {} }, users: 3, employees: 40 }, { available: all });
   assert.equal(q2.lines[0].total, 200);
-  assert.equal(C.quote(catalog, { apps: { ferias: {} }, users: 3, employees: 40 }, { available }).lines.length, 0, "em breve não é vendido");
+  assert.equal(C.quote(catalog, { apps: { pessoas: {} }, users: 3, employees: 40 }, { available }).lines.length, 0, "em breve não é vendido");
 });
 
 test("signupUrl e relatedApps", () => {

@@ -128,6 +128,26 @@ export const PRESET_TYPES = [
   { type: "helpdesk.sla_warning", appId: "helpdesk", label: "Prazo vencendo", template: "O prazo de {title} vence {data.when}", group: { by: "none" } },
   { type: "helpdesk.sla_breached", appId: "helpdesk", label: "Prazo estourado", template: "O prazo de {title} estourou", group: { by: "none" } },
   { type: "helpdesk.daily", appId: "helpdesk", label: "Resumo diário do Suporte", template: "{data.open} chamados abertos, {data.breached} com prazo estourado", group: { by: "none" } },
+  // pessoas (rh)
+  { type: "rh.approval.requested", appId: "pessoas", label: "Pedido para você aprovar", template: { one: "{actor} pediu {title}: aprove ou recuse", many: "{count} pedidos aguardando a sua aprovação" }, group: { by: "key", windowMinutes: 10 } },
+  { type: "rh.approval.reminder", appId: "pessoas", label: "Lembrete de aprovação", template: { one: "{title} aguarda a sua aprovação há {data.days} dias", many: "{count} pedidos aguardam a sua aprovação" }, group: { by: "key", windowMinutes: 60 } },
+  { type: "rh.approval.decided", appId: "pessoas", label: "Seu pedido foi respondido", template: "{actor} {data.verb} {title}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "rh.vacation.expiring", appId: "pessoas", label: "Férias vencendo", template: "{title}: {data.days} dias de férias precisam ser marcados até {data.until}", group: { by: "none" } },
+  { type: "rh.vacation.starting", appId: "pessoas", label: "Férias da equipe começando", template: { one: "{title} sai de férias em {data.when}", many: "{count} pessoas da sua equipe saem de férias esta semana" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "rh.document.expiring", appId: "pessoas", label: "Documento vencendo", template: { one: "{title} vence em {data.when}", many: "{count} documentos vencem nos próximos dias" }, group: { by: "key", windowMinutes: 60 } },
+  { type: "rh.document.ack_requested", appId: "pessoas", label: "Documento para ler e dar ciência", template: "{actor} pediu a sua ciência em {title}", group: { by: "none" } },
+  { type: "rh.payslip.published", appId: "pessoas", label: "Holerite disponível", template: "Seu {title} está disponível", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "rh.admission.submitted", appId: "pessoas", label: "Pré-admissão enviada", template: "{title} enviou os dados e documentos da admissão", group: { by: "none" } },
+  { type: "rh.checklist.assigned", appId: "pessoas", label: "Tarefa de admissão ou desligamento", template: { one: "{data.task} ({title}) até {data.when}", many: "{count} tarefas de {title} para você" }, group: { by: "entity", windowMinutes: 10 } },
+  { type: "rh.review.assigned", appId: "pessoas", label: "Avaliação para fazer", template: { one: "Você tem a avaliação de {title} para fazer até {data.when}", many: "Você tem {count} avaliações para fazer em {data.cycle}" }, group: { by: "key", windowMinutes: 10 } },
+  { type: "rh.review.released", appId: "pessoas", label: "Resultado da avaliação", template: "O resultado da sua avaliação em {title} foi liberado", group: { by: "none" } },
+  { type: "rh.feedback.received", appId: "pessoas", label: "Feedback recebido", template: "{actor} deixou um feedback para você", group: { by: "none" } },
+  { type: "rh.feedback.requested", appId: "pessoas", label: "Pedido de feedback", template: "{actor} pediu o seu feedback sobre {title}", group: { by: "none" } },
+  { type: "rh.one_on_one.soon", appId: "pessoas", label: "1:1 amanhã", template: "Sua 1:1 com {data.with} é amanhã: adicione os assuntos", group: { by: "none" }, defaultEmail: "DAILY" },
+  { type: "rh.goal.checkin_due", appId: "pessoas", label: "Atualizar metas", template: { one: "Atualize o progresso de {title}", many: "Atualize o progresso de {count} metas" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "rh.survey.open", appId: "pessoas", label: "Pesquisa para responder", template: "Responda {title} até {data.when} (anônima)", group: { by: "none" } },
+  { type: "rh.expense.paid", appId: "pessoas", label: "Reembolso pago", template: "O reembolso de {title} ({data.amount}) foi pago", group: { by: "none" } },
+  { type: "rh.birthday", appId: "pessoas", label: "Aniversários e tempo de casa", template: { one: "Hoje é aniversário de {title}", many: "{count} aniversários hoje" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "OFF" },
 ].map(defineType);
 
 /** Catálogo ativo: tipos base + os dos apps instalados (+ add-ons exigidos). */

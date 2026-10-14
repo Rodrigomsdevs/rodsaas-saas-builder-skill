@@ -78,7 +78,7 @@ export function priceLabel(app, catalog) {
 
 /**
  * Calculadora da página de preços.
- * selection: { apps: { crm: { seats: 3 }, forms: { tier: 0 }, ferias: {} }, users, employees, cycle: "monthly"|"annual" }
+ * selection: { apps: { crm: { seats: 3 }, forms: { tier: 0 }, pessoas: {} }, users, employees, cycle: "monthly"|"annual" }
  *   - seats: quantas pessoas usam aquele app (para apps cobrados por pessoa)
  *   - users: pessoas da empresa que usam o sistema (para o Completo e o grátis)
  *   - employees: colaboradores (para a Suíte RH)

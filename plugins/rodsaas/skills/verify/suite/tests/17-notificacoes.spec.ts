@@ -174,7 +174,7 @@ test.describe("Notificações", () => {
     expect(types.some((x) => x.type === "org.member_joined"), "membro não vê no catálogo o aviso que só owners/admins recebem").toBe(false);
     const ownerTypes = items<any>(await ok(await call(ownerCtx.request, "GET", "/v1/notification-types"), "catálogo do owner"));
     expect(ownerTypes.some((x) => x.type === "org.member_joined"), "catálogo do owner tem org.member_joined").toBe(true);
-    const expectedByPreset: Record<string, string> = { tarefas: "task.assigned", crm: "crm.deal.assigned", forms: "forms.response.new", agenda: "agenda.booked" };
+    const expectedByPreset: Record<string, string> = { tarefas: "task.assigned", crm: "crm.deal.assigned", forms: "forms.response.new", agenda: "agenda.booked", rh: "rh.approval.requested" };
     for (const [preset, type] of Object.entries(expectedByPreset)) {
       if (cfg.presets.includes(preset)) expect(types.some((x) => x.type === type), `preset ${preset} registrou os tipos dele (${type})`).toBe(true);
     }

@@ -98,13 +98,7 @@
     "price": 5,
     "minimum": 79,
     "apps": [
-     "aprovacoes",
-     "ferias",
-     "onboarding",
-     "clima",
-     "okrs",
-     "despesas",
-     "feedback"
+     "pessoas"
     ]
    }
   },
@@ -769,270 +763,111 @@
    "faq": []
   },
   {
-   "id": "aprovacoes",
-   "slug": "aprovacoes",
-   "name": "Aprovações",
-   "preset": "aprovacoes",
-   "category": "trabalho",
-   "icon": "BadgeCheck",
-   "phase": 3,
-   "tagline": "Pedidos aprovados no fluxo certo, sem caçar assinatura no corredor.",
-   "description": "Fluxos de aprovação com etapas e aprovadores, para compras, descontos, férias, contratações ou o que a empresa precisar.",
-   "benefits": [
-    {
-     "title": "Fluxo claro",
-     "text": "Cada pedido segue as etapas definidas, com quem aprova em cada uma."
-    },
-    {
-     "title": "Rápido",
-     "text": "O aprovador recebe o aviso e aprova pelo celular."
-    },
-    {
-     "title": "Rastro completo",
-     "text": "Quem pediu, quem aprovou, quando e por quê."
-    }
-   ],
-   "features": [
-    "Modelos de pedido",
-    "Etapas e aprovadores",
-    "Aprovar pelo celular",
-    "Prazos e lembretes",
-    "Histórico e anexos",
-    "Relatórios"
-   ],
-   "replaces": "e-mail com 'pode aprovar?'",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "despesas",
-    "ferias",
-    "contratos"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "ferias",
-   "slug": "ferias",
-   "name": "Férias",
-   "preset": "ferias",
+   "id": "pessoas",
+   "slug": "pessoas",
+   "name": "Pessoas",
+   "preset": "rh",
    "category": "pessoas",
-   "icon": "Palmtree",
+   "icon": "Users",
    "phase": 3,
-   "tagline": "Pedido de férias e folga com saldo, aprovação e calendário da equipe.",
-   "description": "O colaborador pede, o gestor aprova e todo mundo vê no calendário quem estará fora, com saldo calculado.",
+   "tagline": "Todo o RH num lugar só: férias, aprovações, admissão, holerites, desempenho e clima.",
+   "description": "Colaboradores com ficha e organograma, férias pelas regras da CLT, aprovações com o gestor, admissão pelo celular, holerites em lote, avaliações, metas, pesquisas anônimas e despesas, com autoatendimento para cada pessoa.",
    "benefits": [
     {
-     "title": "Saldo sempre certo",
-     "text": "Dias disponíveis calculados por pessoa."
+     "title": "A CLT no sistema",
+     "text": "Período aquisitivo, faltas, fracionamento, venda de 1/3 e os 2 dias antes do descanso conferidos antes de pedir."
     },
     {
-     "title": "Equipe coberta",
-     "text": "Calendário mostra conflitos antes de aprovar."
+     "title": "O RH deixa de digitar",
+     "text": "O contratado preenche a pré-admissão pelo celular; holerites em lote são entregues a cada um pelo CPF."
     },
     {
-     "title": "Sem papel",
-     "text": "Pedido e aprovação pelo app."
+     "title": "Cada um vê o que deve",
+     "text": "Salário, documentos e atestados só para o RH e a pessoa; pesquisa anônima de verdade."
     }
    ],
    "features": [
-    "Pedido de férias e folga",
-    "Saldo por pessoa",
-    "Aprovação pelo gestor",
-    "Calendário da equipe",
-    "Feriados nacionais",
-    "Relatórios"
+    "Ficha do colaborador e organograma",
+    "Férias e ausências pela CLT, com calendário da equipe",
+    "Aprovações com gestor, valor e delegação",
+    "Pré-admissão pelo celular e checklists de entrada e saída",
+    "Documentos com validade e holerites em lote",
+    "Avaliação de desempenho, 9-box, 1:1 e metas",
+    "Pesquisa de clima e eNPS anônimos",
+    "Despesas e reembolso",
+    "Fechamento do mês para a contabilidade"
    ],
-   "replaces": "planilha de férias",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "aprovacoes",
-    "onboarding"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "onboarding",
-   "slug": "onboarding",
-   "name": "Onboarding",
-   "preset": "onboarding",
-   "category": "pessoas",
-   "icon": "Rocket",
-   "phase": 3,
-   "tagline": "Quem chega já sabe o que fazer desde o primeiro dia.",
-   "description": "Checklists de entrada com tarefas para RH, TI, gestor e o próprio colaborador, com prazos e acompanhamento.",
-   "benefits": [
-    {
-     "title": "Primeiro dia redondo",
-     "text": "Acesso, equipamento e treinamentos prontos no prazo."
-    },
-    {
-     "title": "Cada área com sua parte",
-     "text": "Tarefas distribuídas para RH, TI e gestor."
-    },
-    {
-     "title": "Padrão que se repete",
-     "text": "Modelos por cargo."
-    }
-   ],
-   "features": [
-    "Modelos por cargo",
-    "Tarefas por área",
-    "Prazos relativos à entrada",
-    "Documentos para assinar",
-    "Acompanhamento do progresso",
-    "Offboarding"
-   ],
-   "replaces": "lista de e-mails e esquecimentos",
+   "replaces": "planilhas de férias, pastas de documentos, holerite por e-mail, formulários de avaliação e pesquisas avulsas",
    "pricing": {
     "suite": "rh"
    },
    "integrations": [
     "tarefas",
-    "ferias",
-    "ativos"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "clima",
-   "slug": "clima",
-   "name": "Clima",
-   "preset": "clima",
-   "category": "pessoas",
-   "icon": "HeartPulse",
-   "phase": 3,
-   "tagline": "Saiba como a equipe está antes que vire pedido de demissão.",
-   "description": "Pesquisas de clima e eNPS anônimas, com resultados por equipe e evolução ao longo do tempo.",
-   "benefits": [
-    {
-     "title": "Anônimo de verdade",
-     "text": "Resultados só aparecem com número mínimo de respostas."
-    },
-    {
-     "title": "Ação certa",
-     "text": "Temas que pioraram ficam destacados."
-    },
-    {
-     "title": "Rotina leve",
-     "text": "Pesquisas curtas e periódicas."
-    }
-   ],
-   "features": [
-    "eNPS",
-    "Pesquisas prontas",
-    "Anonimato garantido",
-    "Resultados por equipe",
-    "Evolução no tempo",
-    "Comentários"
-   ],
-   "replaces": "pesquisa anual em papel",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "feedback",
-    "forms"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "okrs",
-   "slug": "okrs",
-   "name": "OKRs",
-   "preset": "okrs",
-   "category": "trabalho",
-   "icon": "Target",
-   "phase": 3,
-   "tagline": "Metas que todo mundo entende e acompanha.",
-   "description": "Objetivos e resultados-chave por empresa, equipe e pessoa, com check-ins e progresso visível.",
-   "benefits": [
-    {
-     "title": "Foco",
-     "text": "Poucas metas claras, ligadas à estratégia."
-    },
-    {
-     "title": "Ritmo",
-     "text": "Check-ins semanais rápidos."
-    },
-    {
-     "title": "Transparência",
-     "text": "Todo mundo vê o progresso."
-    }
-   ],
-   "features": [
-    "Objetivos e resultados-chave",
-    "Empresa, equipe e pessoa",
-    "Check-ins",
-    "Progresso automático",
-    "Ligação com tarefas",
-    "Ciclos trimestrais"
-   ],
-   "replaces": "metas em slides esquecidos",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "tarefas",
-    "feedback"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "despesas",
-   "slug": "despesas",
-   "name": "Despesas",
-   "preset": "despesas",
-   "category": "financeiro",
-   "icon": "Receipt",
-   "phase": 3,
-   "tagline": "Reembolso com foto do recibo, aprovação e exportação.",
-   "description": "O colaborador fotografa o recibo, o gestor aprova e o financeiro exporta para pagar.",
-   "benefits": [
-    {
-     "title": "Sem papelada",
-     "text": "Foto do recibo pelo celular."
-    },
-    {
-     "title": "Política aplicada",
-     "text": "Limites por categoria avisam na hora."
-    },
-    {
-     "title": "Fechamento rápido",
-     "text": "Exportação pronta para o financeiro."
-    }
-   ],
-   "features": [
-    "Foto do recibo",
-    "Categorias e limites",
-    "Aprovação",
-    "Quilometragem",
-    "Exportação",
-    "Relatórios por centro de custo"
-   ],
-   "replaces": "envelope de notinhas",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "aprovacoes",
+    "agenda",
+    "recrutamento",
+    "ativos",
     "contas"
    ],
-   "shots": [],
-   "video": null,
-   "faq": []
+   "shots": [
+    {
+     "id": "pessoas-inicio",
+     "path": "/pessoas",
+     "waitFor": "rh-home",
+     "caption": "Início com pendências, férias e aprovações"
+    },
+    {
+     "id": "pessoas-ferias",
+     "path": "/pessoas/ferias",
+     "waitFor": "vacation-balance",
+     "actions": [
+      {
+       "click": "vacation-request-new"
+      },
+      {
+       "waitFor": "vacation-request-form"
+      }
+     ],
+     "caption": "Pedido de férias com as regras da CLT conferidas na hora"
+    },
+    {
+     "id": "pessoas-organograma",
+     "path": "/pessoas/organograma",
+     "waitFor": "org-node",
+     "caption": "Organograma da empresa"
+    }
+   ],
+   "video": {
+    "id": "pessoas-demo",
+    "path": "/pessoas/aprovacoes",
+    "steps": [
+     {
+      "waitFor": "approval-item"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "click": "approval-approve"
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "O Pessoas faz a folha de pagamento?",
+     "a": "Não. A folha e o eSocial continuam com a sua contabilidade: o Pessoas entrega o fechamento do mês (férias, ausências, admissões, desligamentos e reembolsos) pronto para ela e distribui os holerites que ela gera."
+    },
+    {
+     "q": "Tem ponto eletrônico?",
+     "a": "Ainda não. O ponto será um app separado, seguindo a Portaria 671/2021."
+    },
+    {
+     "q": "Como é cobrado?",
+     "a": "Pela Suíte RH: R$ 5 por colaborador ativo por mês (mínimo R$ 79), com tudo incluído e sem cobrar por login."
+    }
+   ]
   },
   {
    "id": "contratos",
@@ -1074,7 +909,7 @@
    "integrations": [
     "assinatura",
     "crm",
-    "aprovacoes"
+    "pessoas"
    ],
    "shots": [],
    "video": null,
@@ -1118,7 +953,7 @@
     "price": 29
    },
    "integrations": [
-    "onboarding",
+    "pessoas",
     "reservas"
    ],
    "shots": [],
@@ -1346,7 +1181,7 @@
    },
    "integrations": [
     "paginas",
-    "onboarding"
+    "pessoas"
    ],
    "shots": [],
    "video": null,
@@ -1391,52 +1226,8 @@
    },
    "integrations": [
     "agenda",
-    "onboarding",
+    "pessoas",
     "forms"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
-   "id": "feedback",
-   "slug": "feedback",
-   "name": "Feedback",
-   "preset": "feedback",
-   "category": "pessoas",
-   "icon": "MessagesSquare",
-   "phase": 4,
-   "tagline": "1:1, feedback contínuo e avaliação de desempenho num lugar só.",
-   "description": "Reuniões 1:1 com pauta, feedbacks registrados e ciclos de avaliação com autoavaliação e gestor.",
-   "benefits": [
-    {
-     "title": "Conversas melhores",
-     "text": "Pauta e histórico de cada 1:1."
-    },
-    {
-     "title": "Feedback que fica",
-     "text": "Registrado e consultável."
-    },
-    {
-     "title": "Avaliação justa",
-     "text": "Ciclos com critérios claros."
-    }
-   ],
-   "features": [
-    "1:1 com pauta",
-    "Feedback contínuo",
-    "Ciclos de avaliação",
-    "Autoavaliação",
-    "PDI",
-    "Relatórios"
-   ],
-   "replaces": "avaliação anual em planilha",
-   "pricing": {
-    "suite": "rh"
-   },
-   "integrations": [
-    "okrs",
-    "clima"
    ],
    "shots": [],
    "video": null,
@@ -1616,7 +1407,7 @@
    },
    "integrations": [
     "cobrancas",
-    "despesas",
+    "pessoas",
     "estoque"
    ],
    "shots": [],

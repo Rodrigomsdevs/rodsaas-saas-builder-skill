@@ -9,9 +9,9 @@ const T0 = Date.parse("2026-10-14T12:00:00Z");
 
 test("suggestApps: landing primeiro, depois o segmento, só disponíveis", () => {
   assert.deepEqual(W.suggestApps({ segment: "saude", available: AVAIL }).selected, ["agenda", "crm", "forms", "helpdesk"]);
-  const r = W.suggestApps({ segment: "agencia", available: AVAIL, preselected: ["helpdesk", "ferias"] });
+  const r = W.suggestApps({ segment: "agencia", available: AVAIL, preselected: ["helpdesk", "pessoas"] });
   assert.equal(r.selected[0], "helpdesk", "veio da landing");
-  assert.ok(!r.selected.includes("ferias"), "em breve fora");
+  assert.ok(!r.selected.includes("pessoas"), "em breve fora");
   assert.deepEqual([...r.selected, ...r.others].sort(), [...AVAIL].sort());
   assert.ok(W.suggestApps({ segment: "nada", available: AVAIL }).selected.includes("tarefas"), "segmento desconhecido = outro");
   const many = W.suggestApps({ segment: "saude", available: AVAIL, preselected: ["crm", "forms", "agenda", "helpdesk", "tarefas"] });
@@ -23,7 +23,7 @@ test("validateOnboarding", () => {
   assert.deepEqual(ok.errors, []);
   assert.deepEqual(ok.value.apps, ["agenda", "crm"]);
   assert.deepEqual(ok.value.invites, ["ana@x.com"]);
-  const bad = W.validateOnboarding({ segment: "x", teamSize: "100", apps: ["ferias"], invites: ["nao-email"] }, { available: AVAIL });
+  const bad = W.validateOnboarding({ segment: "x", teamSize: "100", apps: ["pessoas"], invites: ["nao-email"] }, { available: AVAIL });
   const paths = bad.errors.map((e) => e.path);
   for (const p of ["segment", "teamSize", "apps", "invites.0"]) assert.ok(paths.includes(p), p);
   assert.ok(W.validateOnboarding({ segment: "saude", apps: [] }, { available: AVAIL }).errors.some((e) => e.path === "apps"));
@@ -48,7 +48,7 @@ test("effectiveModel: teste vence vira grátis; pago ativo; atrasado mantém com
 });
 
 test("appStates: teste libera tudo menos uso; por app só os pagos; grátis só os do grátis; suíte libera os apps dela", () => {
-  const avail = [...AVAIL, "whatsapp", "ferias", "clima", "mural"];
+  const avail = [...AVAIL, "whatsapp", "pessoas", "mural"];
   const trial = W.appStates({ model: "trial", catalog, available: avail });
   assert.equal(trial.crm, "trial");
   assert.equal(trial.whatsapp, "locked", "uso precisa de item próprio");
@@ -57,8 +57,8 @@ test("appStates: teste libera tudo menos uso; por app só os pagos; grátis só 
   assert.equal(apps.crm, "active");
   assert.equal(apps.helpdesk, "locked");
   assert.equal(apps.tarefas, "free", "app do grátis continua grátis");
-  assert.equal(apps.ferias, "active");
-  assert.equal(apps.clima, "active");
+  assert.equal(apps.pessoas, "active", "Suíte RH libera o Pessoas");
+  assert.equal(W.appStates({ model: "apps", items: [{ key: "app:crm", quantity: 2 }], catalog, available: avail }).pessoas, "locked", "sem a suíte, bloqueado");
   const free = W.appStates({ model: "free", catalog, available: avail });
   assert.equal(free.crm, "locked");
   assert.equal(free.forms, "free");
@@ -83,6 +83,10 @@ test("buildFeatureMap e classifyFeature: features e limites do plano mais alto v
   assert.deepEqual(m._paid.sort(), ["api_access", "audit_log"]);
   assert.deepEqual(m._completo, ["priority_support"]);
   assert.equal(W.classifyFeature("projects"), "_paid");
+  assert.equal(W.classifyFeature("rh_performance"), "pessoas");
+  assert.equal(W.classifyFeature("rhEmployees"), "pessoas", "limite em camelCase do preset");
+  assert.equal(W.classifyFeature("helpdeskAgents"), "helpdesk");
+  assert.equal(W.classifyFeature("rhythm_x"), "_paid", "prefixo exige _ ou maiúscula");
   assert.deepEqual(m._baseLimits, { paid: { projects: null }, free: { projects: 3 } }, "limite do Cadastros fica na base");
 });
 
@@ -118,8 +122,8 @@ test("canUseApp, defaultAccess e seatsFromAccess", () => {
 });
 
 test("desiredItems, lookupKey e monthlyOfItems batem com o quote do catálogo", () => {
-  const sel = { apps: { crm: { seats: 2 }, agenda: { seats: 1 }, forms: { tier: 1 }, tarefas: { seats: 3 }, ferias: {} }, users: 4, employees: 12 };
-  const avail = [...AVAIL, "ferias"];
+  const sel = { apps: { crm: { seats: 2 }, agenda: { seats: 1 }, forms: { tier: 1 }, tarefas: { seats: 3 }, pessoas: {} }, users: 4, employees: 12 };
+  const avail = [...AVAIL, "pessoas"];
   const items = W.desiredItems({ model: "apps", selection: sel, catalog, available: avail, cycle: "month" });
   assert.deepEqual(items.map((i) => `${i.key}×${i.quantity}${i.tier != null ? `/t${i.tier}` : ""}`), ["app:crm×2", "app:agenda×1", "app:forms×1/t1", "app:tarefas×3", "suite:rh×12"]);
   assert.equal(items[2].lookupKey, "rodsaas_ws_app_forms_t1_month");

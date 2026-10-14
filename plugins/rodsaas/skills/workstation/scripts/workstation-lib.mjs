@@ -21,8 +21,8 @@ export const SEGMENTS = [
   { id: "beleza", label: "Salão, estética ou academia", icon: "Scissors", apps: ["agenda", "crm", "forms", "tarefas"] },
   { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk"] },
   { id: "comercio", label: "Loja ou comércio", icon: "Store", apps: ["crm", "helpdesk", "forms", "tarefas"] },
-  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas"] },
-  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk"] },
+  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas"] },
+  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas"] },
   { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm"] },
   { id: "outro", label: "Outro", icon: "Sparkles", apps: ["tarefas", "crm", "paginas"] },
 ];
@@ -241,7 +241,8 @@ export function prorate({ fromMonthly, toMonthly, periodStart, periodEnd, now = 
 
 /** Prefixos que dizem de qual app é cada feature/limite do config/plans.ts (o resto vai para _paid). */
 export const FEATURE_PREFIXES = [
-  [/^crm_/, "crm"], [/^forms_/, "forms"], [/^agenda_/, "agenda"], [/^helpdesk_/, "helpdesk"],
+  [/^crm(_|[A-Z])/, "crm"], [/^forms(_|[A-Z])/, "forms"], [/^agenda(_|[A-Z])/, "agenda"], [/^helpdesk(_|[A-Z])/, "helpdesk"],
+  [/^rh(_|[A-Z])/, "pessoas"], // rh_performance (feature) e rhEmployees (limite)
   [/^(tasks?_|private_projects$|sprints$|time_tracking$)/, "tarefas"], [/^(pages_|public_pages$|databases?_)/, "paginas"],
   [/^priority_support$/, "_completo"],
 ];

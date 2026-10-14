@@ -261,3 +261,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | acesso por pessoa | acesso só escondido na tela (API responde para quem não tem acesso); dar acesso além dos assentos cobrando sem confirmar; tirar acesso reduzindo a cobrança sozinho |
 | fim do teste | bloqueio que esconde os dados (GET 403); app bloqueado aceitando escrita; grátis sem limite de pessoas; assinar não libera na hora |
 | telas | onboarding sem os apps da landing marcados; banner do teste ausente; total da assinatura sem as pessoas; mudança sem prévia; app bloqueado sem aviso |
+
+## RH / app Pessoas (`20-rh.spec.ts`, `/rodsaas:rh`)
+
+| Teste | Causas comuns |
+|---|---|
+| colaborador e ficha | CPF só com máscara, sem dígito verificador; CPF único na base toda (deveria ser por empresa); gestor em ciclo aceito; ficha escondendo o salário só no front (o JSON da API traz `compensation` para colega ou gestor); diretório devolvendo CPF |
+| saldo de férias | "30 dias por ano" sem período aquisitivo; faltas (`falta`) não descontando o direito (art. 130); situação `vencida` não calculada; datas com fuso (use `YYYY-MM-DD`, não `Date` com horário) |
+| regras do pedido | validação só no front; sexta-feira aceita (2 dias antes do descanso); feriado do local ignorado; 14 dias exigido sempre (deveria ser só quando não sobra como cumprir); venda acima de 1/3 |
+| aprovação | aprovador fixo "o gestor" sem fallback para o RH; quem pede consegue aprovar o próprio pedido; recusa sem comentário; pendente não reservando o saldo (dois pedidos com o mesmo saldo); recusa não devolvendo |
+| despesas | limite só avisando (sem exigir justificativa); valor em reais com ponto flutuante (use centavos); condição por valor sem a etapa do financeiro |
+| documentos e holerites | listagem de documentos sem checar quem pede; casamento por nome em vez de CPF; holerite de outra pessoa acessível pelo id; publicar o lote duas vezes |
+| clima | resultado com menos de 5 respostas; recorte pequeno escondido mas descobrível por subtração (sem "outros"); `employeeId`/`userId` gravado na resposta ou devolvido no resultado; responder duas vezes |
+| pré-admissão | link sem expirar ou reaproveitável depois de efetivar; efetivar sem conferir os documentos; página pública devolvendo dados internos |
+| telas | erro da CLT só em toast (não aparece no trecho); enviar habilitado com erro; abas de salário/documentos aparecendo para colega; caixa de aprovações sem atualizar depois de decidir |
