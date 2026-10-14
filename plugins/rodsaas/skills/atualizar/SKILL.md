@@ -1,6 +1,6 @@
 ---
 name: atualizar
-description: Atualiza um projeto rodsaas já existente para a versão atual de todas as skills de uma vez — lê o rodsaas.json, e para cada parte instalada (base, add-ons e apps como CRM, Forms, Agenda, Suporte, Tarefas, Páginas, Pessoas, Financeiro, Comercial, ERP e workstation) roda o modo revisão da skill dela, um módulo por vez, com a tabela de lacunas, migrations só aditivas, testes e commit por módulo, e um arquivo de progresso que deixa retomar de onde parou. Use quando o usuário pedir para atualizar, refatorar ou revisar todos os módulos, trazer o projeto para a versão nova do plugin, aplicar as melhorias novas (ex.: a Agenda com recepção, comissões e clube), ou chamar /rodsaas:atualizar (opcionalmente com os módulos: /rodsaas:atualizar agenda erp).
+description: Atualiza um projeto rodsaas já existente para a versão atual de todas as skills de uma vez — lê o rodsaas.json, e para cada parte instalada (base, add-ons e apps como CRM, Forms, Agenda, Suporte, Tarefas, Páginas, Pessoas, Financeiro, Comercial, ERP e workstation, mais os motores de WhatsApp e Fiscal quando um app precisa deles) roda o modo revisão da skill dela, um módulo por vez, com a tabela de lacunas, migrations só aditivas, testes e commit por módulo, e um arquivo de progresso que deixa retomar de onde parou. Use quando o usuário pedir para atualizar, refatorar ou revisar todos os módulos, trazer o projeto para a versão nova do plugin, aplicar as melhorias novas (ex.: a Agenda com recepção, comissões e clube), ou chamar /rodsaas:atualizar (opcionalmente com os módulos: /rodsaas:atualizar agenda erp).
 ---
 
 # rodsaas · atualizar
@@ -26,12 +26,26 @@ Leia `rodsaas.json` (`presets`, `addons`, `apps`) e monte a fila só com o que e
 | 1 | base da API | `backend` | auth, empresas, planos, acessos por pessoa: tudo depende |
 | 2 | base do painel | `frontend` e `apps` (casca de apps) | telas, componentes, trilho |
 | 3 | add-ons | `notificacoes`, `email`, `uploads` | os apps registram avisos e anexos neles |
+| 3b | motores compartilhados | `whatsapp`, `fiscal` (ver abaixo) | os apps novos mandam mensagem e emitem nota por eles |
 | 4 | apps | `crm`, `forms`, `agenda`, `helpdesk`, `tarefas`, `notion`, `rh`, `financeiro`, `comercial`, `erp` | nessa ordem: os de baixo usam os de cima (Agenda usa Forms e Financeiro; Comercial e ERP usam CRM e Financeiro) — integração com app que ainda vai ser atualizado fica para a passada dele |
 | 5 | cobrança por app | `workstation` | catálogo, preços e segmentos dos apps já atualizados |
 | 6 | site | `landing` | textos e prints do catálogo novo |
 | 7 | fechamento | `verify` (bateria completa) | prova que nada regrediu |
 
-Preset novo que o projeto ainda não tem (ex.: ERP) **não entra** sem o usuário pedir; liste no relatório como disponível.
+Preset novo que o projeto ainda não tem (ex.: ERP) **não entra** sem o usuário pedir; liste no relatório como disponível. Os **motores compartilhados** são a exceção (abaixo): entram quando um app atualizado precisa deles.
+
+## Motores compartilhados: WhatsApp e Fiscal
+
+Dois add-ons que vários apps usam. Os dois são **motores com drivers trocáveis**: o projeto guarda as regras, os dados e um contrato único de driver; cada provedor é só uma peça de transmissão. A atualização instala **sempre com o driver falso** (funciona em dev e no `/rodsaas:verify`); o provedor de verdade é escolha do usuário, perguntada uma vez e nunca inventada.
+
+| Motor | Skill | Entra quando | Drivers |
+|---|---|---|---|
+| WhatsApp | `whatsapp` | a fila tem `agenda`, `crm`, `helpdesk`, `comercial` ou `financeiro` (ou o usuário pede) | falso (agora); depois: Meta (API oficial, nativa), Zenvia, RodTicket |
+| Fiscal (NF-e, NFC-e, NFS-e) | `fiscal` | a fila tem `erp` ou `financeiro` (ou o usuário pede) | falso (agora); depois: provedores (Focus NFe, NFE.io, PlugNotas, Nuvem Fiscal) e integração nativa com as SEFAZ |
+
+- Rode o motor **antes** dos apps que dependem dele (posição 3b); os apps ligam nele na passada deles (ex.: confirmação da Agenda pelo WhatsApp, NFC-e no PDV do ERP).
+- Se a versão instalada do plugin ainda não tem a skill do motor (`skills/whatsapp` ou `skills/fiscal`), **não improvise**: marque ⏳ "aguardando a skill" no progresso, siga com os apps (eles continuam com o nível sem o motor — links `wa.me`, comprovante "sem valor fiscal") e liste no relatório.
+- Credenciais do provedor (token, certificado A1) só pelo usuário, criptografadas; nunca no código nem no progresso.
 
 ## Por módulo
 
