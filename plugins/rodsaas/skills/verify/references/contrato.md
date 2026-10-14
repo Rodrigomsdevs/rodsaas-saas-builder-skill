@@ -131,6 +131,7 @@ Quando `rodsaas.json → presets` (ou `addons`) tem um item listado em `contract
 | `notion` | `skills/notion/references/04-frontend.md` (seção "Contrato testável"), `03-editor.md` e os formatos ★ de `02-api.md` | `suite/tests/15-paginas.spec.ts` |
 | `uploads` (add-on) | rotas ★ de `skills/uploads/references/01-backend.md` | `suite/tests/16-uploads.spec.ts` |
 | `email` (add-on, o `backend` já instala) | `skills/email/references/02-webhooks-e-supressao.md` (rota `POST /v1/webhooks/resend`, fora do OpenAPI, e as rotas de e-mails com problema e supressão) | `suite/tests/18-email.spec.ts` (assina os eventos com o `RESEND_WEBHOOK_SECRET` do `api/.env`) |
+| `workstation` (add-on) | `skills/workstation/references/05-telas.md` (seção "Contrato testável") e as rotas ★ de `03-cobranca.md` e `02-cadastro-e-onboarding.md`; com `billing.model: "apps"` a parte antiga de planos é pulada | `suite/tests/19-workstation.spec.ts` |
 | `notificacoes` (add-on) | `skills/notificacoes/references/06-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` (inclui o descadastro público e os avisos da base `org.member_joined`/`org.role_changed`) | `suite/tests/17-notificacoes.spec.ts` |
 
 Em todos os presets, o contrato é o **mínimo** que dá para conferir de fora; o escopo de cada um é a referência inteira da skill (cada SKILL.md tem "Como trabalhar" e "Pronto quando" por fase).

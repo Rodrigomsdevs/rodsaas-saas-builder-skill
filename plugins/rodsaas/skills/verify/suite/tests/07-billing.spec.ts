@@ -1,12 +1,17 @@
 import { test, expect } from "@playwright/test";
 import { billingMode, call, me, newUser, ok, plansFromApi } from "../support/api";
 import { ownerWithMember, signUp, submitWithRateLimitRetry } from "../support/ui";
+import { cfg } from "../support/config.mjs";
 
 const card = (page: import("@playwright/test").Page, id: string) => page.locator(`[data-testid="plan-card"][data-plan="${id}"]`);
 const subscribeBtn = (page: import("@playwright/test").Page, id: string) =>
   page.locator(`[data-testid="plan-subscribe"][data-plan="${id}"]`);
 
 test.describe("Plano e cobrança", () => {
+  test.beforeEach(() => {
+    test.skip(cfg.billingModel === "apps", "projeto com a workstation: a cobrança é por app (parte Workstation)");
+  });
+
   test("owner vê os planos, o atual, o uso e o botão de assinar", async ({ page, request }) => {
     await signUp(page, "billing", "/configuracoes/plano");
     const { all, paid } = await plansFromApi(request);

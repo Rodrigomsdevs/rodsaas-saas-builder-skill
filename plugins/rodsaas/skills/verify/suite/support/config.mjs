@@ -48,6 +48,7 @@ export const cfg = {
   mailpitURL: trim(process.env.MAILPIT_URL ?? mailpitFromCompose() ?? "http://localhost:8025"),
   presets: rs.presets ?? [],
   addons: rs.addons ?? [],
+  billingModel: rs.billing?.model ?? "plans",
   resendWebhookSecret: process.env.RESEND_WEBHOOK_SECRET ?? apiEnv("RESEND_WEBHOOK_SECRET"),
   apps: Array.isArray(rs.apps) ? rs.apps : null,
   productName: rs.product?.name ?? null,

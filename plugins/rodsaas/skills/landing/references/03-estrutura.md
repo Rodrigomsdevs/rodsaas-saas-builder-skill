@@ -22,7 +22,7 @@ site/src/
 │   ├── sitemap.ts · robots.ts   # export const dynamic = "force-static"
 │   └── opengraph-image.tsx (+ por rota)  # 05-seo-e-publicacao.md
 ├── components/             # lista do 02-design.md
-├── content/catalogo.json · site.json · depoimentos.json (opcional)
+├── content/catalogo.json · site.json · depoimentos.json (opcional)   # com a workstation: catalogo.json copiado de api/src/config/catalogo.json
 └── lib/catalog-lib.ts      # porte do scripts/catalog-lib.mjs + testes (Vitest)
 ```
 

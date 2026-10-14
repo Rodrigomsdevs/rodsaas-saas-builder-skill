@@ -187,6 +187,10 @@ test.describe("API · sessão e empresas", () => {
 });
 
 test.describe("API · planos e cobrança", () => {
+  test.beforeEach(() => {
+    test.skip(cfg.billingModel === "apps", "projeto com a workstation: a cobrança é por app (parte Workstation)");
+  });
+
   test("planos com preço, /v1/me com modo de cobrança e free não é comprável", async () => {
     const ctx = await pwRequest.newContext();
     await register(ctx, newUser("plans"));

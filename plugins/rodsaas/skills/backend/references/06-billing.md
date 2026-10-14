@@ -1,5 +1,7 @@
 # Billing (planos, assinatura e Stripe)
 
+> Este é o modelo **por plano** (padrão). Para cobrança **por app** (cada empresa liga os apps que usa, teste grátis, Completo), rode a `/rodsaas:workstation`: ela estende o que está aqui (mesma `Subscription`, mesmo webhook, mesmos guards) e grava `billing.model: "apps"` no `rodsaas.json`.
+
 ## Princípios
 
 - **Planos ficam em código** (`config/plans.ts`): nome, limites, features **e preços**. A Stripe é sincronizada a partir dele por um comando (`npm run billing:sync`); ninguém copia `price_...` para o `.env`.

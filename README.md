@@ -71,6 +71,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
 | 📧 | **`/rodsaas:email`** | Todos os e-mails pelo **Resend** (envio, status de entrega, lista de supressão e recebimento), Mailpit em dev — o `backend` já instala sozinho; em projeto antigo, roda em modo revisão. Passo a passo em [E-mails com Resend](#-e-mails-com-resend-envio-e-recebimento) |
+| 🧰 | **`/rodsaas:workstation`** | Transforma o projeto numa **workstation** (estilo Zoho One): cada empresa faz o onboarding, testa tudo grátis por 14 dias, escolhe os apps e paga por app (por pessoa que usa) ou o Completo, com loja de apps, acesso por pessoa e app bloqueado só para leitura. Do cadastro ao cancelamento |
 | 🛍️ | **`/rodsaas:landing`** | Cria o **site de vendas** (`site/`): home, página de cada app (os prontos e os futuros como "Em breve" com lista de espera), preços com calculadora, prints e vídeos tirados do sistema de verdade, SEO, checagem automática e publicação no domínio raiz. Rode de novo a cada app novo |
 | 🔔 | **`/rodsaas:notificacoes`** | Sino com contador, central de notificações, preferências por tipo (no app, e-mail na hora, resumo diário), e-mail agrupado com descadastro de um clique — um só serviço para todos os apps; `tarefas`, `crm`, `forms`, `agenda` e `helpdesk` já instalam sozinhos |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
@@ -93,7 +94,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:landing   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:workstation   →   /rodsaas:landing   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -116,7 +117,7 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações e +2 do e-mail com Resend, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações, +2 do e-mail com Resend e +7 da workstation, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |
@@ -265,6 +266,7 @@ plugins/rodsaas/skills/
 ├── helpdesk/   SKILL.md + references/ + scripts/helpdesk-lib.mjs (+ testes)
 ├── agenda/     SKILL.md + references/ + scripts/agenda-lib.mjs (+ testes)
 ├── uploads/    SKILL.md + references/       → add-on de arquivos
+├── workstation/ SKILL.md + references/ + scripts/workstation-lib.mjs (+ testes) → cobrança por app, onboarding, loja
 ├── landing/    SKILL.md + references/ + assets/catalogo.json (todos os apps) + scripts/ (catalog-lib, capture, check-site)
 ├── email/      SKILL.md + references/ + scripts/email-lib.mjs (+ testes) → Resend: envio, webhook, recebimento
 ├── notificacoes/ SKILL.md + references/ + scripts/notifications-lib.mjs (+ testes) → add-on de notificações

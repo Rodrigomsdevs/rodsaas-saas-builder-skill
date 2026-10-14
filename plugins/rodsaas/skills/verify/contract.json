@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -1651,6 +1651,146 @@
         {
           "method": "delete",
           "path": "/v1/email-suppressions/{address}"
+        }
+      ]
+    },
+    "workstation": {
+      "when": "rodsaas.json → addons inclui \"workstation\"",
+      "routes": [
+        "/boas-vindas",
+        "/configuracoes/assinatura"
+      ],
+      "testids": [
+        "onboarding-resume",
+        "onboarding-wizard",
+        "onboarding-step",
+        "onboarding-segment",
+        "onboarding-team-size",
+        "onboarding-app",
+        "onboarding-estimate",
+        "onboarding-invite-email",
+        "onboarding-next",
+        "onboarding-finish",
+        "onboarding-skip",
+        "trial-banner",
+        "trial-days",
+        "trial-choose",
+        "app-store-card",
+        "app-activate",
+        "app-deactivate",
+        "app-access-open",
+        "app-access-dialog",
+        "app-access-member",
+        "app-access-delta",
+        "app-access-save",
+        "ws-summary",
+        "ws-item",
+        "ws-model-apps",
+        "ws-model-completo",
+        "ws-cycle",
+        "ws-app-toggle",
+        "ws-seats",
+        "ws-employees",
+        "ws-total",
+        "ws-best",
+        "ws-checkout",
+        "ws-preview-dialog",
+        "ws-preview-confirm",
+        "ws-cancel",
+        "ws-resume",
+        "app-locked",
+        "app-locked-cta",
+        "app-no-access"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/workstation/catalog"
+        },
+        {
+          "method": "get",
+          "path": "/v1/workstation/subscription"
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/quote",
+          "body": [
+            "apps",
+            "users",
+            "employees",
+            "cycle"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/preview",
+          "body": [
+            "model",
+            "apps",
+            "cycle"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/checkout",
+          "body": [
+            "model",
+            "apps",
+            "cycle"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/change",
+          "body": [
+            "model",
+            "apps",
+            "cycle"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/onboarding",
+          "body": [
+            "segment",
+            "apps",
+            "invites"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/workstation/apps/{appId}/access"
+        },
+        {
+          "method": "put",
+          "path": "/v1/workstation/apps/{appId}/access",
+          "body": [
+            "userIds",
+            "confirm"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/apps/{appId}/activate"
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/apps/{appId}/deactivate"
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/cancel"
+        },
+        {
+          "method": "post",
+          "path": "/v1/workstation/resume"
+        },
+        {
+          "method": "post",
+          "path": "/v1/billing/fake/simulate",
+          "body": [
+            "event"
+          ]
         }
       ]
     }

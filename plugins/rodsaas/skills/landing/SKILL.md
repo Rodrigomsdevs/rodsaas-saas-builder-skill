@@ -48,7 +48,7 @@ Se `site/` já existe, **não gere de novo**:
 |---|---|
 | Nome do produto e domínio do site | `rodsaas.json → product.name`; site no domínio raiz (`usebancada.app`), painel em `app.` |
 | Para quem é (segmento principal) | PMEs brasileiras de serviços (clínicas, agências, comércio); define exemplos e a ordem dos apps na home |
-| Preços | os do catálogo (sugestão: CRM R$ 39/vendedor, Suporte R$ 39/atendente, Agenda R$ 19/profissional, Tarefas R$ 12, Páginas R$ 9, Forms a partir de R$ 29, Suíte RH R$ 5/colaborador, Completo R$ 69/usuário, grátis até 2 usuários, anual = 10 meses); se o projeto já tem `config/plans.ts`, os de lá vencem |
+| Preços | os do catálogo (sugestão: CRM R$ 39/vendedor, Suporte R$ 39/atendente, Agenda R$ 19/profissional, Tarefas R$ 12, Páginas R$ 9, Forms a partir de R$ 29, Suíte RH R$ 5/colaborador, Completo R$ 69/usuário, grátis até 2 usuários, anual = 10 meses); com a `/rodsaas:workstation`, os de `api/src/config/catalogo.json` vencem (mesma conta no site e no painel) |
 | Dados legais | razão social, CNPJ, endereço, e-mail de contato e do encarregado (LGPD). **Sem isso, termos e privacidade não são publicados** |
 | Prova social real | nenhuma (seção não aparece). Depoimentos e logos só com autorização por escrito, em `src/content/depoimentos.json` |
 | Contato | e-mail de suporte do `/rodsaas:email` (`RESEND_SUPPORT_EMAIL`); WhatsApp comercial opcional |

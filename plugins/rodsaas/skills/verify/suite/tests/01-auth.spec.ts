@@ -14,7 +14,13 @@ test.describe("Autenticação na interface", () => {
     await page.getByTestId("signup-org-name").fill(u.organizationName);
     const res = await submitWithRateLimitRetry(page, page.getByTestId("signup-submit"), "/v1/auth/register");
     expect(res.status(), "resposta do cadastro").toBeLessThan(300);
-    await expect(page).toHaveURL(/\/inicio/);
+    if (cfg.addons.includes("workstation")) {
+      // com a workstation, o cadastro termina no onboarding (que não trava o painel)
+      await expect(page).toHaveURL(/\/boas-vindas/);
+      await page.goto("/inicio");
+    } else {
+      await expect(page).toHaveURL(/\/inicio/);
+    }
     await expect(currentOrg(page)).toContainText(u.organizationName);
   });
 

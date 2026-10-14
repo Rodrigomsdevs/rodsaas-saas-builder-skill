@@ -250,3 +250,14 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 |---|---|
 | assinatura do webhook | `JSON.parse` antes de conferir (o corpo re-serializado não bate); conferência sem o horário (aceita evento capturado reenviado); segredo errado no `.env`; 500 para envio desconhecido ou tipo não tratado (o Resend reenvia sem parar); rota atrás da checagem de Origin |
 | supressão | devolução definitiva/spam sem gravar na lista; lista conferida só no driver `resend` (em dev, com Mailpit, o e-mail sai); devolução temporária suprimindo; `RESEND_WEBHOOK_SECRET` ausente no `api/.env` (o teste é pulado) |
+
+## Workstation (`19-workstation.spec.ts`, `/rodsaas:workstation`)
+
+| Teste | Causas comuns |
+|---|---|
+| teste e catálogo | empresa nascendo no grátis (sem `trial`); `trialEndsAt` em UTC errado; catálogo sem os apps "em breve" ou com preço para eles; app instalado faltando no catálogo |
+| onboarding | não desliga os apps não escolhidos; conteúdo inicial criado de novo ao refazer; convites não criados; segmento inválido aceito |
+| assinar | itens sem a quantidade de pessoas; total diferente da calculadora (conta separada no front); Completo sem o mínimo de 3; assinar duas vezes |
+| acesso por pessoa | acesso só escondido na tela (API responde para quem não tem acesso); dar acesso além dos assentos cobrando sem confirmar; tirar acesso reduzindo a cobrança sozinho |
+| fim do teste | bloqueio que esconde os dados (GET 403); app bloqueado aceitando escrita; grátis sem limite de pessoas; assinar não libera na hora |
+| telas | onboarding sem os apps da landing marcados; banner do teste ausente; total da assinatura sem as pessoas; mudança sem prévia; app bloqueado sem aviso |

@@ -1,5 +1,7 @@
 # Plano e cobrança (`/configuracoes/plano`)
 
+> Com a `/rodsaas:workstation` (`rodsaas.json → billing.model: "apps"`), esta tela só existe para empresas no plano antigo (`legacy`); as outras usam `/configuracoes/assinatura` (`skills/workstation/references/05-telas.md`).
+
 Esta tela é onde o SaaS ganha dinheiro: tem que funcionar em **todas** as situações, inclusive sem Stripe configurada (modo de teste). Nunca esconda um botão em silêncio — se a pessoa não pode agir, diga por quê.
 
 Dados: `GET /v1/me` (`plan`, `billing.mode`, `billing.canManage`), `GET /v1/billing/plans`, `GET /v1/billing/subscription` (owner/admin).
