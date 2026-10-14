@@ -83,6 +83,8 @@ export const BASE_TYPES = [
     template: "{actor} {data.verb} o seu acesso ao {data.app}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "org.access_issue", appId: "geral", label: "Acesso não aplicado", description: "Parte dos acessos de um convite não pôde ser aplicada", roles: ["OWNER", "ADMIN"],
     template: "Não deu para liberar o {data.app} para {data.person}: {data.reason}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "whatsapp.connection_error", appId: "geral", label: "WhatsApp desconectado", description: "A conexão do WhatsApp da empresa expirou ou deu erro (owners e admins)", roles: ["OWNER", "ADMIN"],
+    template: "O WhatsApp da empresa desconectou: {data.reason}. Reconecte para as mensagens voltarem a sair", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "billing.payment_failed", appId: "geral", label: "Pagamento recusado", description: "Cobrança da assinatura que falhou (owners)", roles: ["OWNER"],
     template: "O pagamento da assinatura do plano {data.planName} falhou", group: { by: "none" }, critical: true },
   { type: "billing.trial_ending", appId: "geral", label: "Fim do período de teste", description: "3 dias antes do fim do teste (owners)", roles: ["OWNER"],

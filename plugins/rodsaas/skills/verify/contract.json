@@ -1,5 +1,5 @@
 {
-  "version": 18,
+  "version": 19,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -3345,6 +3345,84 @@
         {
           "method": "get",
           "path": "/v1/erp/reports/abc"
+        }
+      ]
+    },
+    "whatsapp": {
+      "when": "rodsaas.json → addons inclui \"whatsapp\" (motor de WhatsApp)",
+      "routes": [
+        "/configuracoes/whatsapp",
+        "/whatsapp"
+      ],
+      "testids": [
+        "wa-connection",
+        "data-status",
+        "wa-driver",
+        "wa-phone",
+        "wa-connect",
+        "wa-webhook-secret",
+        "wa-template-row",
+        "wa-template-new",
+        "wa-conversation-row",
+        "data-phone",
+        "wa-thread",
+        "wa-message",
+        "data-direction",
+        "wa-window",
+        "data-open",
+        "wa-reply",
+        "wa-reply-send",
+        "wa-reply-template"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/whatsapp/connection"
+        },
+        {
+          "method": "put",
+          "path": "/v1/whatsapp/connection",
+          "body": [
+            "driver",
+            "phone"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/whatsapp/connection"
+        },
+        {
+          "method": "get",
+          "path": "/v1/whatsapp/templates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/whatsapp/templates",
+          "body": [
+            "name",
+            "category",
+            "language",
+            "body"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/whatsapp/messages",
+          "body": [
+            "to"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/whatsapp/conversations"
+        },
+        {
+          "method": "get",
+          "path": "/v1/whatsapp/conversations/{id}/messages"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/whatsapp/webhook/{token}"
         }
       ]
     }

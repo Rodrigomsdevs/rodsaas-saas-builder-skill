@@ -30,7 +30,7 @@ Falha de envio: 3 novas tentativas; depois, `AgendaEvent` "email_failed" visíve
 Barbearia e clínica confirmam no WhatsApp, não no e-mail. A v1 trabalha em dois níveis:
 
 1. **Sem integração (sempre)**: cada aviso ao cliente tem a **mensagem pronta** (`clientMessage`, texto curto com o link de gerenciar/pagar/aceitar) e o link `wa.me` (`waLink`, telefone normalizado com `normalizePhoneBR`). O painel, a recepção, os retornos e a lista de espera têm o botão **WhatsApp** que abre o app com o texto preenchido — a recepção manda com um toque, do número da empresa. A API devolve os links no detalhe do agendamento (`whatsapp.links`).
-2. **Com o add-on `whatsapp`** (quando existir: API oficial da Meta ou provedor): `notifyClient(appointment, kind)` manda e-mail **e** a mensagem automática com o mesmo texto (modelos aprovados), e as respostas "1 = confirmo" voltam como confirmação. Até lá, `notifyClient` só manda e-mail e registra no histórico "WhatsApp manual disponível".
+2. **Com o add-on `whatsapp`** (`/rodsaas:whatsapp`, motor com drivers: falso, Meta, Zenvia, RodTicket): `notifyClient(appointment, kind)` manda e-mail **e** a mensagem automática com o mesmo texto (modelos aprovados), e as respostas "1 = confirmo" voltam como confirmação. Sem o add-on conectado, `notifyClient` só manda e-mail e os botões `wa.me` continuam. Modelos usados: `agenda_confirmacao`, `agenda_lembrete`, `agenda_sinal`, `espera_vaga` (`skills/whatsapp/references/03-telas-e-integracoes.md`).
 
 Cliente que pediu para não receber (`whatsappOptOut`) não aparece nos botões nem nas mensagens automáticas.
 

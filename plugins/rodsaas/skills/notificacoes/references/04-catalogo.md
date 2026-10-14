@@ -27,6 +27,7 @@ O boot falha se `validateCatalog(getCatalog())` tiver erro. App novo (`/rodsaas:
 | `org.access_requested` | quem pode aprovar (owners; admins quando cabe nos assentos) | por empresa, 10 min | imediato |
 | `org.access_decided` | quem pediu (ou ganhou o acesso pelo pedido do convite) | não | imediato |
 | `org.access_issue` | quem convidou (ou fez o ajuste) | não | imediato |
+| `whatsapp.connection_error` | owners e admins (add-on `whatsapp`: conexão expirou ou erro `AUTH` do provedor) | não | imediato |
 | `billing.payment_failed` | owners | não | imediato, **obrigatório** |
 | `billing.trial_ending` | owners | não | imediato |
 | `files.quota_warning` (com `uploads`) | owners e admins | não | imediato |

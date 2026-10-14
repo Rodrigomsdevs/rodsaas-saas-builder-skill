@@ -353,3 +353,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | papéis | membro sem papel entrando; custo visível para vendedor/caixa (deveria vir `null`); caixa cadastrando produto; vendedor vendo pedido de outro |
 | integração e relatórios | venda a prazo sem contas a receber, ou uma só com o total em vez de uma por parcela; curva ABC pelo bruto ou sem descontar devoluções |
 | telas | dinheiro com `parseFloat`/`parseInt` ("25,90" vira R$ 25,00); margem calculada sobre o custo (markup); saldo inicial ignorado; PDV ignorando "2*código"; código inexistente sem aviso; troco não mostrado; comprovante sem "sem valor fiscal" |
+
+## WhatsApp (`26-whatsapp.spec.ts`, `/rodsaas:whatsapp`)
+
+| Teste | Causas comuns |
+|---|---|
+| conexão | provedor ou número sem validação; segredo do webhook voltando no GET; modelos do sistema não criados |
+| modelos | validação só na tela; nome repetido aceito; modelo reprovado sendo enviado; variável faltando enviada em branco |
+| janela de 24 h | texto livre mandado direto (o provedor recusa depois); janela contada pela última mensagem nossa em vez da do cliente |
+| webhook | `JSON.parse` antes de conferir a assinatura; evento repetido duplicando a mensagem; status sobrescrito fora de ordem |
+| descadastro | PARAR ignorado; VOLTAR sem efeito; descadastro só num app |
+| erros | número sem normalizar; erro do provedor mostrado cru (sem tradução); envio sem fila |
+| Agenda | confirmação não sai pelo WhatsApp; resposta "1" sem roteamento para o agendamento (ou confirmando no "2") |
+| telas | conectar sem mandar o número; caixa sem responder ou com resposta fora da janela |
+
