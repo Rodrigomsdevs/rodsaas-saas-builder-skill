@@ -367,3 +367,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | Agenda | confirmação não sai pelo WhatsApp; resposta "1" sem roteamento para o agendamento (ou confirmando no "2") |
 | telas | conectar sem mandar o número; caixa sem responder ou com resposta fora da janela |
 
+## Fiscal (`27-fiscal.spec.ts`, `/rodsaas:fiscal`)
+
+| Teste | Causas comuns |
+|---|---|
+| emitente | CNPJ só pelo tamanho (sem DV); município sem 7 dígitos aceito; token/certificado voltando no GET; regras padrão duplicadas a cada salvar; produção liberada com o driver de teste |
+| NF-e | chave montada fora da ordem ou DV errado; número por `max()+1` (repete ou pula); CFOP fixo 5102 para outro estado; desconto todo no primeiro item; frete dividido igual entre itens; clique duplo gastando dois números |
+| validação e rejeição | número gasto antes de validar; validação só na tela; rejeitada ganhando número novo ao reenviar; editar nota autorizada; denegada tratada como rejeitada |
+| NFC-e | QR Code sem o CSC no hash ou em minúsculas; NFC-e para outro estado; CPF não exigido acima do limite; pagamento menor aceito |
+| cancelamento e correção | prazo fixo (ignora o da UF); justificativa sem limite; cancelar duas vezes; carta de correção na NFC-e; sequência que não avança |
+| inutilização | faixa com nota emitida aceita; numeração que não pula a faixa |
+| contingência | SEFAZ fora vira rejeição (a venda para); contingência sem trocar o tpEmis da chave; NF-e marcada como contingência offline |
+| ERP | NCM ignorado (nota sem NCM); destinatário sem a UF do cadastro; faturar o mesmo pedido duas vezes; faturar orçamento |
+| telas | CNPJ enviado sem o valor digitado; faixa de homologação ausente; preço em reais lido como centavos; cancelar chamando outra rota |
+

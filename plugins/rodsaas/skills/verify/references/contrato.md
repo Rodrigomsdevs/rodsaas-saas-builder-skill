@@ -144,6 +144,7 @@ Quando `rodsaas.json → presets` (ou `addons`) tem um item listado em `contract
 | `comercial` (app Comercial) | `skills/comercial/references/08-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` (inclui a proposta pública `/v1/public/com/proposals/{token}`, a assinatura pública `/v1/public/com/sign/{token}` e a verificação `/v1/public/com/verify`) | `suite/tests/22-comercial.spec.ts` |
 | `erp` (app ERP) | `skills/erp/references/09-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` (produtos com grade e kit, preço, estoque, vendas, PDV, compras e curva ABC) | `suite/tests/24-erp.spec.ts` |
 | `whatsapp` (add-on) | `skills/whatsapp/references/03-telas-e-integracoes.md` (seção "Contrato testável") e as rotas ★ de `02-api-e-webhook.md` | `suite/tests/26-whatsapp.spec.ts` |
+| `fiscal` (add-on) | `skills/fiscal/references/03-telas-e-integracoes.md` (seção "Contrato testável") e as rotas ★ de `02-api.md` | `suite/tests/27-fiscal.spec.ts` |
 | `notificacoes` (add-on) | `skills/notificacoes/references/06-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` (inclui o descadastro público e os avisos da base `org.member_joined`/`org.role_changed`) | `suite/tests/17-notificacoes.spec.ts` |
 
 Em todos os presets, o contrato é o **mínimo** que dá para conferir de fora; o escopo de cada um é a referência inteira da skill (cada SKILL.md tem "Como trabalhar" e "Pronto quando" por fase).

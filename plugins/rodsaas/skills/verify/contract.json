@@ -1,5 +1,5 @@
 {
-  "version": 19,
+  "version": 20,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -3423,6 +3423,135 @@
         {
           "method": "post",
           "path": "/v1/public/whatsapp/webhook/{token}"
+        }
+      ]
+    },
+    "fiscal": {
+      "when": "rodsaas.json → addons inclui \"fiscal\" (motor de NF-e/NFC-e)",
+      "routes": [
+        "/configuracoes/fiscal",
+        "/fiscal"
+      ],
+      "testids": [
+        "fiscal-issuer-status",
+        "data-status",
+        "fiscal-issuer-form",
+        "fiscal-cnpj",
+        "fiscal-legal-name",
+        "fiscal-ie",
+        "fiscal-uf",
+        "fiscal-city-code",
+        "fiscal-regime",
+        "fiscal-driver",
+        "fiscal-save",
+        "fiscal-rule-row",
+        "fiscal-test-banner",
+        "fiscal-doc-row",
+        "data-model",
+        "data-number",
+        "fiscal-new",
+        "fiscal-doc-form",
+        "fiscal-model",
+        "fiscal-recipient-doc",
+        "fiscal-recipient-name",
+        "fiscal-recipient-uf",
+        "fiscal-item-description",
+        "fiscal-item-ncm",
+        "fiscal-item-unit",
+        "fiscal-item-qty",
+        "fiscal-item-price",
+        "fiscal-emit",
+        "fiscal-doc-status",
+        "fiscal-doc-key",
+        "fiscal-doc-xml",
+        "fiscal-doc-danfe",
+        "fiscal-cancel",
+        "fiscal-cancel-reason",
+        "fiscal-cancel-confirm"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/fiscal/issuer"
+        },
+        {
+          "method": "put",
+          "path": "/v1/fiscal/issuer",
+          "body": [
+            "cnpj",
+            "legalName",
+            "ie",
+            "uf",
+            "cityCode",
+            "regime"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fiscal/rules"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/documents",
+          "body": [
+            "model",
+            "items"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fiscal/documents"
+        },
+        {
+          "method": "get",
+          "path": "/v1/fiscal/documents/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/fiscal/documents/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/documents/{id}/transmit"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/documents/{id}/cancel",
+          "body": [
+            "justification"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/documents/{id}/corrections",
+          "body": [
+            "text"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fiscal/documents/{id}/xml"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/voids",
+          "body": [
+            "model",
+            "from",
+            "to",
+            "justification"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fiscal/fake/outage",
+          "body": [
+            "on"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/invoice"
         }
       ]
     }
