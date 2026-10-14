@@ -6,6 +6,7 @@ export declare const cfg: {
   mailpitURL: string;
   presets: string[];
   addons: string[];
+  resendWebhookSecret: string | null;
   apps: { id: string; name: string; home: string }[] | null;
   productName: string | null;
   reportDir: string;

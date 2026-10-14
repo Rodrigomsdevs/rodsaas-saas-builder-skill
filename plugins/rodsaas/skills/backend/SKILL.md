@@ -21,7 +21,7 @@ O objetivo não é só "funcionar": é que todo projeto gerado pela skill seja *
 | Auth | JWT de acesso curto + refresh token opaco com rotação (feito à mão, sem lib de auth) |
 | Billing | Stripe (Checkout + Customer Portal + webhooks) |
 | Fila | pg-boss (usa o próprio Postgres) |
-| E-mail | Provider abstrato; SMTP em produção, Mailpit em dev |
+| E-mail | `Mailer` único com fila: **Resend** em produção (envio, webhook de entrega/supressão e recebimento), Mailpit em dev — pela skill `/rodsaas:email` |
 | Docs | OpenAPI gerado das rotas + UI em `/docs` |
 | Testes | Vitest contra um Postgres real (docker) |
 | Lint/format | Biome |
@@ -98,8 +98,8 @@ CRUD da organização, listagem/alteração de papel/remoção de membros, convi
 → Leia `references/06-billing.md`.
 
 ### Fase 6 — Plataforma
-Audit log, pg-boss (envio de e-mail, limpeza de tokens expirados), provider de e-mail, rate limit por organização, idempotency-key.
-→ Leia `references/07-seguranca.md`.
+Audit log, pg-boss (envio de e-mail, limpeza de tokens expirados), rate limit por organização, idempotency-key. **E-mail**: execute as fases da skill **`/rodsaas:email`** (leia o `SKILL.md` dela): `Mailer` com drivers `smtp` (Mailpit) e `resend`, fila, supressão, webhook `/v1/webhooks/resend` e recebimento. Sem chave do Resend, tudo funciona com o Mailpit; registre `email` em `rodsaas.json → addons`.
+→ Leia `references/07-seguranca.md` e as referências do `/rodsaas:email`.
 
 ### Fase 7 — Módulo de exemplo
 Um CRUD completo (`projects`) usando todos os padrões: tenant, RLS, paginação, erros, guard de limite de plano, OpenAPI, audit, testes. Ele é o **molde** que a skill de módulos copia, então capriche e mantenha simples.
@@ -123,7 +123,7 @@ Quando surgir um caso que a skill não cobre, decida por estes princípios:
 
 Termine com uma mensagem curta contendo:
 - como subir (`docker compose up -d`, `npm run db:migrate`, `npm run dev`) e onde está a doc (`/docs`);
-- variáveis de ambiente que o usuário precisa preencher (Stripe, SMTP, segredos);
+- variáveis de ambiente que o usuário precisa preencher (Stripe, Resend — `RESEND_*`, com o passo a passo do domínio e o `npm run email:setup` —, segredos);
 - o que precisou desviar da skill porque a doc atual de algum pacote mudou;
 - próximo passo natural: `/rodsaas:frontend` para gerar o `web/` (ele usa o `openapi.json` exportado e o `rodsaas.json`).
 

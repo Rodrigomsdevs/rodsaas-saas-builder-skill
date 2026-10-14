@@ -23,7 +23,7 @@ api/
 │   │   ├── usage.ts            # contadores de uso para os limites de plano
 │   │   ├── crypto.ts           # tokens aleatórios, sha256, argon2
 │   │   ├── stripe.ts
-│   │   ├── mailer.ts           # interface + SMTP
+│   │   ├── email/              # Mailer, drivers smtp/resend/memory, webhook, recebimento (skill /rodsaas:email)
 │   │   └── jobs.ts             # pg-boss
 │   ├── plugins/
 │   │   ├── request-context.ts  # request id, logger child
@@ -131,11 +131,20 @@ BILLING_MODE=auto                        # auto | stripe | fake | disabled (auto
 DOCS_ENABLED=true                        # false por padrão em produção
 TRUST_PROXY=false                        # true atrás do nginx (o /rodsaas:domain liga)
 
+# E-mail (skill /rodsaas:email). Dev: RESEND_API_KEY vazio = Mailpit. Produção: Resend.
+MAIL_DRIVER=                             # vazio = resend se houver RESEND_API_KEY, senão smtp
+RESEND_API_KEY=                          # re_...
+RESEND_DOMAIN="seusaas.com.br"           # domínio verificado no Resend
+RESEND_FROM="NOME <no-reply@seusaas.com.br>"
+RESEND_REPLY_TO="NOME <suporte@seusaas.com.br>"
+RESEND_SUPPORT_EMAIL="NOME <suporte@seusaas.com.br>"
+RESEND_SUPPORT_NAME="NOME"
+RESEND_WEBHOOK_SECRET=                   # whsec_... (npm run email:setup -- --webhook https://api.../v1/webhooks/resend)
+RESEND_INBOUND_FORWARD_TO=               # opcional: caixa real que recebe o que chegou e nenhum app pegou
 SMTP_HOST=localhost
 SMTP_PORT=1025                           # mailpit em dev
 SMTP_USER=
 SMTP_PASS=
-MAIL_FROM="NOME <no-reply@seusaas.com>"
 ```
 
 `env.ts` valida tudo com Zod (inclusive tamanho mínimo dos segredos) e o processo encerra com mensagem clara se algo faltar. Os preços ficam em `config/plans.ts` e são enviados à Stripe pelo `npm run billing:sync`; não existe `STRIPE_PRICE_*` no `.env`. `BILLING_MODE=fake` com `NODE_ENV=production` reprova o boot.

@@ -1,6 +1,6 @@
 # Modelo de dados e regras
 
-Todas as tabelas têm `organizationId` e **RLS com `FORCE`**, menos as de busca pública (`HelpdeskPortalLookup`, `HelpdeskTokenLookup`, `HelpdeskInboundLookup` e `HelpdeskApiKeyLookup`, explicadas abaixo). Relações recebem o trigger `rodsaas_assert_same_org` (função da skill `module`). Horários em `timestamptz` (UTC); o horário de atendimento usa o fuso da empresa.
+Todas as tabelas têm `organizationId` e **RLS com `FORCE`**, menos as de busca pública (`HelpdeskPortalLookup`, `HelpdeskTokenLookup`, `HelpdeskInboundLookup`, `HelpdeskAddressLookup` e `HelpdeskApiKeyLookup`, explicadas abaixo). Relações recebem o trigger `rodsaas_assert_same_org` (função da skill `module`). Horários em `timestamptz` (UTC); o horário de atendimento usa o fuso da empresa.
 
 ## Configurações, filas e atendentes
 
@@ -195,6 +195,7 @@ A linha fica travada até o commit, então dois chamados simultâneos recebem n�
 model HelpdeskTokenLookup   { tokenHash String @id; organizationId String @db.Uuid; kind String /* TICKET | SESSION */; refId String @db.Uuid }
 model HelpdeskInboundLookup { inboundKeyHash String @id; organizationId String @db.Uuid; inboxId String @unique @db.Uuid }
 model HelpdeskApiKeyLookup  { keyHash String @id; organizationId String @db.Uuid; apiKeyId String @unique @db.Uuid }
+model HelpdeskAddressLookup { address String @id; organizationId String @db.Uuid; inboxId String @unique @db.Uuid }   // modo RESEND: acme@dominio → caixa (o handler do roteador de entrada consulta sem empresa ativa)
 ```
 
 ## Caixas de e-mail
@@ -206,14 +207,15 @@ model HelpdeskInbox {
   name            String                         // "Suporte"
   address         String                         // suporte@empresa.com.br (remetente das respostas)
   queueId         String   @db.Uuid              // fila dos chamados que entram por aqui
-  mode            String                         // IMAP | WEBHOOK
+  mode            String                         // RESEND | IMAP | WEBHOOK
+  inboundAddress  String?                        // modo RESEND: acme@RESEND_DOMAIN (único no sistema, via HelpdeskAddressLookup)
   imapHost        String?; imapPort Int?; imapSecure Boolean @default(true); imapUser String?
   imapPasswordEnc String?                        // AES-256-GCM com HELPDESK_ENCRYPTION_KEY
   imapFolder      String   @default("INBOX")
   imapLastUid     BigInt?                        // até onde já leu (UIDVALIDITY junto)
   imapUidValidity BigInt?
   smtpHost        String?; smtpPort Int?; smtpSecure Boolean @default(true); smtpUser String?
-  smtpPasswordEnc String?                        // sem SMTP próprio: sai pelo SMTP da base com Reply-To = address
+  smtpPasswordEnc String?                        // sem SMTP próprio: sai pelo Mailer da base (Resend) com Reply-To = endereço de recebimento
   inboundKeyPrefix String?                       // webhook: /v1/public/helpdesk/inbound/<key>
   status          String   @default("OK")        // OK | AUTH_ERROR | ERROR
   lastError       String?

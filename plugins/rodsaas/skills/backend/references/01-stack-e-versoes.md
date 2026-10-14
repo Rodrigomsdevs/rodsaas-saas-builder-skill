@@ -31,7 +31,9 @@ Para a configuração, consulte a documentação oficial **da versão que vai in
 | `pg-boss` | fila de jobs no Postgres | — |
 | `stripe` | SDK Stripe | fixar `apiVersion` na versão atual da API |
 | `argon2` | hash de senha (argon2id) | — |
-| `nodemailer` | SMTP | — |
+| `nodemailer` | SMTP (Mailpit em dev, driver `smtp`) | — |
+| `resend` | envio, recebimento e API do Resend (driver `resend`, skill `/rodsaas:email`) | conferir na doc atual os nomes de `emails.send`, `emails.receiving.get` e `webhooks` |
+| `svix` | verificar a assinatura do webhook do Resend | ou `resend.webhooks.verify`, se a versão do SDK tiver |
 | `pino` | logger (já vem com o Fastify; só configurar) | — |
 
 ### Desenvolvimento

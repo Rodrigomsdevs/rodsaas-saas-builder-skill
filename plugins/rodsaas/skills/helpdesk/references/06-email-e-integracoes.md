@@ -7,18 +7,23 @@ Duas formas de receber, por caixa (`HelpdeskInbox.mode`):
 | Modo | Como funciona | Quando usar |
 |---|---|---|
 | **IMAP** | job a cada minuto por caixa (`imapflow`): conecta, lê as mensagens novas por UID (guardando `imapLastUid` + `UIDVALIDITY`), processa e marca como lida (nunca apaga). Lock por caixa (`pg_try_advisory_lock`) para não ler duas vezes | a empresa já tem `suporte@empresa.com.br` no Gmail/Microsoft 365/Zoho/Locaweb; sem mexer em DNS |
-| **WEBHOOK** | o provedor de recebimento (Postmark, Mailgun, SendGrid, Cloudflare Email Workers) faz `POST` para `/v1/public/helpdesk/inbound/<chave>[/<provedor>]` | volume alto ou domínio dedicado (`suporte@ajuda.empresa.com.br`) |
+| **RESEND** (padrão quando o projeto tem o Resend com recebimento) | cada empresa ganha um endereço no domínio do produto, `<slug>@RESEND_DOMAIN` (ou `@HELPDESK_INBOUND_DOMAIN`, se definido); o handler `helpdesk` do roteador de entrada da base (`skills/email/references/03-recebimento.md`) recebe o `email.received` já normalizado e chama o `ingestEmail`. A empresa só encaminha o `suporte@empresa.com.br` dela (Gmail, Microsoft 365…) para esse endereço | o jeito mais simples: sem senha de caixa, sem DNS do cliente |
+| **WEBHOOK** | outro provedor de recebimento (Postmark, Mailgun, SendGrid, Cloudflare Email Workers) faz `POST` para `/v1/public/helpdesk/inbound/<chave>[/<provedor>]` | volume alto ou domínio dedicado (`suporte@ajuda.empresa.com.br`) sem Resend |
 
 Variáveis em `api/.env`:
 
 ```
 HELPDESK_ENCRYPTION_KEY=          # 32 bytes em base64 (openssl rand -base64 32); criptografa senhas IMAP/SMTP
-HELPDESK_MAIL_DOMAIN=             # domínio dos Message-ID que geramos (ex.: app.seusaas.com.br)
+HELPDESK_MAIL_DOMAIN=             # domínio dos Message-ID que geramos (padrão: RESEND_DOMAIN)
+HELPDESK_INBOUND_DOMAIN=          # opcional: domínio/subdomínio de recebimento dos endereços das empresas (padrão: RESEND_DOMAIN)
+HELPDESK_HOUSE_ORG_ID=            # opcional: empresa "da casa" — e-mails para RESEND_SUPPORT_EMAIL viram chamados nela (suporte do próprio SaaS)
 ```
+
+Modo **RESEND**: o endereço da empresa nasce do slug (`acme@mock-lab.dev`), editável por owner/admin (único, partes reservadas recusadas por `isReservedLocalPart`, só letras, números, `.`, `-`). A tela da caixa mostra o endereço com "copiar" e o passo a passo de encaminhamento do Gmail e do Microsoft 365 (confira o procedimento atual), e um botão **Mandar e-mail de teste** que confere a chegada. As respostas saem pelo `Mailer` da base com `From: "Acme Suporte" <no-reply@RESEND_DOMAIN>` e `Reply-To: acme@RESEND_DOMAIN` (a resposta do cliente volta pelo Resend para o chamado certo); com SMTP próprio da empresa configurado, sai como `suporte@empresa.com.br`.
 
 - Senhas: AES-256-GCM, IV aleatório; nunca voltam pela API. Gmail e Microsoft 365 exigem **senha de app** (ou OAuth): a tela explica com o passo a passo e link para a ajuda de cada um (confira o procedimento atual).
 - Erro de login → `status: AUTH_ERROR`, aviso no topo da caixa de entrada para owner/admin ("A caixa suporte@… parou de receber: confira a senha") e notificação; o job tenta de novo a cada 15 min, sem bloquear as outras caixas.
-- **Enviar**: com SMTP da caixa, sai como `suporte@empresa.com.br` (o cliente vê o endereço da empresa e a resposta volta para a caixa). Sem SMTP próprio, sai pelo SMTP da base com `From: "Acme Suporte" <no-reply@produto>` e `Reply-To: suporte@empresa.com.br` (ou o endereço de recebimento do webhook). Explique SPF/DKIM no README do projeto.
+- **Enviar**: com SMTP da caixa, sai como `suporte@empresa.com.br` (o cliente vê o endereço da empresa e a resposta volta para a caixa). Sem SMTP próprio, sai pelo `Mailer` da base (Resend em produção) com `From: "Acme Suporte" <no-reply@RESEND_DOMAIN>` e `Reply-To` = endereço de recebimento da caixa (modo RESEND: `acme@RESEND_DOMAIN`; webhook: o endereço do provedor; IMAP: `suporte@empresa.com.br`). SPF/DKIM/DMARC do domínio do produto: passo a passo do `/rodsaas:email` no README do projeto.
 
 ## Recebendo um e-mail (service `ingestEmail`)
 

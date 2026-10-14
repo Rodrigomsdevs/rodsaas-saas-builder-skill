@@ -16,6 +16,7 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER atendent
 - [ ] resposta pública (e-mail com `[#N]`), nota interna (nunca sai), menção, macro com variáveis e ações, anexos, colar imagem, rascunho que sobrevive a recarregar, colisão
 
 ## E-mail
+- [ ] modo RESEND (com o `/rodsaas:email`): endereço `<slug>@RESEND_DOMAIN` por empresa, handler `helpdesk` no roteador de entrada, encaminhamento do Gmail chegando como chamado e a resposta do cliente voltando para o mesmo chamado
 - [ ] caixa IMAP real (Gmail com senha de app ou outra) lendo e respondendo; caixa por webhook com o provedor ou `curl`
 - [ ] resposta do cliente pelo cliente de e-mail entra no mesmo chamado (Gmail e Outlook), sem a citação
 - [ ] `[#N]` de quem não participa vira chamado novo; resposta automática e devolução não geram confirmação nem loop; nosso endereço não abre chamado

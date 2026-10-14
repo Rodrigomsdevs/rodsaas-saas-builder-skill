@@ -101,9 +101,7 @@ Leitura: `GET /v1/audit` (owner/admin, `feature: 'audit_log'`), paginado por cur
 
 ## E-mail
 
-- `Mailer` é uma interface `{ send({ to, subject, html, text }) }` com implementação SMTP (nodemailer).
-- Em dev, SMTP aponta para o Mailpit (UI em `localhost:8025`). Nos testes, um mailer em memória para verificar envios.
-- Templates simples em TS (funções que devolvem `{ subject, html, text }`), em português.
+Tudo na skill **`/rodsaas:email`**: `Mailer` único com fila (`email.send`), drivers `smtp` (Mailpit em dev, UI em `localhost:8025`), `resend` (produção) e `memory` (testes), lista de supressão, webhook assinado `/v1/webhooks/resend` e recebimento. Templates em TS (funções que devolvem `{ subject, html, text }`) com o layout padrão, em português.
 
 ## Checklist de segurança (conferida na Fase 8)
 
@@ -120,5 +118,6 @@ Leitura: `GET /v1/audit` (owner/admin, `feature: 'audit_log'`), paginado por cur
 - [ ] Redact de segredos no logger
 - [ ] Env validado no boot (segredos com tamanho mínimo)
 - [ ] Webhook Stripe com verificação de assinatura e idempotência
+- [ ] Webhook do Resend com assinatura (Svix) no corpo cru, horário de ±5 min e idempotência por `svix-id`
 - [ ] 500 sem detalhe interno em produção
 - [ ] `/docs` desligado por padrão em produção

@@ -9,7 +9,7 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | quase todos falham no primeiro `expect(app-shell)` | testids ausentes | rode `audit.mjs` e acrescente os atributos |
 | cadastro/login pela API dá 403 | a checagem de Origin não aceita o `APP_URL` do `.env` da API | `APP_URL` igual ao endereço do painel (mesmo host e porta) |
 | login funciona na API mas a tela continua deslogada | painel e API em hosts diferentes (`localhost` × `127.0.0.1`): cookie não é compartilhado | use o mesmo host nos dois (`rodsaas.json → domains`) |
-| todos os testes de e-mail falham | Mailpit fora, SMTP apontando para outro lugar, ou fila (pg-boss) sem worker | suba o Mailpit; `SMTP_HOST/PORT` da API; worker de e-mail registrado no boot |
+| todos os testes de e-mail falham | Mailpit fora, SMTP apontando para outro lugar, fila (pg-boss) sem worker, ou `RESEND_API_KEY` preenchida em dev (o e-mail vai pelo Resend, não pelo Mailpit: use `MAIL_DRIVER=smtp`) | suba o Mailpit; `SMTP_HOST/PORT` da API; worker de e-mail registrado no boot |
 | testes demoram muito e acabam em "rate limit persistente" | limite de cadastro/login baixíssimo ou sem `Retry-After` | limites da skill backend (`07-seguranca.md`) e header `Retry-After` no 429 |
 
 ## API (`00-api.spec.ts`)
@@ -243,3 +243,10 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | descadastro | abrir a página (GET) já descadastra (antivírus de e-mail abrem links); desfazer sem efeito; token sem conferir a assinatura |
 | sino e painel (tela) | contador sem sumir em zero; abrir a notificação sem marcar como lida; marcar todas só na tela; sem sino no celular (ou dois sinos no DOM) |
 | página e preferências (tela) | filtro Não lidas só visual; filtro de app sem a opção Geral; interruptor que não salva; aviso obrigatório sem travar; membro vendo "Pagamento recusado" |
+
+## E-mail (`18-email.spec.ts`, `/rodsaas:email`)
+
+| Teste | Causas comuns |
+|---|---|
+| assinatura do webhook | `JSON.parse` antes de conferir (o corpo re-serializado não bate); conferência sem o horário (aceita evento capturado reenviado); segredo errado no `.env`; 500 para envio desconhecido ou tipo não tratado (o Resend reenvia sem parar); rota atrás da checagem de Origin |
+| supressão | devolução definitiva/spam sem gravar na lista; lista conferida só no driver `resend` (em dev, com Mailpit, o e-mail sai); devolução temporária suprimindo; `RESEND_WEBHOOK_SECRET` ausente no `api/.env` (o teste é pulado) |

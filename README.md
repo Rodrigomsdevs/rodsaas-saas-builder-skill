@@ -70,6 +70,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | 🎧 | **`/rodsaas:helpdesk`** | *Opcional*: soma o app **Suporte** (estilo Zendesk/Movidesk): chamados por e-mail, portal e widget, caixa de entrada com visões, resposta e nota interna, SLA com horário comercial, distribuição automática, gatilhos, satisfação e base de conhecimento |
 | ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
+| 📧 | **`/rodsaas:email`** | Todos os e-mails pelo **Resend** (envio, status de entrega, lista de supressão e recebimento), Mailpit em dev — o `backend` já instala sozinho; em projeto antigo, roda em modo revisão. Passo a passo em [E-mails com Resend](#-e-mails-com-resend-envio-e-recebimento) |
 | 🔔 | **`/rodsaas:notificacoes`** | Sino com contador, central de notificações, preferências por tipo (no app, e-mail na hora, resumo diário), e-mail agrupado com descadastro de um clique — um só serviço para todos os apps; `tarefas`, `crm`, `forms`, `agenda` e `helpdesk` já instalam sozinhos |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
 | 🧪 | **`/rodsaas:verify`** | Testa o projeto **de verdade no navegador**: cadastro, login, criar e trocar de empresa, convites, papéis, estados de tela… e corrige até ficar tudo verde |
@@ -109,11 +110,12 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 | 🎨 | **Painel com a sua marca** | Você escolhe cor, logo e estilo, vê uma prévia e aprova antes de gerar as telas |
 | 🧱 | **Telas caprichadas** | Carregando, vazio, erro, página não encontrada, confirmações e botões com loading em tudo |
 | 🛡️ | **Segurança de verdade** | Um cliente nunca vê dados de outro — com trava no próprio banco de dados |
+| 📧 | **E-mails com Resend** | Todos os e-mails saem pelo Resend com o seu domínio, numa fila que respeita o limite e não manda duplicado; endereço que devolve ou marca como spam para de receber; e-mails que chegam no seu domínio vão para o app certo (Suporte) ou são encaminhados para a sua caixa |
 | 📄 | **API documentada** | Página `/docs` gerada sozinha, com todas as rotas para testar |
 | 🗄️ | **Banco pronto** | Postgres com usuários separados e senhas fortes geradas, sem aparecer no chat |
 | 🌐 | **No ar com HTTPS** | nginx configurado, cadeado no navegador e renovação automática do certificado |
 | 🇧🇷 | **Feito para o Brasil** | Português, R$, datas BR, CPF, CNPJ (inclusive o novo alfanumérico), telefone e CEP |
-| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads e +7 das notificações, quando instalados). Funciona até em projeto feito por outra IA |
+| 🧪 | **Verificado no navegador** | 51 testes de ponta a ponta (Playwright) clicam no painel como um usuário: cadastro, sessão, troca de empresa, convites, papéis, troca de plano, estados de erro, celular (+6 da casca de apps, +18 do CRM, +14 do Forms, +18 da Agenda, +19 do Suporte, +15 do Tarefas, +13 do Páginas, +4 do uploads, +7 das notificações e +2 do e-mail com Resend, quando instalados). Funciona até em projeto feito por outra IA |
 | 💼 | **CRM de vendas** *(opcional)* | Funil em quadro com totais em R$, leads com conversão, empresas preenchidas pelo CNPJ, contatos com WhatsApp, atividades com agenda, produtos no negócio, captura de leads do site e do Meta Ads, importação de planilha sem duplicar, visibilidade por vendedor e relatórios de conversão e previsão |
 | 📋 | **Formulários e pesquisas** *(opcional)* | 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS, estrelas, arquivo, LGPD), páginas e lógica, clássico ou uma pergunta por vez, link, incorporar e QR code, respostas em tabela, resumo com gráficos, exportar para Excel, avisos, webhooks e leads no CRM |
 | 📅 | **Agendamento online** *(opcional)* | Link para o cliente marcar sozinho (escolhe o dia, o horário e o profissional, no fuso dele), sem nunca marcar duas vezes o mesmo horário, agenda por profissional com arrastar para remarcar, feriados nacionais, turmas com vagas, aprovação manual, lembretes por e-mail, convite para Google Agenda/Outlook, remarcar e cancelar pelo link e relatórios de comparecimento |
@@ -124,9 +126,77 @@ Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domí
 
 ---
 
+## 📧 E-mails com Resend (envio e recebimento)
+
+Todo projeto rodsaas manda e recebe e-mail pelo [Resend](https://resend.com) em produção e pelo **Mailpit** em dev (`http://localhost:8025`). Quem cuida disso é o `/rodsaas:email` (o `/rodsaas:backend` já chama; em projeto antigo, rode `/rodsaas:email` e ele entra em modo revisão).
+
+**1. Variáveis em `api/.env`**
+
+```bash
+RESEND_API_KEY=re_xxxxxxxx
+RESEND_DOMAIN="mock-lab.dev"
+RESEND_FROM="Rodsaas Claude <no-reply@mock-lab.dev>"
+RESEND_REPLY_TO="Rodsaas Claude <support@mock-lab.dev>"
+RESEND_SUPPORT_EMAIL="Rodsaas Claude <support@mock-lab.dev>"
+RESEND_SUPPORT_NAME="Rodsaas Claude"
+RESEND_WEBHOOK_SECRET=whsec_xxxxxxxx          # o passo 4 gera
+RESEND_INBOUND_FORWARD_TO="voce@gmail.com"    # opcional: recebe o que chegou e nenhum app pegou
+```
+
+| Variável | Para quê |
+|---|---|
+| `RESEND_API_KEY` | chave da API (resend.com → API Keys). Com recebimento, use **Full access** (a API busca o conteúdo dos e-mails recebidos) |
+| `RESEND_DOMAIN` | domínio verificado no Resend. Todo remetente precisa ser dele |
+| `RESEND_FROM` | remetente padrão de todos os e-mails (cadastro, convite, senha, notificações…) |
+| `RESEND_REPLY_TO` | para onde vai quem clica em "Responder" num e-mail automático |
+| `RESEND_SUPPORT_EMAIL` / `RESEND_SUPPORT_NAME` | contato de suporte mostrado no rodapé dos e-mails e no app |
+| `RESEND_WEBHOOK_SECRET` | confere que o webhook veio mesmo do Resend |
+| `RESEND_INBOUND_FORWARD_TO` | caixa real (fora do domínio do Resend) que recebe os e-mails que nenhum app pegou |
+| `MAIL_DRIVER` | opcional: vazio = Resend quando há chave, Mailpit quando não há. Em dev, `MAIL_DRIVER=smtp` força o Mailpit mesmo com a chave preenchida |
+
+> [!WARNING]
+> Sem `;` no fim da linha e com aspas fechadas: `RESEND_DOMAIN="mock-lab.dev";` vira o valor `"mock-lab.dev";` e a API não sobe (ela avisa qual linha está errada). Em dev, deixe `RESEND_API_KEY` vazio ou use `MAIL_DRIVER=smtp`: o `/rodsaas:verify` lê os e-mails do Mailpit.
+
+**2. Domínio no Resend (DNS)**
+
+1. resend.com → **Domains** → *Add domain* → copie os registros que o painel mostrar (DKIM e o SPF/MX de retorno do envio) para o seu DNS e espere **Verified**.
+2. Crie o **DMARC** (TXT em `_dmarc`): `v=DMARC1; p=none; rua=mailto:voce@seudominio` para começar. Gmail e Yahoo exigem para quem manda em volume.
+3. **Recebimento**: na página do domínio, ligue **Receiving** e crie o registro **MX** que aparecer. Se o domínio já recebe e-mail em outro lugar (Google Workspace, Microsoft 365, Locaweb…), use um **subdomínio** para o Resend (ex.: `in.mock-lab.dev`) — o MX de menor prioridade leva todos os e-mails do domínio.
+
+**3. O que acontece com os e-mails que chegam**
+
+| Endereço | Vai para |
+|---|---|
+| `RESEND_SUPPORT_EMAIL` (ex.: `support@`) | encaminhado para `RESEND_INBOUND_FORWARD_TO`; com o Suporte instalado e `HELPDESK_HOUSE_ORG_ID`, vira chamado (o suporte do próprio SaaS) |
+| `RESEND_FROM` (`no-reply@`) | encaminhado igual, e quem escreveu recebe 1x por dia o aviso "este endereço não é lido, escreva para o suporte" |
+| `<empresa>@mock-lab.dev` (Suporte instalado) | chamado na empresa dona do endereço; o cliente dela só encaminha o `suporte@empresa.com.br` para esse endereço |
+| qualquer outro | encaminhado para `RESEND_INBOUND_FORWARD_TO` (ou fica registrado como "sem dono" para reprocessar) |
+
+Respostas automáticas, devoluções e e-mails do próprio domínio nunca são encaminhados (sem loop).
+
+**4. Webhook (status de entrega + recebimento)**
+
+Com a API no ar no domínio de produção:
+
+```bash
+cd api
+npm run email:setup -- --webhook https://api.seudominio.com.br/v1/webhooks/resend --test voce@gmail.com
+```
+
+O comando confere o domínio (e mostra os registros DNS que faltam), cria o webhook com os eventos certos — `email.received`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, `email.suppressed` — e mostra **uma vez** o segredo para pôr em `RESEND_WEBHOOK_SECRET`. Depois, reinicie a API. Prefere pelo painel? resend.com → **Webhooks** → *Add endpoint* com a mesma URL e esses eventos. `npm run email:check` só confere, sem criar nada.
+
+O que o webhook faz:
+- **entregue / atrasado / falhou** → status do envio (Configurações → E-mails mostra os que deram problema);
+- **devolução definitiva, spam ou suprimido** → o endereço entra na lista de supressão e não recebe mais (protege a reputação do domínio); o membro aparece com "E-mail não entrega";
+- **recebido** → a API busca o e-mail completo no Resend e entrega para quem cuida daquele endereço (tabela acima).
+
+Para testar o webhook em dev: `cloudflared tunnel --url http://localhost:3333` e um webhook **separado** no Resend para a URL do túnel (outro segredo).
+
+---
+
 ## 📋 Você precisa de
 
-**Claude Code** · **Linux** (ou WSL / VPS) · **Node.js** LTS · **PostgreSQL** ou Docker · conta **Stripe** (modo teste é grátis) · e, para colocar no ar, **um domínio**.
+**Claude Code** · **Linux** (ou WSL / VPS) · **Node.js** LTS · **PostgreSQL** ou Docker · conta **Stripe** (modo teste é grátis) · conta **Resend** para e-mail em produção (em dev usa o Mailpit) · e, para colocar no ar, **um domínio**.
 
 > [!IMPORTANT]
 > No `/rodsaas:domain`, o painel e a API precisam ser do **mesmo domínio** — por exemplo `app.meusaas.com.br` e `api.meusaas.com.br`. É isso que mantém o login funcionando entre os dois.
@@ -194,6 +264,7 @@ plugins/rodsaas/skills/
 ├── helpdesk/   SKILL.md + references/ + scripts/helpdesk-lib.mjs (+ testes)
 ├── agenda/     SKILL.md + references/ + scripts/agenda-lib.mjs (+ testes)
 ├── uploads/    SKILL.md + references/       → add-on de arquivos
+├── email/      SKILL.md + references/ + scripts/email-lib.mjs (+ testes) → Resend: envio, webhook, recebimento
 ├── notificacoes/ SKILL.md + references/ + scripts/notifications-lib.mjs (+ testes) → add-on de notificações
 └── domain/     SKILL.md + scripts/          → domain.sh + template do nginx
 ```

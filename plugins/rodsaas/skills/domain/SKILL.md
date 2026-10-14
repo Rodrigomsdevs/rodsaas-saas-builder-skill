@@ -108,7 +108,8 @@ Depois diga ao usuário, claramente, o que **ele precisa fazer** (ou faça, se e
 1. **Reiniciar a API** para ler o `.env` novo.
 2. **Rodar `npm run build` no `web/` e reiniciar o front**: as variáveis `NEXT_PUBLIC_*` entram no build; sem rebuild, o front continua chamando o endereço antigo.
 3. **Stripe** (se for cobrar de verdade): com a chave de produção no `api/.env`, rodar `npm run billing:sync -- --webhook https://<api>/v1/billing/webhook` no `api/`. Ele cria produtos, preços, o portal do cliente e o webhook, e mostra o `STRIPE_WEBHOOK_SECRET` (uma única vez) para colocar no `.env`. Sem chave, a produção fica com a cobrança `disabled` (planos visíveis, botões desabilitados com aviso).
-4. Em produção: `NODE_ENV=production` e `DOCS_ENABLED=false` no `api/.env`, se ainda não estiverem.
+4. **Resend** (e-mail de produção): `RESEND_*` preenchidas no `api/.env` (domínio verificado no Resend, ver README do plugin, seção "E-mails com Resend") e, no `api/`, `npm run email:setup -- --webhook https://<api>/v1/webhooks/resend --test <seu e-mail>`. Ele confere o domínio e os registros DNS, cria o webhook (entrega, supressão e recebimento) e mostra o `RESEND_WEBHOOK_SECRET` uma única vez. Sem isso, a API de produção não sobe com `MAIL_DRIVER=resend` (o boot exige o segredo).
+5. Em produção: `NODE_ENV=production` e `DOCS_ENABLED=false` no `api/.env`, se ainda não estiverem.
 
 ## 6. Verificar
 

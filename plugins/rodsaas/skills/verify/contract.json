@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -1636,6 +1636,21 @@
         {
           "method": "post",
           "path": "/v1/public/notifications/unsubscribe/undo"
+        }
+      ]
+    },
+    "email": {
+      "when": "rodsaas.json → addons inclui \"email\"",
+      "routes": [],
+      "testids": [],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/email-logs"
+        },
+        {
+          "method": "delete",
+          "path": "/v1/email-suppressions/{address}"
         }
       ]
     }

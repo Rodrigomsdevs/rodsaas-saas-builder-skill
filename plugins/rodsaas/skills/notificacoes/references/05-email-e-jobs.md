@@ -11,7 +11,7 @@
 
 Detalhes:
 - Antes de enviar, confira de novo: ainda é membro ativo, a empresa não desligou o app, a notificação não foi lida, a preferência atual ainda pede e-mail (se a pessoa desligou depois, `SKIPPED`).
-- Envio pelo `Mailer` da base, pela fila `email.send` (retry com backoff). Sucesso → `emailStatus = SENT`, `emailedAt`; falha definitiva → `FAILED` (não tenta para sempre; o sino continua).
+- Envio pelo `Mailer` da base (skill `/rodsaas:email`: Resend em produção, Mailpit em dev), pela fila `email.send` (retry com backoff); os cabeçalhos abaixo vão no campo `headers` do Resend e a tag `tipo=notificacao`. Reclamação de spam (webhook do Resend) desliga o e-mail de notificações da pessoa. Sucesso → `emailStatus = SENT`, `emailedAt`; falha definitiva → `FAILED` (não tenta para sempre; o sino continua).
 - Marcar como `SENT` **antes** de enfileirar o `email.send`, numa transação com `UPDATE … WHERE emailStatus = 'PENDING' RETURNING id` (dois workers não mandam o mesmo e-mail).
 - Mudança de `digestHour`/`emailMode` vale no próximo ciclo; trocar de `DAILY` para `IMMEDIATE` faz as pendentes do resumo saírem no próximo `notifications.sweep` (como imediatas).
 
