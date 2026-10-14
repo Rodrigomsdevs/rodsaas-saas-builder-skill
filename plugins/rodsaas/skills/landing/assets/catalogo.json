@@ -154,7 +154,8 @@
     "agenda",
     "helpdesk",
     "whatsapp",
-    "comercial"
+    "comercial",
+    "erp"
    ],
    "shots": [
     {
@@ -761,7 +762,7 @@
     "crm",
     "agenda",
     "pessoas",
-    "estoque",
+    "erp",
     "comercial"
    ],
    "shots": [
@@ -971,7 +972,8 @@
    "integrations": [
     "crm",
     "financeiro",
-    "pessoas"
+    "pessoas",
+    "erp"
    ],
    "shots": [
     {
@@ -1437,49 +1439,106 @@
    "faq": []
   },
   {
-   "id": "estoque",
-   "slug": "estoque",
-   "name": "Estoque",
-   "preset": "estoque",
+   "id": "erp",
+   "slug": "erp",
+   "name": "ERP",
+   "preset": "erp",
    "category": "financeiro",
-   "icon": "Package",
-   "phase": 4,
-   "tagline": "Entrada, saída e estoque mínimo sem surpresa.",
-   "description": "Produtos, movimentações, estoque mínimo, inventário e ligação com vendas do CRM.",
+   "icon": "Boxes",
+   "phase": 3,
+   "tagline": "Produtos, estoque, vendas, PDV e compras num ERP simples de usar.",
+   "description": "Produtos com grade de cor e tamanho, kits e preço por quantidade; estoque por depósito com reserva e custo médio; orçamento que vira pedido; frente de caixa com leitor de código de barras; compras com recebimento e relatórios.",
    "benefits": [
     {
-     "title": "Sem ruptura",
-     "text": "Aviso de estoque mínimo."
+     "title": "Estoque que bate",
+     "text": "Cada entrada e saída registrada, o reservado separado do disponível e o custo médio calculado sozinho."
     },
     {
-     "title": "Movimento claro",
-     "text": "Entradas e saídas com motivo."
+     "title": "Balcão rápido",
+     "text": "PDV com leitor de código de barras, pagamento misto com troco e fechamento de caixa."
     },
     {
-     "title": "Inventário fácil",
-     "text": "Contagem pelo celular."
+     "title": "Preço certo sempre",
+     "text": "Tabela de varejo e atacado e desconto por quantidade aplicados na hora, sem conta de cabeça."
     }
    ],
    "features": [
-    "Produtos e variações",
-    "Entradas e saídas",
-    "Estoque mínimo",
-    "Inventário",
-    "Vários depósitos",
-    "Relatórios"
+    "Produtos simples, com variações (cor × tamanho) e kits",
+    "Código de barras EAN e código interno",
+    "Tabelas de preço e faixas por quantidade",
+    "Estoque por depósito, reserva, custo médio e inventário",
+    "Clientes e fornecedores com limite de crédito",
+    "Orçamento que vira pedido, separação e devolução",
+    "PDV com leitor, pagamento misto e fechamento de caixa",
+    "Compras com recebimento parcial",
+    "Curva ABC e sugestão de compra"
    ],
-   "replaces": "caderno e planilha de estoque",
+   "replaces": "planilha de estoque, caderno de pedidos e caixa sem controle",
    "pricing": {
     "unit": "empresa",
-    "price": 49
+    "price": 79,
+    "note": "nota fiscal em breve; hoje exporta para o seu contador"
    },
    "integrations": [
-    "crm",
-    "financeiro"
+    "financeiro",
+    "comercial",
+    "crm"
    ],
-   "shots": [],
-   "video": null,
-   "faq": []
+   "shots": [
+    {
+     "id": "erp-inicio",
+     "path": "/erp",
+     "waitFor": "erp-home",
+     "caption": "Vendas do dia, pedidos a separar e estoque baixo"
+    },
+    {
+     "id": "erp-produtos",
+     "path": "/erp/produtos",
+     "waitFor": "erp-product-row",
+     "caption": "Produtos com variações, preço e disponível"
+    },
+    {
+     "id": "erp-pdv",
+     "path": "/erp/pdv",
+     "waitFor": "pdv-page",
+     "caption": "Frente de caixa com leitor de código de barras"
+    }
+   ],
+   "video": {
+    "id": "erp-demo",
+    "path": "/erp/produtos",
+    "steps": [
+     {
+      "waitFor": "erp-product-row"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "click": "erp-product-new"
+     },
+     {
+      "waitFor": "erp-product-form"
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "Emite nota fiscal?",
+     "a": "Ainda não. Os dados fiscais dos produtos e clientes já ficam guardados para a emissão, que vem numa próxima etapa; hoje o ERP exporta as vendas para o seu contador."
+    },
+    {
+     "q": "Funciona com leitor de código de barras?",
+     "a": "Sim, qualquer leitor USB ou Bluetooth que funcione como teclado. No celular, a câmera também lê o código."
+    },
+    {
+     "q": "Preciso do Financeiro junto?",
+     "a": "Não, mas com ele as vendas e compras viram contas a receber e a pagar sozinhas."
+    }
+   ]
   },
   {
    "id": "mural",

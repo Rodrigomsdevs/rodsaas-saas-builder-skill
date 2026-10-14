@@ -177,6 +177,13 @@ export const PRESET_TYPES = [
   { type: "com.contract.expiring", appId: "comercial", label: "Contrato vencendo", template: { one: "O contrato {title} {data.what} em {data.when}", many: "{count} contratos entrando no aviso prévio" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
   { type: "com.contract.renewed", appId: "comercial", label: "Contrato renovado", template: "O contrato {title} foi renovado até {data.until}", group: { by: "none" } },
   { type: "com.integration.failed", appId: "comercial", label: "Integração com problema", template: "Não deu para {data.action} da proposta {title}: tente de novo", group: { by: "none" } },
+  // erp
+  { type: "erp.stock.low", appId: "erp", label: "Estoque baixo", template: { one: "{title} chegou ao estoque mínimo ({data.available} disponível)", many: "{count} produtos chegaram ao estoque mínimo" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "erp.order.to_pick", appId: "erp", label: "Pedido para separar", template: { one: "Pedido {title} confirmado: separar {data.items} itens", many: "{count} pedidos para separar" }, group: { by: "key", windowMinutes: 15 } },
+  { type: "erp.quote.expiring", appId: "erp", label: "Orçamento vencendo", template: { one: "O orçamento {title} de {data.customer} vence amanhã", many: "{count} orçamentos vencem amanhã" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "erp.cash.difference", appId: "erp", label: "Diferença no caixa", template: "{actor} fechou o {title} com diferença de {data.diff}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "erp.session.stale", appId: "erp", label: "Caixa esquecido aberto", template: "O {title} está aberto desde {data.since}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "erp.purchase.received", appId: "erp", label: "Compra recebida", template: "{actor} recebeu a compra {title} de {data.supplier}", group: { by: "none" } },
 ].map(defineType);
 
 /** Catálogo ativo: tipos base + os dos apps instalados (+ add-ons exigidos). */

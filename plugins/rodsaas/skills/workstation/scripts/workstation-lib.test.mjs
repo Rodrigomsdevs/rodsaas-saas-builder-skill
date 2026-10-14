@@ -92,6 +92,9 @@ test("buildFeatureMap e classifyFeature: features e limites do plano mais alto v
   assert.equal(W.classifyFeature("com_signatures"), "comercial");
   assert.equal(W.classifyFeature("comEnvelopesMonthly"), "comercial", "limite em camelCase do Comercial");
   assert.equal(W.classifyFeature("comments_x"), "_paid", "com sem _ ou maiúscula não é do Comercial");
+  assert.equal(W.classifyFeature("erp_pdv"), "erp");
+  assert.equal(W.classifyFeature("erpProducts"), "erp", "limite em camelCase do ERP");
+  assert.equal(W.classifyFeature("erpanything"), "_paid");
   assert.equal(W.classifyFeature("rhythm_x"), "_paid", "prefixo exige _ ou maiúscula");
   assert.deepEqual(m._baseLimits, { paid: { projects: null }, free: { projects: 3 } }, "limite do Cadastros fica na base");
 });

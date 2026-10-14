@@ -10,7 +10,7 @@ const available = new Set(C.withStatus(catalog, RODSAAS).filter((a) => a.status 
 test("catálogo entregue é válido e cobre o roadmap inteiro", () => {
   assert.deepEqual(C.validateCatalog(catalog), []);
   assert.ok(catalog.apps.length >= 25);
-  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "financeiro", "pessoas", "comercial", "estoque", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
+  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "financeiro", "pessoas", "comercial", "erp", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
 });
 
 test("validateCatalog acusa os erros comuns", () => {

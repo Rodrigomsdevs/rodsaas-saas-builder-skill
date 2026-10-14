@@ -45,6 +45,7 @@ registerMemberAccess('helpdesk', {
 | Pessoas (`rh`) | `role` (`RH_ADMIN`/`RH`/`FINANCE`/nenhum), `employee` (`none` · `link` com `employeeId` de ficha sem login · `admission`, que inicia a pré-admissão) | papel: só `RH_ADMIN`/owner; ficha: RH | o colaborador conta na Suíte RH |
 | Financeiro (`financeiro`) | `role` (`FIN_ADMIN`/`FIN`/`VIEWER`, padrão `VIEWER`) | `FIN_ADMIN` ou owner | dados financeiros nunca entram sozinhos (nem no Completo) |
 | Comercial (`comercial`) | `role` (`COM_ADMIN`/`SELLER`/`VIEWER`, padrão `SELLER`) | `COM_ADMIN` ou owner | `SELLER`/`COM_ADMIN` contam como vendedor (assento) |
+| ERP (`erp`) | `roles` (multiselect: `ERP_ADMIN`, `SELLER`, `STOCK`, `CASHIER`, `VIEWER`; padrão `SELLER`) | `ERP_ADMIN` ou owner; admin da empresa dá `SELLER`/`CASHIER`/`VIEWER` | por empresa (sem assento); custo é dado sensível |
 | CRM, Forms, Páginas | nenhum ("usa o app") | — | com a workstation, só o `AppAccess` |
 
 ## Modelo

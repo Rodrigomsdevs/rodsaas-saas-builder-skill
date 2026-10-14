@@ -159,6 +159,19 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 
 `canSee`: ter papel no Comercial e, para `SELLER`, ser o dono da proposta/contrato. Tirar o papel → `retract`. Os e-mails para **clientes e signatários** (proposta, código, convite para assinar, lembretes, PDF final) não passam por aqui: saem pelo app com a marca da empresa.
 
+### ERP (`erp`)
+
+| Tipo | Evento | Destinatários | entity · groupKey | url |
+|---|---|---|---|---|
+| `erp.stock.low` | job 7 h: produtos que cruzaram o mínimo desde ontem (um aviso por produto, agrupados) | `ERP_ADMIN` e `STOCK` | product · `low_stock` (`groupUrl` `/erp/estoque?baixo=1`) | `/erp/produtos/<id>` |
+| `erp.order.to_pick` | pedido confirmado (inclusive o que veio do Comercial) | `STOCK` | order · `to_pick` (`groupUrl` `/erp/vendas?aba=separar`) | `/erp/vendas/<id>` |
+| `erp.quote.expiring` | job 9 h: orçamentos que vencem amanhã | o vendedor | order · `expiring` | `/erp/vendas/<id>` |
+| `erp.cash.difference` | caixa fechado com diferença ≠ 0 | `ERP_ADMIN` | cash_session | `/erp/relatorios?aba=caixas` |
+| `erp.session.stale` | job: caixa aberto há mais de 18 h | o operador e `ERP_ADMIN` | cash_session | `/erp/pdv` |
+| `erp.purchase.received` | recebimento de compra | quem criou a compra | purchase | `/erp/compras/<id>` |
+
+`canSee`: ter papel no ERP; custo nunca vai no texto do aviso.
+
 ## Regras que valem para todos os apps
 
 - Nunca gravar `Notification` direto nem mandar e-mail de aviso para membro por conta própria: tudo por `notify()`. (E-mails para **clientes** — confirmação de agendamento, resposta do chamado, resposta automática do formulário — continuam no app, porque cliente não é membro.)

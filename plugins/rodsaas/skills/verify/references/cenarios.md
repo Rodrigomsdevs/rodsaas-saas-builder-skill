@@ -317,3 +317,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | recusa e cancelamento | recusa que não encerra o envelope ou não devolve o contrato a rascunho; cancelar que só registra o evento; mesmo e-mail duas vezes; envelope só com testemunhas |
 | papéis | vendedor vendo propostas de outro vendedor; `VIEWER` escrevendo; membro sem papel entrando; vendedor mudando limite ou papéis; owner perdendo o papel; proposta de outra empresa acessível pelo id |
 | telas | total do editor sem a quantidade; erro do aceite fora do campo; erro da assinatura sem o código; verificação sem os signatários |
+
+## ERP (`24-erp.spec.ts`, `/rodsaas:erp`)
+
+| Teste | Causas comuns |
+|---|---|
+| produtos | EAN validado só no front (ou sem o dígito verificador); SKU único só na tela; código interno sem dígito; grade que não cria as variações ou cria sem SKU; mudar a grade apagando a variação (perde o histórico) |
+| preços | preço calculado no front e só gravado; faixa por quantidade ignorada; tabela de atacado ignorada; o maior entre tabela e faixa em vez do menor |
+| estoque | saldo editado direto em vez de movimentação; custo médio não recalculado na entrada; saída acima do disponível aceita (negativo); reserva não descontada do disponível; transferência que só tira da origem; inventário que não gera o ajuste; kit com estoque próprio ou disponível sem dividir pela quantidade do componente; venda do kit sem baixar os componentes |
+| orçamento e pedido | frete fora do total; rateio do desconto geral que não fecha no centavo; fração aceita em `UN`; orçamento reservando; confirmar sem checar o estoque; entregar sem tirar a reserva; cancelar sem liberar; pedido confirmado editável; vencido confirmando (status só por job) |
+| crédito, desconto e devolução | limite de crédito ignorado ou aplicado no à vista; vendedor acima do desconto máximo; devolução de pedido não entregue; devolução que não volta ao estoque; reembolso do pedido inteiro em vez do proporcional; devolver mais que o vendido |
+| PDV | troco em cartão/Pix; venda com pagamento menor que o total; sem `Idempotency-Key` (clique duplo vende duas vezes); dois caixas abertos pela mesma pessoa; venda com caixa fechado; dinheiro da venda fora do esperado; fechamento que mostra o esperado antes de contar ou sempre "OK" |
+| compras | frete fora do custo; recebimento acima do pedido aceito; status da compra parado em parcial |
+| papéis | membro sem papel entrando; custo visível para vendedor/caixa (deveria vir `null`); caixa cadastrando produto; vendedor vendo pedido de outro |
+| integração e relatórios | venda a prazo sem contas a receber, ou uma só com o total em vez de uma por parcela; curva ABC pelo bruto ou sem descontar devoluções |
+| telas | dinheiro com `parseFloat`/`parseInt` ("25,90" vira R$ 25,00); margem calculada sobre o custo (markup); saldo inicial ignorado; PDV ignorando "2*código"; código inexistente sem aviso; troco não mostrado; comprovante sem "sem valor fiscal" |

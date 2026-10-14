@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2732,6 +2732,402 @@
           "body": [
             "sha256"
           ]
+        }
+      ]
+    },
+    "erp": {
+      "when": "rodsaas.json → presets inclui \"erp\" (app ERP)",
+      "routes": [
+        "/erp",
+        "/erp/produtos",
+        "/erp/produtos/novo",
+        "/erp/produtos/[id]",
+        "/erp/estoque",
+        "/erp/estoque/inventarios/[id]",
+        "/erp/clientes",
+        "/erp/vendas",
+        "/erp/vendas/nova",
+        "/erp/vendas/[id]",
+        "/erp/pdv",
+        "/erp/compras",
+        "/erp/relatorios",
+        "/erp/configuracoes"
+      ],
+      "testids": [
+        "erp-home",
+        "erp-sales-today",
+        "erp-low-stock",
+        "erp-to-pick",
+        "erp-product-new",
+        "erp-product-row",
+        "data-id",
+        "data-type",
+        "erp-product-stock",
+        "erp-product-form",
+        "erp-product-type",
+        "erp-product-name",
+        "erp-product-unit",
+        "erp-product-sku",
+        "erp-product-barcode",
+        "erp-product-barcode-generate",
+        "erp-product-price",
+        "erp-product-cost",
+        "erp-product-margin",
+        "erp-product-initial-stock",
+        "erp-product-min",
+        "erp-variant-attr-name",
+        "erp-variant-attr-values",
+        "erp-variant-row",
+        "data-key",
+        "erp-kit-component",
+        "data-product",
+        "erp-tier-row",
+        "erp-field-error",
+        "data-path",
+        "erp-product-save",
+        "erp-stock-row",
+        "data-warehouse",
+        "erp-stock-available",
+        "erp-move-new",
+        "erp-party-new",
+        "erp-party-row",
+        "erp-order-new",
+        "erp-order-row",
+        "data-status",
+        "erp-order-customer",
+        "erp-order-item-search",
+        "erp-order-line",
+        "erp-order-line-qty",
+        "erp-order-total",
+        "data-cents",
+        "erp-order-error",
+        "data-code",
+        "erp-order-save-quote",
+        "erp-order-confirm",
+        "erp-order-status",
+        "erp-order-pick",
+        "erp-order-deliver",
+        "erp-order-cancel",
+        "erp-order-return",
+        "pdv-open-form",
+        "pdv-register",
+        "pdv-opening",
+        "pdv-open-submit",
+        "pdv-page",
+        "pdv-scan",
+        "pdv-line",
+        "pdv-line-qty",
+        "pdv-customer",
+        "pdv-total",
+        "pdv-error",
+        "pdv-pay",
+        "pdv-payment-method",
+        "data-method",
+        "pdv-payment-amount",
+        "pdv-payment-add",
+        "pdv-remaining",
+        "pdv-change",
+        "pdv-finish",
+        "pdv-receipt",
+        "pdv-new-sale",
+        "pdv-menu",
+        "pdv-close",
+        "pdv-close-counted",
+        "pdv-close-confirm",
+        "pdv-close-result",
+        "erp-purchase-new",
+        "erp-purchase-row",
+        "erp-purchase-receive",
+        "erp-receive-qty",
+        "data-line",
+        "erp-receive-confirm",
+        "erp-report-abc",
+        "erp-abc-row",
+        "data-class"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/erp/me"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/erp/settings"
+        },
+        {
+          "method": "put",
+          "path": "/v1/erp/roles/{userId}",
+          "body": [
+            "roles"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/warehouses"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/warehouses",
+          "body": [
+            "name",
+            "code"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/price-tables"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/price-tables",
+          "body": [
+            "name",
+            "kind",
+            "pct"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/products"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/products",
+          "body": [
+            "type",
+            "name",
+            "unit",
+            "priceCents",
+            "sku",
+            "barcode",
+            "costCents",
+            "minStock",
+            "attributes",
+            "components",
+            "tiers",
+            "initialStock"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/products/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/erp/products/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/erp/products/{id}/variations/{variationId}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/products/{id}/barcode"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/products/{id}/movements"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/price"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/stock/movements",
+          "body": [
+            "type",
+            "productId",
+            "warehouseId",
+            "qty",
+            "unitCostCents",
+            "reason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/stock"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/stock/transfers",
+          "body": [
+            "fromWarehouseId",
+            "toWarehouseId",
+            "items"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/inventories",
+          "body": [
+            "warehouseId"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/erp/inventories/{id}/counts",
+          "body": [
+            "counts"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/inventories/{id}/apply"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/reorder"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/parties"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/parties",
+          "body": [
+            "kinds",
+            "name",
+            "document",
+            "creditLimitCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/orders"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders",
+          "body": [
+            "status",
+            "customerId",
+            "items",
+            "discountPct",
+            "discountCents",
+            "freightCents",
+            "payment",
+            "validUntil"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/orders/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/erp/orders/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/confirm"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/pick"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/deliver"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/cancel",
+          "body": [
+            "reason"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/orders/{id}/returns",
+          "body": [
+            "items",
+            "refundMethod"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/registers"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/registers",
+          "body": [
+            "name",
+            "warehouseId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/pdv/sessions",
+          "body": [
+            "registerId",
+            "openingCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/pdv/sessions/current"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/pdv/lookup"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/pdv/sales",
+          "body": [
+            "sessionId",
+            "items",
+            "payments"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/pdv/sessions/{id}/movements",
+          "body": [
+            "type",
+            "amountCents"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/pdv/sessions/{id}/close",
+          "body": [
+            "countedCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/purchases"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/purchases",
+          "body": [
+            "supplierId",
+            "items"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/purchases/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/purchases/{id}/receive",
+          "body": [
+            "items"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/reports/abc"
         }
       ]
     }
