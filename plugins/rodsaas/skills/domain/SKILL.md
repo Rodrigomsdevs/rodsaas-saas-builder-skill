@@ -25,6 +25,7 @@ Pergunte, numa mensagem só:
 - **Domínio do frontend** — ex.: `app.meusaas.com.br` (ou o domínio raiz `meusaas.com.br`, se preferir o app na raiz).
 - **Domínio da API** — ex.: `api.meusaas.com.br`.
 - **E-mail** para o Let's Encrypt (avisos de vencimento do certificado).
+- **Site de vendas** (se o projeto tem a pasta `site/` do `/rodsaas:landing`): domínio do site, normalmente o **domínio raiz** (`meusaas.com.br`, com `www.` redirecionando para ele). Vai em `SITE_DOMAIN` (e `SITE_WWW`, `SITE_ROOT`) no config; sem `site/`, deixe de fora.
 
 Regra que não tem exceção: **os dois domínios precisam ser do mesmo domínio registrado** (`app.meusaas.com.br` + `api.meusaas.com.br`). Os cookies de login são compartilhados entre os dois; com domínios de sites diferentes (`meusaas.com` + `meusaas-api.com`), o login simplesmente não funciona. Se o usuário propuser isso, explique em uma frase e sugira os subdomínios.
 
@@ -77,6 +78,8 @@ Avisos (`!`) não bloqueiam, mas comente os relevantes. Em especial: **portas da
 - Rodar de novo faz backup do arquivo anterior. Se o arquivo já tiver HTTPS do certbot, recusa sem `FORCE=true`; com `FORCE=true`, rode o passo 4 em seguida (o certificado existente é reaproveitado).
 - Servidor sem IPv6: gera só com IPv4 automaticamente.
 
+Com `SITE_DOMAIN`, o mesmo arquivo ganha o bloco do **site estático**: `root` em `SITE_ROOT` (padrão `/var/www/rodsaas-<projeto>-site`, criado se não existir), `/precos` servindo `precos.html`, cache longo em `/_next/static/`, cache de 7 dias em `/shots/`, `404.html` próprio, gzip, os mesmos cabeçalhos de segurança, e `www.` redirecionando para o domínio sem www. Publicar o site é copiar o build: `cd site && npm run build && sudo rsync -a --delete out/ /var/www/rodsaas-<projeto>-site/` (pasta legível pelo nginx: nunca dentro de `/root` ou `/tmp`; o `check` confere).
+
 O que vai no site: proxy com `X-Forwarded-*` (a API usa para IP real e HTTPS), limite de body compatível com a API, timeouts, suporte a WebSocket no front, cabeçalhos de segurança no front e HSTS (vale depois do HTTPS).
 
 ## 4. HTTPS
@@ -85,7 +88,7 @@ O que vai no site: proxy com `X-Forwarded-*` (a API usa para IP real e HTTPS), l
 "${CLAUDE_PLUGIN_ROOT}/skills/domain/scripts/domain.sh" ssl "$CFG"
 ```
 
-Emite **um certificado** com os dois domínios (`--cert-name rodsaas-<projeto>`), instala no nginx, liga o redirecionamento HTTP → HTTPS e confere a renovação automática (timer ou cron do certbot). Se falhar, a causa quase sempre é DNS (volte ao passo 2) ou porta 80 bloqueada no firewall do provedor (painel da VPS, não só o ufw).
+Emite **um certificado** com os dois domínios (e o site com o `www`, quando houver `SITE_DOMAIN`) (`--cert-name rodsaas-<projeto>`), instala no nginx, liga o redirecionamento HTTP → HTTPS e confere a renovação automática (timer ou cron do certbot). Se falhar, a causa quase sempre é DNS (volte ao passo 2) ou porta 80 bloqueada no firewall do provedor (painel da VPS, não só o ufw).
 
 Não rode o `ssl` repetidamente em caso de erro: o Let's Encrypt tem limite de tentativas. Diagnostique primeiro.
 

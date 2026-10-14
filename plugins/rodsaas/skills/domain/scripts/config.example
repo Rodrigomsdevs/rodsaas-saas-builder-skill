@@ -7,6 +7,11 @@ WEB_PORT=3000                            # ports.web do rodsaas.json
 API_PORT=3333                            # ports.api do rodsaas.json
 LE_EMAIL=voce@agendafacil.com.br         # Let's Encrypt avisa vencimentos aqui
 
+# Opcional: landing estática (/rodsaas:landing) no domínio raiz
+# SITE_DOMAIN=agendafacil.com.br         # site de vendas (sem www; o www redireciona para cá)
+# SITE_WWW=true                          # false se não quiser o www.<SITE_DOMAIN>
+# SITE_ROOT=/var/www/rodsaas-agendafacil-site   # pasta com o build do site/ (padrão: /var/www/rodsaas-<PROJECT>-site)
+
 # Arquivos atualizados pelo comando env (relativos ao diretório atual)
 API_ENV_FILE=api/.env
 WEB_ENV_FILE=web/.env.production

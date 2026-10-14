@@ -1,0 +1,1943 @@
+{
+ "version": 1,
+ "about": "Catálogo de todos os apps do rodsaas (prontos e futuros). Status vem do rodsaas.json do projeto: app em rodsaas.json → apps = disponível; o resto = em breve. Preços são sugestões: confirme com o dono do produto e com config/plans.ts.",
+ "categories": [
+  {
+   "id": "vendas",
+   "label": "Vendas e marketing"
+  },
+  {
+   "id": "atendimento",
+   "label": "Atendimento"
+  },
+  {
+   "id": "trabalho",
+   "label": "Trabalho e projetos"
+  },
+  {
+   "id": "conhecimento",
+   "label": "Conhecimento"
+  },
+  {
+   "id": "pessoas",
+   "label": "Pessoas (RH)"
+  },
+  {
+   "id": "comunicacao",
+   "label": "Comunicação"
+  },
+  {
+   "id": "financeiro",
+   "label": "Financeiro e operação"
+  }
+ ],
+ "platform": [
+  {
+   "id": "notificacoes",
+   "icon": "Bell",
+   "title": "Notificações num lugar só",
+   "text": "Sino com tudo o que importa, e-mail agrupado ou resumo diário, do jeito que cada pessoa preferir."
+  },
+  {
+   "id": "busca",
+   "icon": "Search",
+   "title": "Busca em tudo",
+   "text": "Ctrl+K acha negócios, chamados, tarefas e páginas de todos os apps."
+  },
+  {
+   "id": "apps",
+   "icon": "LayoutGrid",
+   "title": "Liga só o que usa",
+   "text": "Cada app é ligado ou desligado pela empresa, e cada pessoa fixa os seus no menu."
+  },
+  {
+   "id": "seguranca",
+   "icon": "ShieldCheck",
+   "title": "Dados isolados por empresa",
+   "text": "Uma empresa nunca vê dados de outra, com trava no próprio banco de dados."
+  },
+  {
+   "id": "celular",
+   "icon": "Smartphone",
+   "title": "Funciona no celular",
+   "text": "Todas as telas pensadas para o celular, sem instalar nada."
+  },
+  {
+   "id": "brasil",
+   "icon": "Flag",
+   "title": "Feito para o Brasil",
+   "text": "Português, R$, CPF, CNPJ, CEP, feriados nacionais e Pix."
+  }
+ ],
+ "pricing": {
+  "currency": "BRL",
+  "annualMonthsCharged": 10,
+  "free": {
+   "maxUsers": 2,
+   "apps": [
+    "tarefas",
+    "paginas",
+    "forms"
+   ],
+   "limits": {
+    "formsResponsesPerMonth": 100
+   },
+   "label": "Grátis para sempre"
+  },
+  "trialDays": 14,
+  "completo": {
+   "pricePerUser": 69,
+   "minUsers": 3,
+   "label": "Completo",
+   "includes": "todos os apps disponíveis, menos os de uso (WhatsApp, Cobranças, Assinatura, E-mail marketing)"
+  },
+  "suites": {
+   "rh": {
+    "label": "Suíte RH",
+    "unit": "colaborador",
+    "price": 5,
+    "minimum": 79,
+    "apps": [
+     "aprovacoes",
+     "ferias",
+     "onboarding",
+     "clima",
+     "okrs",
+     "despesas",
+     "feedback"
+    ]
+   }
+  },
+  "addons": [
+   {
+    "id": "armazenamento",
+    "label": "Armazenamento extra",
+    "unit": "50 GB",
+    "price": 19
+   }
+  ]
+ },
+ "apps": [
+  {
+   "id": "crm",
+   "slug": "crm",
+   "name": "CRM",
+   "preset": "crm",
+   "category": "vendas",
+   "icon": "Handshake",
+   "phase": 1,
+   "tagline": "Seu funil de vendas sem planilha, do primeiro contato ao contrato.",
+   "description": "Negócios em quadro com valor em R$, leads que viram clientes com um clique, empresas preenchidas pelo CNPJ e o histórico de cada conversa num lugar só.",
+   "benefits": [
+    {
+     "title": "Nenhuma venda esquecida",
+     "text": "Toda oportunidade tem dono, próxima atividade e prazo. O que está parado aparece destacado."
+    },
+    {
+     "title": "Cadastro em segundos",
+     "text": "Digite o CNPJ e a empresa vem preenchida. Telefone abre no WhatsApp com um clique."
+    },
+    {
+     "title": "Previsão de verdade",
+     "text": "Totais por etapa, taxa de conversão e previsão do mês calculados com o que está no funil."
+    }
+   ],
+   "features": [
+    "Funil em quadro com arrastar e totais por etapa",
+    "Leads com conversão para negócio, contato e empresa",
+    "Empresas pelo CNPJ (inclusive o novo alfanumérico)",
+    "Produtos no negócio com valor calculado",
+    "Atividades com agenda, atrasadas e de hoje",
+    "Captura de leads do site e relatórios de conversão"
+   ],
+   "replaces": "planilhas de vendas e CRMs avulsos",
+   "pricing": {
+    "unit": "vendedor",
+    "price": 39
+   },
+   "integrations": [
+    "forms",
+    "agenda",
+    "helpdesk",
+    "whatsapp",
+    "propostas"
+   ],
+   "shots": [
+    {
+     "id": "crm-funil",
+     "path": "/crm/negocios",
+     "waitFor": "crm-board",
+     "caption": "Funil com totais por etapa"
+    },
+    {
+     "id": "crm-negocio",
+     "path": "/crm/negocios",
+     "waitFor": "crm-board",
+     "actions": [
+      {
+       "click": "crm-deal-card"
+      },
+      {
+       "waitFor": "crm-deal-title"
+      }
+     ],
+     "caption": "Negócio com pessoa, empresa, produtos e histórico"
+    }
+   ],
+   "video": {
+    "id": "crm-demo",
+    "path": "/crm/negocios",
+    "steps": [
+     {
+      "waitFor": "crm-board"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "dragTo": [
+       "crm-deal-card",
+       "crm-stage-column:2"
+      ]
+     },
+     {
+      "pause": 900
+     },
+     {
+      "click": "crm-deal-card"
+     },
+     {
+      "waitFor": "crm-deal-title"
+     },
+     {
+      "pause": 1800
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "Dá para importar minha planilha de clientes?",
+     "a": "Sim. A importação lê planilha (.xlsx ou .csv), mostra uma prévia, aponta duplicados e importa em lotes."
+    },
+    {
+     "q": "Cada vendedor vê só os próprios negócios?",
+     "a": "Você escolhe: todos veem tudo, ou cada vendedor vê só os dele e gestores veem tudo."
+    }
+   ]
+  },
+  {
+   "id": "helpdesk",
+   "slug": "suporte",
+   "name": "Suporte",
+   "preset": "helpdesk",
+   "category": "atendimento",
+   "icon": "Headset",
+   "phase": 1,
+   "tagline": "Todo pedido de cliente vira um chamado com dono e prazo.",
+   "description": "E-mail, portal de ajuda, widget no site e API caindo numa caixa de entrada única, com prazos em horário comercial, respostas prontas e base de conhecimento.",
+   "benefits": [
+    {
+     "title": "Nada se perde",
+     "text": "Cada e-mail vira chamado com número; a resposta do cliente volta para o mesmo chamado."
+    },
+    {
+     "title": "Prazo é a régua",
+     "text": "SLA em horário comercial com feriados: a caixa ordena pelo que vence primeiro."
+    },
+    {
+     "title": "Cliente se resolve sozinho",
+     "text": "Base de conhecimento com busca em português e sugestões antes de abrir chamado."
+    }
+   ],
+   "features": [
+    "Caixa de entrada com visões e contadores",
+    "Resposta pública e nota interna que nunca vaza",
+    "Respostas prontas com variáveis",
+    "SLA com horário comercial e pausa",
+    "Distribuição automática entre atendentes",
+    "Pesquisa de satisfação e relatórios"
+   ],
+   "replaces": "caixa de e-mail compartilhada e helpdesks avulsos",
+   "pricing": {
+    "unit": "atendente",
+    "price": 39
+   },
+   "integrations": [
+    "crm",
+    "forms",
+    "whatsapp",
+    "status"
+   ],
+   "shots": [
+    {
+     "id": "suporte-caixa",
+     "path": "/suporte",
+     "waitFor": "helpdesk-ticket-list",
+     "caption": "Caixa de entrada ordenada pelo prazo"
+    },
+    {
+     "id": "suporte-chamado",
+     "path": "/suporte",
+     "waitFor": "helpdesk-ticket-list",
+     "actions": [
+      {
+       "click": "helpdesk-ticket-row"
+      },
+      {
+       "waitFor": "helpdesk-ticket"
+      }
+     ],
+     "caption": "Conversa com nota interna e respostas prontas"
+    }
+   ],
+   "video": {
+    "id": "suporte-demo",
+    "path": "/suporte",
+    "steps": [
+     {
+      "waitFor": "helpdesk-ticket-list"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "click": "helpdesk-ticket-row"
+     },
+     {
+      "waitFor": "helpdesk-reply-editor"
+     },
+     {
+      "click": "helpdesk-macro-open"
+     },
+     {
+      "pause": 700
+     },
+     {
+      "click": "helpdesk-macro-item"
+     },
+     {
+      "pause": 1800
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "Funciona com o e-mail que já usamos?",
+     "a": "Sim. Você encaminha o seu suporte@ para o endereço da sua empresa no Suporte, ou conecta a caixa por IMAP."
+    },
+    {
+     "q": "O cliente precisa criar conta?",
+     "a": "Não. Ele acompanha e responde pelo link do e-mail, sem senha."
+    }
+   ]
+  },
+  {
+   "id": "agenda",
+   "slug": "agenda",
+   "name": "Agenda",
+   "preset": "agenda",
+   "category": "atendimento",
+   "icon": "CalendarCheck",
+   "phase": 1,
+   "tagline": "Seu cliente marca sozinho, no horário livre, sem troca de mensagens.",
+   "description": "Link público de agendamento com a disponibilidade da equipe, feriados nacionais, lembretes por e-mail e agenda por profissional para encaixar e remarcar arrastando.",
+   "benefits": [
+    {
+     "title": "Fim do vai e vem",
+     "text": "O cliente escolhe dia, horário e profissional no link. Nunca marca duas vezes o mesmo horário."
+    },
+    {
+     "title": "Menos faltas",
+     "text": "Confirmação e lembretes automáticos, com remarcar e cancelar pelo próprio cliente."
+    },
+    {
+     "title": "Equipe organizada",
+     "text": "Agenda por profissional, rodízio, turmas com vagas e aprovação manual quando precisar."
+    }
+   ],
+   "features": [
+    "Link público no fuso do cliente",
+    "Disponibilidade semanal com exceções e feriados",
+    "Rodízio entre profissionais",
+    "Turmas com vagas",
+    "Lembretes e convite para Google Agenda e Outlook",
+    "Compareceu/faltou e relatórios"
+   ],
+   "replaces": "agendamento por WhatsApp e agendas de papel",
+   "pricing": {
+    "unit": "profissional com agenda",
+    "price": 19
+   },
+   "integrations": [
+    "crm",
+    "forms",
+    "whatsapp",
+    "cobrancas"
+   ],
+   "shots": [
+    {
+     "id": "agenda-semana",
+     "path": "/agenda",
+     "waitFor": "agenda-calendar",
+     "caption": "Agenda da equipe na semana"
+    },
+    {
+     "id": "agenda-publica",
+     "path": "$public:agenda",
+     "waitFor": "agenda-public-page",
+     "caption": "Link que o cliente usa para marcar",
+     "device": "mobile"
+    }
+   ],
+   "video": {
+    "id": "agenda-demo",
+    "path": "$public:agenda",
+    "device": "mobile",
+    "steps": [
+     {
+      "waitFor": "agenda-public-page"
+     },
+     {
+      "click": "agenda-public-type"
+     },
+     {
+      "waitFor": "agenda-public-calendar"
+     },
+     {
+      "click": "agenda-public-day"
+     },
+     {
+      "pause": 600
+     },
+     {
+      "click": "agenda-public-slot"
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "Serve para clínica e salão?",
+     "a": "Sim. Cada profissional tem a própria agenda, e o cliente pode escolher com quem quer ser atendido."
+    },
+    {
+     "q": "Avisa no WhatsApp?",
+     "a": "Hoje avisa por e-mail. O aviso por WhatsApp chega com o app WhatsApp."
+    }
+   ]
+  },
+  {
+   "id": "tarefas",
+   "slug": "tarefas",
+   "name": "Tarefas",
+   "preset": "tarefas",
+   "category": "trabalho",
+   "icon": "SquareCheckBig",
+   "phase": 1,
+   "tagline": "Projetos andando, com cada tarefa no lugar e cada prazo à vista.",
+   "description": "Quadro, lista e calendário para qualquer equipe, com subtarefas, comentários com menção, anexos, horas trabalhadas e sprints para quem desenvolve software.",
+   "benefits": [
+    {
+     "title": "Todo mundo sabe o que fazer",
+     "text": "Minhas tarefas separa atrasadas, hoje e semana. Ninguém precisa perguntar."
+    },
+    {
+     "title": "Rápido de verdade",
+     "text": "Digite \"Revisar contrato @ana !alta amanhã\" e a tarefa nasce com responsável, prioridade e prazo."
+    },
+    {
+     "title": "Horas sem planilha",
+     "text": "Cronômetro na tarefa e relatório de horas por pessoa e projeto."
+    }
+   ],
+   "features": [
+    "Quadro, lista e calendário",
+    "Código por projeto (MKT-123)",
+    "Subtarefas, checklist e vínculos",
+    "Comentários com @menção",
+    "Cronômetro e horas",
+    "Sprints com burndown (opcional)"
+   ],
+   "replaces": "Trello, Asana e listas no WhatsApp",
+   "pricing": {
+    "unit": "usuário",
+    "price": 12
+   },
+   "integrations": [
+    "paginas",
+    "crm",
+    "helpdesk"
+   ],
+   "shots": [
+    {
+     "id": "tarefas-quadro",
+     "path": "/tarefas/projetos",
+     "waitFor": "tasks-project-card",
+     "actions": [
+      {
+       "click": "tasks-project-card"
+      },
+      {
+       "waitFor": "tasks-board"
+      }
+     ],
+     "caption": "Quadro do projeto"
+    },
+    {
+     "id": "tarefas-minhas",
+     "path": "/tarefas",
+     "waitFor": "tasks-mine-row",
+     "caption": "Minhas tarefas por prazo"
+    }
+   ],
+   "video": {
+    "id": "tarefas-demo",
+    "path": "/tarefas/projetos",
+    "steps": [
+     {
+      "click": "tasks-project-card"
+     },
+     {
+      "waitFor": "tasks-board"
+     },
+     {
+      "type": [
+       "tasks-quick-add",
+       "Revisar contrato !alta amanhã"
+      ]
+     },
+     {
+      "press": "Enter"
+     },
+     {
+      "pause": 900
+     },
+     {
+      "dragTo": [
+       "tasks-card",
+       "tasks-column:2"
+      ]
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "Serve para equipe que não é de tecnologia?",
+     "a": "Sim. Sprints são opcionais; marketing, RH e operação usam quadro, lista e calendário."
+    },
+    {
+     "q": "Dá para anexar arquivos?",
+     "a": "Sim, arrastando, colando ou clicando, com prévia de imagem e PDF."
+    }
+   ]
+  },
+  {
+   "id": "paginas",
+   "slug": "paginas",
+   "name": "Páginas",
+   "preset": "notion",
+   "category": "conhecimento",
+   "icon": "FileText",
+   "phase": 1,
+   "tagline": "Documentos, processos e bancos de dados da empresa num editor só.",
+   "description": "Páginas aninhadas com editor de blocos, comando \"/\", databases em tabela e quadro, favoritos, lixeira, busca e página pública com um clique.",
+   "benefits": [
+    {
+     "title": "O conhecimento fica",
+     "text": "Processos, atas e manuais organizados em árvore, achados pela busca."
+    },
+    {
+     "title": "Escreve e já salva",
+     "text": "Editor com \"/\" e salvamento automático, sem perder nada."
+    },
+    {
+     "title": "Mais que texto",
+     "text": "Databases em tabela e quadro para controlar o que quiser."
+    }
+   ],
+   "features": [
+    "Editor de blocos com \"/\"",
+    "Páginas dentro de páginas",
+    "Databases em tabela e quadro",
+    "Busca em todo o conteúdo",
+    "Favoritos e lixeira",
+    "Página pública com link"
+   ],
+   "replaces": "Notion, Google Docs soltos e pastas de Word",
+   "pricing": {
+    "unit": "usuário",
+    "price": 9
+   },
+   "integrations": [
+    "tarefas",
+    "arquivos"
+   ],
+   "shots": [
+    {
+     "id": "paginas-editor",
+     "path": "/paginas",
+     "waitFor": "pages-tree",
+     "actions": [
+      {
+       "click": "pages-tree-item"
+      },
+      {
+       "waitFor": "page-editor"
+      }
+     ],
+     "caption": "Editor de blocos com a árvore de páginas"
+    }
+   ],
+   "video": null,
+   "faq": [
+    {
+     "q": "Dá para publicar uma página?",
+     "a": "Sim. Um clique gera um link público só de leitura, que você desliga quando quiser."
+    }
+   ]
+  },
+  {
+   "id": "forms",
+   "slug": "forms",
+   "name": "Forms",
+   "preset": "forms",
+   "category": "vendas",
+   "icon": "ClipboardList",
+   "phase": 1,
+   "tagline": "Formulários e pesquisas bonitos, com resposta caindo direto no CRM.",
+   "description": "Construtor com 20 tipos de pergunta (CPF, CNPJ, CEP, R$, NPS), lógica condicional, modo uma pergunta por vez, respostas com gráficos e exportação para Excel.",
+   "benefits": [
+    {
+     "title": "Pergunta brasileira",
+     "text": "CPF, CNPJ, CEP com endereço automático, telefone e R$ já validados."
+    },
+    {
+     "title": "Resposta vira negócio",
+     "text": "Cada resposta pode criar lead no CRM e avisar quem cuida."
+    },
+    {
+     "title": "Resultado na hora",
+     "text": "Resumo com gráficos e NPS calculado, pronto para apresentar."
+    }
+   ],
+   "features": [
+    "20 tipos de pergunta",
+    "Lógica e páginas",
+    "Clássico ou uma por vez",
+    "Link, incorporar e QR code",
+    "Respostas com gráficos e NPS",
+    "Webhooks e exportação para Excel"
+   ],
+   "replaces": "Typeform e Google Forms",
+   "pricing": {
+    "unit": "empresa",
+    "tiers": [
+     {
+      "label": "até 1.000 respostas/mês",
+      "price": 29
+     },
+     {
+      "label": "até 10.000 respostas/mês",
+      "price": 59
+     }
+    ]
+   },
+   "integrations": [
+    "crm",
+    "agenda",
+    "helpdesk"
+   ],
+   "shots": [
+    {
+     "id": "forms-construtor",
+     "path": "/forms",
+     "waitFor": "forms-new",
+     "caption": "Construtor de formulários"
+    },
+    {
+     "id": "forms-publico",
+     "path": "$public:forms",
+     "waitFor": "public-form",
+     "caption": "Formulário que o cliente responde",
+     "device": "mobile"
+    }
+   ],
+   "video": null,
+   "faq": [
+    {
+     "q": "Tem limite de formulários?",
+     "a": "Não. O limite é de respostas por mês, conforme a faixa escolhida."
+    }
+   ]
+  },
+  {
+   "id": "whatsapp",
+   "slug": "whatsapp",
+   "name": "WhatsApp",
+   "preset": "whatsapp",
+   "category": "comunicacao",
+   "icon": "MessageCircle",
+   "phase": 2,
+   "tagline": "Avisos, atendimento e lembretes no WhatsApp, ligados aos seus apps.",
+   "description": "Lembretes da Agenda, chamados do Suporte e conversas do CRM pelo WhatsApp da empresa, com histórico no lugar certo.",
+   "benefits": [
+    {
+     "title": "Onde o cliente está",
+     "text": "Confirmação de horário e respostas pelo canal que o cliente mais usa."
+    },
+    {
+     "title": "Histórico junto",
+     "text": "A conversa fica no chamado ou no negócio, não no celular de alguém."
+    },
+    {
+     "title": "Automático",
+     "text": "Lembretes e avisos saem sozinhos, com modelos aprovados."
+    }
+   ],
+   "features": [
+    "Número oficial da empresa",
+    "Lembretes da Agenda",
+    "Chamados do Suporte pelo WhatsApp",
+    "Conversas no histórico do CRM",
+    "Modelos de mensagem",
+    "Relatório de envios"
+   ],
+   "replaces": "WhatsApp no celular de cada funcionário",
+   "pricing": {
+    "unit": "uso",
+    "note": "pacotes de conversas (custo da Meta + margem)"
+   },
+   "integrations": [
+    "agenda",
+    "helpdesk",
+    "crm",
+    "notificacoes"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "cobrancas",
+   "slug": "cobrancas",
+   "name": "Cobranças",
+   "preset": "pagamento-br",
+   "category": "financeiro",
+   "icon": "QrCode",
+   "phase": 2,
+   "tagline": "Pix e boleto saindo sozinhos, com baixa automática.",
+   "description": "Cobranças avulsas e recorrentes por Pix e boleto, lembrete de vencimento e baixa quando o cliente paga.",
+   "benefits": [
+    {
+     "title": "Recebe mais rápido",
+     "text": "Pix com QR code e boleto no e-mail do cliente."
+    },
+    {
+     "title": "Sem conferir extrato",
+     "text": "A baixa acontece sozinha quando o pagamento cai."
+    },
+    {
+     "title": "Recorrência",
+     "text": "Mensalidades geradas todo mês, com lembrete antes do vencimento."
+    }
+   ],
+   "features": [
+    "Pix e boleto",
+    "Cobrança recorrente",
+    "Lembrete de vencimento",
+    "Baixa automática",
+    "Ligação com Agenda e CRM",
+    "Relatório de recebimentos"
+   ],
+   "replaces": "emitir boleto no banco e conferir extrato",
+   "pricing": {
+    "unit": "uso",
+    "note": "tarifa do provedor + pequeno valor por cobrança paga"
+   },
+   "integrations": [
+    "agenda",
+    "crm",
+    "contas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "aprovacoes",
+   "slug": "aprovacoes",
+   "name": "Aprovações",
+   "preset": "aprovacoes",
+   "category": "trabalho",
+   "icon": "BadgeCheck",
+   "phase": 3,
+   "tagline": "Pedidos aprovados no fluxo certo, sem caçar assinatura no corredor.",
+   "description": "Fluxos de aprovação com etapas e aprovadores, para compras, descontos, férias, contratações ou o que a empresa precisar.",
+   "benefits": [
+    {
+     "title": "Fluxo claro",
+     "text": "Cada pedido segue as etapas definidas, com quem aprova em cada uma."
+    },
+    {
+     "title": "Rápido",
+     "text": "O aprovador recebe o aviso e aprova pelo celular."
+    },
+    {
+     "title": "Rastro completo",
+     "text": "Quem pediu, quem aprovou, quando e por quê."
+    }
+   ],
+   "features": [
+    "Modelos de pedido",
+    "Etapas e aprovadores",
+    "Aprovar pelo celular",
+    "Prazos e lembretes",
+    "Histórico e anexos",
+    "Relatórios"
+   ],
+   "replaces": "e-mail com 'pode aprovar?'",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "despesas",
+    "ferias",
+    "contratos"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "ferias",
+   "slug": "ferias",
+   "name": "Férias",
+   "preset": "ferias",
+   "category": "pessoas",
+   "icon": "Palmtree",
+   "phase": 3,
+   "tagline": "Pedido de férias e folga com saldo, aprovação e calendário da equipe.",
+   "description": "O colaborador pede, o gestor aprova e todo mundo vê no calendário quem estará fora, com saldo calculado.",
+   "benefits": [
+    {
+     "title": "Saldo sempre certo",
+     "text": "Dias disponíveis calculados por pessoa."
+    },
+    {
+     "title": "Equipe coberta",
+     "text": "Calendário mostra conflitos antes de aprovar."
+    },
+    {
+     "title": "Sem papel",
+     "text": "Pedido e aprovação pelo app."
+    }
+   ],
+   "features": [
+    "Pedido de férias e folga",
+    "Saldo por pessoa",
+    "Aprovação pelo gestor",
+    "Calendário da equipe",
+    "Feriados nacionais",
+    "Relatórios"
+   ],
+   "replaces": "planilha de férias",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "aprovacoes",
+    "onboarding"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "onboarding",
+   "slug": "onboarding",
+   "name": "Onboarding",
+   "preset": "onboarding",
+   "category": "pessoas",
+   "icon": "Rocket",
+   "phase": 3,
+   "tagline": "Quem chega já sabe o que fazer desde o primeiro dia.",
+   "description": "Checklists de entrada com tarefas para RH, TI, gestor e o próprio colaborador, com prazos e acompanhamento.",
+   "benefits": [
+    {
+     "title": "Primeiro dia redondo",
+     "text": "Acesso, equipamento e treinamentos prontos no prazo."
+    },
+    {
+     "title": "Cada área com sua parte",
+     "text": "Tarefas distribuídas para RH, TI e gestor."
+    },
+    {
+     "title": "Padrão que se repete",
+     "text": "Modelos por cargo."
+    }
+   ],
+   "features": [
+    "Modelos por cargo",
+    "Tarefas por área",
+    "Prazos relativos à entrada",
+    "Documentos para assinar",
+    "Acompanhamento do progresso",
+    "Offboarding"
+   ],
+   "replaces": "lista de e-mails e esquecimentos",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "tarefas",
+    "ferias",
+    "ativos"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "clima",
+   "slug": "clima",
+   "name": "Clima",
+   "preset": "clima",
+   "category": "pessoas",
+   "icon": "HeartPulse",
+   "phase": 3,
+   "tagline": "Saiba como a equipe está antes que vire pedido de demissão.",
+   "description": "Pesquisas de clima e eNPS anônimas, com resultados por equipe e evolução ao longo do tempo.",
+   "benefits": [
+    {
+     "title": "Anônimo de verdade",
+     "text": "Resultados só aparecem com número mínimo de respostas."
+    },
+    {
+     "title": "Ação certa",
+     "text": "Temas que pioraram ficam destacados."
+    },
+    {
+     "title": "Rotina leve",
+     "text": "Pesquisas curtas e periódicas."
+    }
+   ],
+   "features": [
+    "eNPS",
+    "Pesquisas prontas",
+    "Anonimato garantido",
+    "Resultados por equipe",
+    "Evolução no tempo",
+    "Comentários"
+   ],
+   "replaces": "pesquisa anual em papel",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "feedback",
+    "forms"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "okrs",
+   "slug": "okrs",
+   "name": "OKRs",
+   "preset": "okrs",
+   "category": "trabalho",
+   "icon": "Target",
+   "phase": 3,
+   "tagline": "Metas que todo mundo entende e acompanha.",
+   "description": "Objetivos e resultados-chave por empresa, equipe e pessoa, com check-ins e progresso visível.",
+   "benefits": [
+    {
+     "title": "Foco",
+     "text": "Poucas metas claras, ligadas à estratégia."
+    },
+    {
+     "title": "Ritmo",
+     "text": "Check-ins semanais rápidos."
+    },
+    {
+     "title": "Transparência",
+     "text": "Todo mundo vê o progresso."
+    }
+   ],
+   "features": [
+    "Objetivos e resultados-chave",
+    "Empresa, equipe e pessoa",
+    "Check-ins",
+    "Progresso automático",
+    "Ligação com tarefas",
+    "Ciclos trimestrais"
+   ],
+   "replaces": "metas em slides esquecidos",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "tarefas",
+    "feedback"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "despesas",
+   "slug": "despesas",
+   "name": "Despesas",
+   "preset": "despesas",
+   "category": "financeiro",
+   "icon": "Receipt",
+   "phase": 3,
+   "tagline": "Reembolso com foto do recibo, aprovação e exportação.",
+   "description": "O colaborador fotografa o recibo, o gestor aprova e o financeiro exporta para pagar.",
+   "benefits": [
+    {
+     "title": "Sem papelada",
+     "text": "Foto do recibo pelo celular."
+    },
+    {
+     "title": "Política aplicada",
+     "text": "Limites por categoria avisam na hora."
+    },
+    {
+     "title": "Fechamento rápido",
+     "text": "Exportação pronta para o financeiro."
+    }
+   ],
+   "features": [
+    "Foto do recibo",
+    "Categorias e limites",
+    "Aprovação",
+    "Quilometragem",
+    "Exportação",
+    "Relatórios por centro de custo"
+   ],
+   "replaces": "envelope de notinhas",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "aprovacoes",
+    "contas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "contratos",
+   "slug": "contratos",
+   "name": "Contratos",
+   "preset": "contratos",
+   "category": "financeiro",
+   "icon": "FileSignature",
+   "phase": 3,
+   "tagline": "Todo contrato com vencimento à vista e renovação no prazo.",
+   "description": "Contratos com partes, valores, vigência e anexos, com alertas antes de vencer ou renovar.",
+   "benefits": [
+    {
+     "title": "Nada vence sem aviso",
+     "text": "Alertas antes do fim e da renovação."
+    },
+    {
+     "title": "Tudo achável",
+     "text": "Busca por parte, valor e status."
+    },
+    {
+     "title": "Histórico",
+     "text": "Aditivos e versões no mesmo lugar."
+    }
+   ],
+   "features": [
+    "Cadastro com vigência e valores",
+    "Alertas de vencimento",
+    "Anexos e aditivos",
+    "Partes e responsáveis",
+    "Busca e filtros",
+    "Assinatura eletrônica"
+   ],
+   "replaces": "pasta de contratos e lembrete no calendário",
+   "pricing": {
+    "unit": "empresa",
+    "price": 29
+   },
+   "integrations": [
+    "assinatura",
+    "crm",
+    "aprovacoes"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "ativos",
+   "slug": "ativos",
+   "name": "Ativos",
+   "preset": "ativos",
+   "category": "financeiro",
+   "icon": "Laptop",
+   "phase": 3,
+   "tagline": "Saiba quem está com cada equipamento e quando ele vai para manutenção.",
+   "description": "Patrimônio e equipamentos com responsável, localização, manutenção e histórico.",
+   "benefits": [
+    {
+     "title": "Controle",
+     "text": "Quem está com o quê, sempre atualizado."
+    },
+    {
+     "title": "Manutenção em dia",
+     "text": "Agenda de revisões e garantias."
+    },
+    {
+     "title": "Etiqueta",
+     "text": "QR code para identificar o item."
+    }
+   ],
+   "features": [
+    "Cadastro de itens",
+    "Responsável e local",
+    "QR code",
+    "Manutenção e garantia",
+    "Histórico",
+    "Relatórios"
+   ],
+   "replaces": "planilha de patrimônio",
+   "pricing": {
+    "unit": "empresa",
+    "price": 29
+   },
+   "integrations": [
+    "onboarding",
+    "reservas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "reservas",
+   "slug": "reservas",
+   "name": "Reservas",
+   "preset": "reservas",
+   "category": "trabalho",
+   "icon": "DoorOpen",
+   "phase": 3,
+   "tagline": "Salas, mesas e veículos reservados sem conflito.",
+   "description": "Reserva de recursos da empresa com calendário, regras e aprovação quando preciso.",
+   "benefits": [
+    {
+     "title": "Sem conflito",
+     "text": "Nada é reservado duas vezes."
+    },
+    {
+     "title": "Regras simples",
+     "text": "Quem pode reservar e por quanto tempo."
+    },
+    {
+     "title": "Visão do dia",
+     "text": "Ocupação de cada recurso."
+    }
+   ],
+   "features": [
+    "Salas, mesas e veículos",
+    "Calendário",
+    "Regras e limites",
+    "Aprovação opcional",
+    "Check-in",
+    "Relatórios de uso"
+   ],
+   "replaces": "caderno da recepção",
+   "pricing": {
+    "unit": "empresa",
+    "price": 19
+   },
+   "integrations": [
+    "ativos",
+    "agenda"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "issues",
+   "slug": "issues",
+   "name": "Issues",
+   "preset": "issues",
+   "category": "trabalho",
+   "icon": "Bug",
+   "phase": 4,
+   "tagline": "Bugs e melhorias organizados para o time de produto.",
+   "description": "Rastreador de problemas com estados, prioridades, ciclos e ligação com o Suporte.",
+   "benefits": [
+    {
+     "title": "Do cliente ao código",
+     "text": "Chamado do Suporte vira issue com um clique."
+    },
+    {
+     "title": "Prioridade clara",
+     "text": "Triagem e ciclos curtos."
+    },
+    {
+     "title": "Rápido",
+     "text": "Atalhos de teclado para tudo."
+    }
+   ],
+   "features": [
+    "Estados e prioridades",
+    "Ciclos",
+    "Triagem",
+    "Ligação com o Suporte",
+    "Atalhos de teclado",
+    "Relatórios"
+   ],
+   "replaces": "Jira e planilha de bugs",
+   "pricing": {
+    "unit": "usuário",
+    "price": 12
+   },
+   "integrations": [
+    "helpdesk",
+    "tarefas",
+    "roadmap"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "tabelas",
+   "slug": "tabelas",
+   "name": "Tabelas",
+   "preset": "tabelas",
+   "category": "conhecimento",
+   "icon": "Table2",
+   "phase": 4,
+   "tagline": "Monte o seu próprio sistema em tabelas, sem programar.",
+   "description": "Banco de dados visual com campos tipados, visões em grade, quadro, calendário e formulário.",
+   "benefits": [
+    {
+     "title": "Do seu jeito",
+     "text": "Campos e visões para qualquer controle."
+    },
+    {
+     "title": "Sem bagunça",
+     "text": "Tipos validados, não planilha solta."
+    },
+    {
+     "title": "Compartilhável",
+     "text": "Formulário público alimenta a tabela."
+    }
+   ],
+   "features": [
+    "Campos tipados",
+    "Grade, quadro e calendário",
+    "Fórmulas",
+    "Relacionamentos",
+    "Formulário público",
+    "Permissões"
+   ],
+   "replaces": "Airtable e planilhas compartilhadas",
+   "pricing": {
+    "unit": "usuário",
+    "price": 12
+   },
+   "integrations": [
+    "forms",
+    "paginas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "arquivos",
+   "slug": "arquivos",
+   "name": "Arquivos",
+   "preset": "arquivos",
+   "category": "conhecimento",
+   "icon": "FolderOpen",
+   "phase": 4,
+   "tagline": "O drive da empresa, com pastas, versões e compartilhamento seguro.",
+   "description": "Arquivos da empresa organizados em pastas, com prévia, versões, busca e links com validade.",
+   "benefits": [
+    {
+     "title": "Um lugar só",
+     "text": "Tudo da empresa, não no computador de alguém."
+    },
+    {
+     "title": "Seguro",
+     "text": "Links com validade e permissões por pasta."
+    },
+    {
+     "title": "Achável",
+     "text": "Busca por nome e conteúdo."
+    }
+   ],
+   "features": [
+    "Pastas e permissões",
+    "Prévia de imagem e PDF",
+    "Versões",
+    "Links com validade",
+    "Busca",
+    "Cota por plano"
+   ],
+   "replaces": "Google Drive pessoal e pendrive",
+   "pricing": {
+    "unit": "incluido",
+    "note": "armazenamento do plano; pacotes extras à parte"
+   },
+   "integrations": [
+    "paginas",
+    "tarefas",
+    "helpdesk"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "wiki",
+   "slug": "wiki",
+   "name": "Wiki",
+   "preset": "wiki",
+   "category": "conhecimento",
+   "icon": "BookOpen",
+   "phase": 4,
+   "tagline": "A base de conhecimento interna que a equipe realmente consulta.",
+   "description": "Espaços por área, páginas com revisão periódica e busca, para processos e políticas da empresa.",
+   "benefits": [
+    {
+     "title": "Sempre atual",
+     "text": "Lembrete de revisão para cada página."
+    },
+    {
+     "title": "Por área",
+     "text": "Espaços com permissões."
+    },
+    {
+     "title": "Achável",
+     "text": "Busca em português."
+    }
+   ],
+   "features": [
+    "Espaços por área",
+    "Revisão periódica",
+    "Modelos",
+    "Permissões",
+    "Busca",
+    "Histórico de versões"
+   ],
+   "replaces": "manual em PDF desatualizado",
+   "pricing": {
+    "unit": "usuário",
+    "price": 9
+   },
+   "integrations": [
+    "paginas",
+    "onboarding"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "recrutamento",
+   "slug": "recrutamento",
+   "name": "Recrutamento",
+   "preset": "recrutamento",
+   "category": "pessoas",
+   "icon": "UserPlus",
+   "phase": 4,
+   "tagline": "Da vaga publicada ao contratado, com funil de candidatos.",
+   "description": "Página de carreiras, vagas, funil de candidatos, entrevistas agendadas e avaliação da equipe.",
+   "benefits": [
+    {
+     "title": "Página de carreiras",
+     "text": "Vagas publicadas com a sua marca."
+    },
+    {
+     "title": "Funil visual",
+     "text": "Candidatos por etapa, sem e-mail perdido."
+    },
+    {
+     "title": "Decisão melhor",
+     "text": "Avaliações da equipe lado a lado."
+    }
+   ],
+   "features": [
+    "Página de carreiras",
+    "Vagas e etapas",
+    "Triagem de currículos",
+    "Entrevistas na Agenda",
+    "Avaliações",
+    "Banco de talentos"
+   ],
+   "replaces": "currículos no e-mail",
+   "pricing": {
+    "unit": "empresa",
+    "price": 49
+   },
+   "integrations": [
+    "agenda",
+    "onboarding",
+    "forms"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "feedback",
+   "slug": "feedback",
+   "name": "Feedback",
+   "preset": "feedback",
+   "category": "pessoas",
+   "icon": "MessagesSquare",
+   "phase": 4,
+   "tagline": "1:1, feedback contínuo e avaliação de desempenho num lugar só.",
+   "description": "Reuniões 1:1 com pauta, feedbacks registrados e ciclos de avaliação com autoavaliação e gestor.",
+   "benefits": [
+    {
+     "title": "Conversas melhores",
+     "text": "Pauta e histórico de cada 1:1."
+    },
+    {
+     "title": "Feedback que fica",
+     "text": "Registrado e consultável."
+    },
+    {
+     "title": "Avaliação justa",
+     "text": "Ciclos com critérios claros."
+    }
+   ],
+   "features": [
+    "1:1 com pauta",
+    "Feedback contínuo",
+    "Ciclos de avaliação",
+    "Autoavaliação",
+    "PDI",
+    "Relatórios"
+   ],
+   "replaces": "avaliação anual em planilha",
+   "pricing": {
+    "suite": "rh"
+   },
+   "integrations": [
+    "okrs",
+    "clima"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "propostas",
+   "slug": "propostas",
+   "name": "Propostas",
+   "preset": "propostas",
+   "category": "vendas",
+   "icon": "FileCheck",
+   "phase": 4,
+   "tagline": "Proposta bonita em minutos, com aceite online.",
+   "description": "Propostas a partir de modelos, com produtos do CRM, link para o cliente aceitar e aviso quando ele abre.",
+   "benefits": [
+    {
+     "title": "Rápido",
+     "text": "Modelo + produtos do negócio = proposta pronta."
+    },
+    {
+     "title": "Profissional",
+     "text": "Página com a sua marca."
+    },
+    {
+     "title": "Fecha mais",
+     "text": "Aceite online e aviso quando o cliente abre."
+    }
+   ],
+   "features": [
+    "Modelos",
+    "Produtos do CRM",
+    "Link de aceite",
+    "Aviso de abertura",
+    "Validade",
+    "Assinatura eletrônica"
+   ],
+   "replaces": "proposta em Word por e-mail",
+   "pricing": {
+    "unit": "vendedor",
+    "price": 19
+   },
+   "integrations": [
+    "crm",
+    "assinatura",
+    "cobrancas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "roadmap",
+   "slug": "roadmap",
+   "name": "Roadmap",
+   "preset": "roadmap",
+   "category": "atendimento",
+   "icon": "Map",
+   "phase": 4,
+   "tagline": "Ouça os clientes, mostre o que vem por aí e avise quando chegar.",
+   "description": "Portal de ideias com votos, roadmap público e changelog que avisa quem pediu.",
+   "benefits": [
+    {
+     "title": "Prioridade com dados",
+     "text": "Votos mostram o que importa."
+    },
+    {
+     "title": "Cliente por dentro",
+     "text": "Roadmap público e changelog."
+    },
+    {
+     "title": "Fecha o ciclo",
+     "text": "Quem pediu é avisado quando sai."
+    }
+   ],
+   "features": [
+    "Portal de ideias",
+    "Votos",
+    "Roadmap público",
+    "Changelog",
+    "Aviso a quem votou",
+    "Ligação com Issues"
+   ],
+   "replaces": "planilha de pedidos de clientes",
+   "pricing": {
+    "unit": "empresa",
+    "price": 39
+   },
+   "integrations": [
+    "issues",
+    "helpdesk"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "status",
+   "slug": "status",
+   "name": "Status",
+   "preset": "status",
+   "category": "atendimento",
+   "icon": "Activity",
+   "phase": 4,
+   "tagline": "Página de status para avisar os clientes antes que eles perguntem.",
+   "description": "Componentes, incidentes e manutenções programadas numa página pública, com assinatura de avisos.",
+   "benefits": [
+    {
+     "title": "Menos chamados",
+     "text": "Clientes veem o status antes de abrir chamado."
+    },
+    {
+     "title": "Transparência",
+     "text": "Histórico de incidentes."
+    },
+    {
+     "title": "Aviso automático",
+     "text": "Assinantes recebem as atualizações."
+    }
+   ],
+   "features": [
+    "Componentes",
+    "Incidentes",
+    "Manutenção programada",
+    "Assinatura por e-mail",
+    "Histórico",
+    "Domínio próprio"
+   ],
+   "replaces": "aviso no Instagram",
+   "pricing": {
+    "unit": "empresa",
+    "price": 19
+   },
+   "integrations": [
+    "helpdesk"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "contas",
+   "slug": "financeiro",
+   "name": "Financeiro",
+   "preset": "contas",
+   "category": "financeiro",
+   "icon": "Wallet",
+   "phase": 4,
+   "tagline": "Contas a pagar e a receber com fluxo de caixa sempre atualizado.",
+   "description": "Lançamentos, categorias, contas bancárias e fluxo de caixa, com recebimentos vindos das Cobranças.",
+   "benefits": [
+    {
+     "title": "Caixa à vista",
+     "text": "Fluxo de caixa realizado e previsto."
+    },
+    {
+     "title": "Nada atrasa",
+     "text": "Lembretes de vencimento."
+    },
+    {
+     "title": "Integrado",
+     "text": "Recebimentos e despesas entram sozinhos."
+    }
+   ],
+   "features": [
+    "Contas a pagar e receber",
+    "Categorias e centros de custo",
+    "Fluxo de caixa",
+    "Conciliação",
+    "Recorrências",
+    "Relatórios"
+   ],
+   "replaces": "planilha financeira",
+   "pricing": {
+    "unit": "empresa",
+    "price": 49
+   },
+   "integrations": [
+    "cobrancas",
+    "despesas",
+    "estoque"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "estoque",
+   "slug": "estoque",
+   "name": "Estoque",
+   "preset": "estoque",
+   "category": "financeiro",
+   "icon": "Package",
+   "phase": 4,
+   "tagline": "Entrada, saída e estoque mínimo sem surpresa.",
+   "description": "Produtos, movimentações, estoque mínimo, inventário e ligação com vendas do CRM.",
+   "benefits": [
+    {
+     "title": "Sem ruptura",
+     "text": "Aviso de estoque mínimo."
+    },
+    {
+     "title": "Movimento claro",
+     "text": "Entradas e saídas com motivo."
+    },
+    {
+     "title": "Inventário fácil",
+     "text": "Contagem pelo celular."
+    }
+   ],
+   "features": [
+    "Produtos e variações",
+    "Entradas e saídas",
+    "Estoque mínimo",
+    "Inventário",
+    "Vários depósitos",
+    "Relatórios"
+   ],
+   "replaces": "caderno e planilha de estoque",
+   "pricing": {
+    "unit": "empresa",
+    "price": 49
+   },
+   "integrations": [
+    "crm",
+    "contas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "mural",
+   "slug": "mural",
+   "name": "Mural",
+   "preset": "mural",
+   "category": "comunicacao",
+   "icon": "Megaphone",
+   "phase": 4,
+   "tagline": "Comunicados que a equipe lê, com confirmação de leitura.",
+   "description": "Avisos da empresa com confirmação de leitura, reações e segmentação por equipe.",
+   "benefits": [
+    {
+     "title": "Todo mundo sabe",
+     "text": "Confirmação de leitura."
+    },
+    {
+     "title": "Certeiro",
+     "text": "Avisos por equipe ou unidade."
+    },
+    {
+     "title": "Leve",
+     "text": "Reações e comentários."
+    }
+   ],
+   "features": [
+    "Comunicados",
+    "Confirmação de leitura",
+    "Segmentação",
+    "Reações e comentários",
+    "Fixados",
+    "Agendamento"
+   ],
+   "replaces": "grupo de avisos no WhatsApp",
+   "pricing": {
+    "unit": "incluido",
+    "note": "incluído em todos os planos"
+   },
+   "integrations": [
+    "chat",
+    "notificacoes"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "visitantes",
+   "slug": "visitantes",
+   "name": "Visitantes",
+   "preset": "visitantes",
+   "category": "financeiro",
+   "icon": "IdCard",
+   "phase": 4,
+   "tagline": "Recepção organizada: visitante cadastrado, anfitrião avisado.",
+   "description": "Cadastro de visitantes, aviso ao anfitrião, crachá e histórico de entradas.",
+   "benefits": [
+    {
+     "title": "Recepção ágil",
+     "text": "Cadastro rápido, até pelo próprio visitante."
+    },
+    {
+     "title": "Anfitrião avisado",
+     "text": "Notificação na chegada."
+    },
+    {
+     "title": "Segurança",
+     "text": "Histórico de quem entrou."
+    }
+   ],
+   "features": [
+    "Cadastro de visitantes",
+    "Pré-cadastro por link",
+    "Aviso ao anfitrião",
+    "Crachá",
+    "Histórico",
+    "Vários locais"
+   ],
+   "replaces": "caderno da portaria",
+   "pricing": {
+    "unit": "local",
+    "price": 29
+   },
+   "integrations": [
+    "reservas",
+    "notificacoes"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "chat",
+   "slug": "chat",
+   "name": "Chat",
+   "preset": "chat",
+   "category": "comunicacao",
+   "icon": "MessageSquare",
+   "phase": 5,
+   "tagline": "Conversa da equipe separada do WhatsApp pessoal.",
+   "description": "Canais, mensagens diretas, threads, menções e arquivos, ligados aos outros apps.",
+   "benefits": [
+    {
+     "title": "Trabalho no lugar certo",
+     "text": "Separado da vida pessoal."
+    },
+    {
+     "title": "Organizado",
+     "text": "Canais por assunto e threads."
+    },
+    {
+     "title": "Ligado aos apps",
+     "text": "Avisos de tarefas e vendas no canal."
+    }
+   ],
+   "features": [
+    "Canais",
+    "Mensagens diretas",
+    "Threads",
+    "Menções",
+    "Arquivos",
+    "Busca"
+   ],
+   "replaces": "grupos de WhatsApp da empresa",
+   "pricing": {
+    "unit": "usuário",
+    "price": 6
+   },
+   "integrations": [
+    "tarefas",
+    "crm",
+    "mural"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "whiteboard",
+   "slug": "quadro-branco",
+   "name": "Quadro branco",
+   "preset": "whiteboard",
+   "category": "trabalho",
+   "icon": "PenTool",
+   "phase": 5,
+   "tagline": "Um quadro infinito para a equipe pensar junto.",
+   "description": "Notas, formas, setas e desenhos em tempo real, para brainstorm, fluxos e planejamento.",
+   "benefits": [
+    {
+     "title": "Junto, ao vivo",
+     "text": "Todos editando ao mesmo tempo."
+    },
+    {
+     "title": "Do rascunho à tarefa",
+     "text": "Nota vira tarefa com um clique."
+    },
+    {
+     "title": "Modelos",
+     "text": "Retrospectiva, fluxograma e mapa mental."
+    }
+   ],
+   "features": [
+    "Quadro infinito",
+    "Notas e formas",
+    "Tempo real",
+    "Modelos",
+    "Comentários",
+    "Exportar imagem"
+   ],
+   "replaces": "Miro e quadro físico",
+   "pricing": {
+    "unit": "usuário",
+    "price": 9
+   },
+   "integrations": [
+    "tarefas",
+    "paginas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "assinatura",
+   "slug": "assinatura",
+   "name": "Assinatura",
+   "preset": "assinatura",
+   "category": "financeiro",
+   "icon": "Signature",
+   "phase": 5,
+   "tagline": "Documentos assinados online, com validade jurídica e trilha de auditoria.",
+   "description": "Envio de documentos para assinatura eletrônica, com ordem de assinantes, lembretes e certificado.",
+   "benefits": [
+    {
+     "title": "Sem impressora",
+     "text": "Assina pelo celular."
+    },
+    {
+     "title": "Seguro",
+     "text": "Trilha de auditoria e certificado."
+    },
+    {
+     "title": "Rápido",
+     "text": "Lembretes até todos assinarem."
+    }
+   ],
+   "features": [
+    "Assinatura eletrônica",
+    "Ordem de assinantes",
+    "Lembretes",
+    "Trilha de auditoria",
+    "Modelos",
+    "Ligação com Contratos e Propostas"
+   ],
+   "replaces": "imprimir, assinar e escanear",
+   "pricing": {
+    "unit": "uso",
+    "note": "pacotes de documentos"
+   },
+   "integrations": [
+    "contratos",
+    "propostas"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  },
+  {
+   "id": "email-marketing",
+   "slug": "email-marketing",
+   "name": "E-mail marketing",
+   "preset": "email-marketing",
+   "category": "vendas",
+   "icon": "Mail",
+   "phase": 5,
+   "tagline": "Campanhas e automações para quem já é seu contato.",
+   "description": "Listas a partir do CRM, editor de e-mails, automações e métricas de entrega e clique.",
+   "benefits": [
+    {
+     "title": "Com seus contatos",
+     "text": "Listas direto do CRM."
+    },
+    {
+     "title": "No piloto automático",
+     "text": "Sequências de boas-vindas e reativação."
+    },
+    {
+     "title": "Entregabilidade",
+     "text": "Envio pelo domínio da empresa."
+    }
+   ],
+   "features": [
+    "Listas e segmentos",
+    "Editor de e-mail",
+    "Automações",
+    "Métricas",
+    "Descadastro automático",
+    "Domínio próprio"
+   ],
+   "replaces": "Mailchimp e RD Station Marketing",
+   "pricing": {
+    "unit": "uso",
+    "note": "por faixa de contatos"
+   },
+   "integrations": [
+    "crm",
+    "forms"
+   ],
+   "shots": [],
+   "video": null,
+   "faq": []
+  }
+ ]
+}

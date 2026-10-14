@@ -14,6 +14,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="$SCRIPT_DIR/nginx-site.conf.tpl"
+TEMPLATE_SITE="$SCRIPT_DIR/nginx-site-static.conf.tpl"
 
 die()  { printf 'ERRO: %s\n' "$*" >&2; exit 1; }
 ok()   { printf '  ✓ %s\n' "$*"; }
@@ -37,6 +38,9 @@ API_ENV_FILE="${API_ENV_FILE:-api/.env}"
 WEB_ENV_FILE="${WEB_ENV_FILE:-web/.env.production}"
 RODSAAS_JSON="${RODSAAS_JSON:-rodsaas.json}"
 FORCE="${FORCE:-false}"
+SITE_DOMAIN="$(printf '%s' "${SITE_DOMAIN:-}" | tr '[:upper:]' '[:lower:]')"   # opcional: landing estática no domínio raiz
+SITE_WWW="${SITE_WWW:-true}"                                                    # www.<SITE_DOMAIN> redireciona para o domínio sem www
+SITE_ROOT="${SITE_ROOT:-/var/www/rodsaas-${PROJECT}-site}"                      # pasta com o build estático do site/
 
 # ---------------------------------------------------------------- validação
 DOMAIN_RE='^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$'
@@ -48,6 +52,14 @@ for p in "$WEB_PORT" "$API_PORT"; do
   [[ "$p" =~ ^[0-9]+$ && "$p" -ge 1024 && "$p" -le 65535 ]] || die "porta inválida: '$p'"
 done
 [[ "$WEB_PORT" != "$API_PORT" ]] || die "WEB_PORT e API_PORT precisam ser diferentes"
+if [[ -n "$SITE_DOMAIN" ]]; then
+  [[ "$SITE_DOMAIN" =~ $DOMAIN_RE ]] || die "SITE_DOMAIN inválido: '$SITE_DOMAIN' (sem http://, ex.: usebancada.app)"
+  [[ "$SITE_DOMAIN" != "$WEB_DOMAIN" && "$SITE_DOMAIN" != "$API_DOMAIN" ]] || die "SITE_DOMAIN precisa ser diferente do frontend e da API (ex.: site em meusaas.com.br, painel em app.meusaas.com.br)"
+  [[ "$SITE_ROOT" =~ ^/[A-Za-z0-9._/-]+$ ]] || die "SITE_ROOT precisa ser um caminho absoluto simples (letras, números, . _ - /): '$SITE_ROOT'"
+  [[ "$SITE_WWW" =~ ^(true|false)$ ]] || die "SITE_WWW deve ser true ou false"
+fi
+SITE_NAMES=()
+if [[ -n "$SITE_DOMAIN" ]]; then SITE_NAMES=("$SITE_DOMAIN"); [[ "$SITE_WWW" == "true" ]] && SITE_NAMES+=("www.$SITE_DOMAIN"); fi
 
 PID="$(printf '%s' "$PROJECT" | tr '-' '_')"
 CONF_NAME="rodsaas-$PROJECT.conf"
@@ -102,6 +114,7 @@ cmd_check() {
   echo "Projeto $PROJECT"
   echo "  frontend: https://$WEB_DOMAIN  →  127.0.0.1:$WEB_PORT"
   echo "  API:      https://$API_DOMAIN  →  127.0.0.1:$API_PORT"
+  [[ -n "$SITE_DOMAIN" ]] && echo "  site:     https://$SITE_DOMAIN  →  $SITE_ROOT (estático)$([[ "$SITE_WWW" == "true" ]] && echo ", www redireciona")"
   echo
 
   echo "Domínios e cookies"
@@ -116,7 +129,7 @@ cmd_check() {
   ip4="$(curl -4 -fsS --max-time 6 https://api.ipify.org 2>/dev/null || curl -4 -fsS --max-time 6 https://ifconfig.me 2>/dev/null || true)"
   ip6="$(curl -6 -fsS --max-time 4 https://api64.ipify.org 2>/dev/null || true)"
   [[ -n "$ip4" ]] && ok "IP público deste servidor: $ip4" || warn "não consegui descobrir o IP público deste servidor (sem saída para a internet?)"
-  for d in "$WEB_DOMAIN" "$API_DOMAIN"; do
+  for d in "$WEB_DOMAIN" "$API_DOMAIN" ${SITE_NAMES[@]+"${SITE_NAMES[@]}"}; do
     local a aaaa
     a="$(resolve "$d" A | tr '\n' ' ')"
     aaaa="$(resolve "$d" AAAA | tr '\n' ' ')"
@@ -140,6 +153,20 @@ cmd_check() {
     fi
   done
 
+  if [[ -n "$SITE_DOMAIN" ]]; then
+    local nguser; nguser="$(grep -E '^[[:space:]]*user[[:space:]]+' /etc/nginx/nginx.conf 2>/dev/null | awk '{print $2}' | tr -d ';' | head -1)"; nguser="${nguser:-www-data}"
+    if [[ -f "$SITE_ROOT/index.html" ]] && id "$nguser" >/dev/null 2>&1 && command -v runuser >/dev/null; then
+      if as_root runuser -u "$nguser" -- test -r "$SITE_ROOT/index.html"; then ok "o nginx ($nguser) consegue ler $SITE_ROOT"
+      else bad "o nginx ($nguser) não consegue ler $SITE_ROOT: use uma pasta fora de /root e /tmp (padrão /var/www/rodsaas-$PROJECT-site) e chmod -R a+rX nela"
+      fi
+    fi
+    if [[ -f "$SITE_ROOT/index.html" ]]; then ok "site: $SITE_ROOT/index.html encontrado"
+    else warn "site: $SITE_ROOT/index.html não existe ainda (rode o build do site/ e copie a saída para lá; até isso, o site responde 404)"
+    fi
+    local sreg; sreg="$(registrable "$SITE_DOMAIN")"
+    [[ "$sreg" == "$WEB_REG" ]] || warn "o site ($SITE_DOMAIN) é de outro domínio registrado que o painel ($WEB_REG); funciona, mas o normal é site em $WEB_REG e painel em app.$WEB_REG"
+  fi
+
   echo "Servidor web"
   if command -v nginx >/dev/null; then ok "nginx instalado ($(nginx -v 2>&1 | sed 's/.*nginx\///'))"
   else bad "nginx não instalado (Debian/Ubuntu: apt install nginx)"
@@ -162,7 +189,9 @@ cmd_check() {
   local clash
   local wre are
   wre="${WEB_DOMAIN//./\\.}"; are="${API_DOMAIN//./\\.}"
-  clash="$(grep -rlE "server_name[^;]*[[:space:]]($wre|$are)([[:space:]]|;)" /etc/nginx 2>/dev/null | grep -v "$CONF_NAME" || true)"
+  local alts="$wre|$are"
+  for d in ${SITE_NAMES[@]+"${SITE_NAMES[@]}"}; do alts="$alts|${d//./\\.}"; done
+  clash="$(grep -rlE "server_name[^;]*[[:space:]]($alts)([[:space:]]|;)" /etc/nginx 2>/dev/null | grep -v "$CONF_NAME" || true)"
   [[ -n "$clash" ]] && bad "outro site do nginx já usa esses domínios: $(echo "$clash" | tr '\n' ' ')"
 
   echo "Firewall"
@@ -196,6 +225,14 @@ cmd_nginx() {
   sed -e "s/{{PROJECT}}/$PROJECT/g" -e "s/{{PID}}/$PID/g" \
       -e "s/{{WEB_DOMAIN}}/$WEB_DOMAIN/g" -e "s/{{API_DOMAIN}}/$API_DOMAIN/g" \
       -e "s/{{WEB_PORT}}/$WEB_PORT/g" -e "s/{{API_PORT}}/$API_PORT/g" "$TEMPLATE" > "$rendered"
+  if [[ -n "$SITE_DOMAIN" ]]; then
+    sed -e "s|{{SITE_DOMAIN}}|$SITE_DOMAIN|g" -e "s|{{SITE_ROOT}}|$SITE_ROOT|g" "$TEMPLATE_SITE" >> "$rendered"
+    [[ "$SITE_WWW" == "true" ]] || sed -i '/# BEGIN WWW/,/# END WWW/d' "$rendered"
+    if [[ ! -d "$SITE_ROOT" ]]; then
+      as_root mkdir -p "$SITE_ROOT"
+      echo "→ criei $SITE_ROOT (copie o build do site/ para cá)"
+    fi
+  fi
   # Servidor sem IPv6: `listen [::]:80` derrubaria o nginx inteiro.
   if [[ ! -s /proc/net/if_inet6 ]]; then
     sed -i '/listen \[::\]:80;/d' "$rendered"
@@ -231,15 +268,17 @@ cmd_nginx() {
   elif pgrep -x nginx >/dev/null; then as_root nginx -s reload
   else as_root nginx
   fi
-  echo "OK: nginx servindo $WEB_DOMAIN e $API_DOMAIN em HTTP (próximo passo: ssl)"
+  echo "OK: nginx servindo $WEB_DOMAIN e $API_DOMAIN${SITE_DOMAIN:+ e o site $SITE_DOMAIN} em HTTP (próximo passo: ssl)"
 }
 
 # ---------------------------------------------------------------- ssl
 cmd_ssl() {
   command -v certbot >/dev/null || die "certbot não instalado"
   [[ "$LE_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] || die "LE_EMAIL inválido (o Let's Encrypt avisa vencimentos nesse e-mail)"
+  local extra=()
+  for d in ${SITE_NAMES[@]+"${SITE_NAMES[@]}"}; do extra+=(-d "$d"); done
   as_root certbot --nginx \
-    -d "$WEB_DOMAIN" -d "$API_DOMAIN" \
+    -d "$WEB_DOMAIN" -d "$API_DOMAIN" ${extra[@]+"${extra[@]}"} \
     --cert-name "$CERT_NAME" \
     --non-interactive --agree-tos -m "$LE_EMAIL" \
     --redirect --keep-until-expiring
@@ -249,7 +288,7 @@ cmd_ssl() {
   elif [[ -f /etc/cron.d/certbot ]]; then ok "cron do certbot presente"
   else warn "não achei timer/cron de renovação; confira com 'certbot renew --dry-run'"
   fi
-  echo "OK: HTTPS ativo para $WEB_DOMAIN e $API_DOMAIN"
+  echo "OK: HTTPS ativo para $WEB_DOMAIN, $API_DOMAIN${SITE_DOMAIN:+ e ${SITE_NAMES[*]}}"
 }
 
 # ---------------------------------------------------------------- env
@@ -284,10 +323,10 @@ cmd_env() {
 
   if [[ -f "$RODSAAS_JSON" ]]; then
     command -v node >/dev/null || die "node não encontrado para atualizar $RODSAAS_JSON"
-    APP="$app" API="$api" WP="$WEB_PORT" AP="$API_PORT" node -e '
+    APP="$app" API="$api" SITE="${SITE_DOMAIN:+https://$SITE_DOMAIN}" WP="$WEB_PORT" AP="$API_PORT" node -e '
       const fs = require("fs"); const f = process.argv[1];
       const j = JSON.parse(fs.readFileSync(f, "utf8"));
-      j.domains = { ...(j.domains || {}), app: process.env.APP, api: process.env.API };
+      j.domains = { ...(j.domains || {}), app: process.env.APP, api: process.env.API, ...(process.env.SITE ? { site: process.env.SITE } : {}) };
       j.ports = { ...(j.ports || {}), web: Number(process.env.WP), api: Number(process.env.AP) };
       fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n");
     ' "$RODSAAS_JSON"
@@ -320,6 +359,17 @@ cmd_verify() {
     502|504) bad "https://$WEB_DOMAIN → $code (nginx ok, mas o frontend não está rodando na porta $WEB_PORT)" ;;
     *) bad "https://$WEB_DOMAIN → $code" ;;
   esac
+  if [[ -n "$SITE_DOMAIN" ]]; then
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$SITE_DOMAIN/" || echo 000)"
+    [[ "$code" == "200" ]] && ok "https://$SITE_DOMAIN → 200" || bad "https://$SITE_DOMAIN → $code (o build do site/ está em $SITE_ROOT?)"
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://$SITE_DOMAIN/" || echo 000)"
+    [[ "$code" =~ ^30[178]$ ]] && ok "http://$SITE_DOMAIN redireciona para HTTPS ($code)" || bad "http://$SITE_DOMAIN respondeu $code (esperado redirecionamento)"
+    if [[ "$SITE_WWW" == "true" ]]; then
+      local loc
+      loc="$(curl -s -o /dev/null -D - --max-time 10 "https://www.$SITE_DOMAIN/precos" | grep -i '^location:' | tr -d '\r' | awk '{print $2}' || true)"
+      [[ "$loc" == "https://$SITE_DOMAIN/precos" ]] && ok "www.$SITE_DOMAIN redireciona para https://$SITE_DOMAIN" || bad "www.$SITE_DOMAIN não redirecionou para https://$SITE_DOMAIN (veio: ${loc:-nada})"
+    fi
+  fi
   local cors
   cors="$(curl -s -o /dev/null -D - --max-time 10 -X OPTIONS -H "Origin: https://$WEB_DOMAIN" -H 'Access-Control-Request-Method: POST' "https://$API_DOMAIN/v1/auth/login" | grep -i '^access-control-allow-origin' | tr -d '\r' || true)"
   [[ "$cors" == *"https://$WEB_DOMAIN"* ]] && ok "CORS da API aceita https://$WEB_DOMAIN" || warn "CORS da API não confirmou https://$WEB_DOMAIN (a API foi reiniciada com o .env novo?)"

@@ -71,6 +71,7 @@ Digite no Claude Code (painel do VS Code ou terminal), **nesta ordem**:
 | ✅ | **`/rodsaas:tarefas`** | *Opcional*: soma ao projeto um **gestor de tarefas** completo (quadro, lista, calendário, sprints, comentários, anexos, horas, notificações) |
 | 📎 | **`/rodsaas:uploads`** | Envio de arquivos (local ou S3/R2/MinIO) com limite por plano — o `tarefas` e o `crm` já instalam sozinhos |
 | 📧 | **`/rodsaas:email`** | Todos os e-mails pelo **Resend** (envio, status de entrega, lista de supressão e recebimento), Mailpit em dev — o `backend` já instala sozinho; em projeto antigo, roda em modo revisão. Passo a passo em [E-mails com Resend](#-e-mails-com-resend-envio-e-recebimento) |
+| 🛍️ | **`/rodsaas:landing`** | Cria o **site de vendas** (`site/`): home, página de cada app (os prontos e os futuros como "Em breve" com lista de espera), preços com calculadora, prints e vídeos tirados do sistema de verdade, SEO, checagem automática e publicação no domínio raiz. Rode de novo a cada app novo |
 | 🔔 | **`/rodsaas:notificacoes`** | Sino com contador, central de notificações, preferências por tipo (no app, e-mail na hora, resumo diário), e-mail agrupado com descadastro de um clique — um só serviço para todos os apps; `tarefas`, `crm`, `forms`, `agenda` e `helpdesk` já instalam sozinhos |
 | 📝 | **`/rodsaas:notion`** | *Opcional*, depois do frontend: transforma o projeto numa **réplica do Notion** (páginas, editor de blocos, databases, busca, link público) |
 | 🧪 | **`/rodsaas:verify`** | Testa o projeto **de verdade no navegador**: cadastro, login, criar e trocar de empresa, convites, papéis, estados de tela… e corrige até ficar tudo verde |
@@ -92,7 +93,7 @@ claude                # ou abra a pasta no VS Code e use o painel do Claude
 ```
 
 ```
-/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:domain
+/rodsaas:backend   →   /rodsaas:frontend   →   /rodsaas:verify   →   (/rodsaas:crm · /rodsaas:forms · /rodsaas:agenda · /rodsaas:helpdesk · /rodsaas:tarefas · /rodsaas:notion)   →   /rodsaas:landing   →   /rodsaas:domain
 ```
 
 Cada comando faz algumas perguntas antes de começar (nome, portas, cores, domínio…). **Tudo tem resposta padrão**: na dúvida, é só apertar enter.
@@ -264,6 +265,7 @@ plugins/rodsaas/skills/
 ├── helpdesk/   SKILL.md + references/ + scripts/helpdesk-lib.mjs (+ testes)
 ├── agenda/     SKILL.md + references/ + scripts/agenda-lib.mjs (+ testes)
 ├── uploads/    SKILL.md + references/       → add-on de arquivos
+├── landing/    SKILL.md + references/ + assets/catalogo.json (todos os apps) + scripts/ (catalog-lib, capture, check-site)
 ├── email/      SKILL.md + references/ + scripts/email-lib.mjs (+ testes) → Resend: envio, webhook, recebimento
 ├── notificacoes/ SKILL.md + references/ + scripts/notifications-lib.mjs (+ testes) → add-on de notificações
 └── domain/     SKILL.md + scripts/          → domain.sh + template do nginx
