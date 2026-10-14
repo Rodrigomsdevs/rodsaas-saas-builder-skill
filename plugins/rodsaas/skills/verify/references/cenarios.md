@@ -189,6 +189,27 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | turma | vagas ignoradas (uma pessoa fecha o horário) ou sem limite; `seatsLeft` ausente |
 | encaixe interno | encaixe sem checar a disponibilidade (ou recusando mesmo com a confirmação); sobreposição aceita quando `outsideAvailability: true` |
 
+
+## Agenda · operação do balcão (`25-agenda-operacao.spec.ts`, `/rodsaas:agenda` fases 8 e 9)
+
+| Teste | Causas comuns |
+|---|---|
+| recursos | recurso só na tela (o motor não recebe `resources`); sem a restrição `EXCLUDE` no `AppointmentResource`; sempre a primeira sala em vez da livre; sala ocupada por outro tipo não contando |
+| combo | horários com a duração só do principal; preço do combo calculado no front; qualquer serviço aceito como adicional |
+| bloqueio | bloqueio fora do `busy`; bloquear por cima de agendamento; apagar sem liberar |
+| série | horário local que anda uma hora no horário de verão; conflito engolido sem aparecer em `conflicts`; `fail` criando parte da série; "esta e as próximas" cancelando a série toda |
+| lista de espera | cancelamento sem oferecer a vaga; oferta para o último em vez do primeiro; oferta sem segurar o horário; aceitar duas vezes; mesma pessoa duas vezes na lista |
+| sinal | agendamento confirmado sem esperar o pagamento; `AWAITING_PAYMENT` fora do `busy`; webhook de pago sem confirmar; link da videochamada antes de pagar; devolução que ignora quem cancelou ou a antecedência; sinal pelo preço todo |
+| faltas | contador de faltas não usado no agendamento público; regra `depositAfterNoShows` só na tela |
+| confirmação e WhatsApp | confirmar sem gravar `clientConfirmedAt`; confirmar cancelado; mensagem com o link da página em vez do link do cliente; telefone sem normalizar (`wa.me` quebra) |
+| recepção | check-in dias antes; concluir antes de começar ou duas vezes; pagamentos que não fecham aceitos; produto comissionando como serviço; comissão recalculada com a regra nova no extrato; concluir em período fechado; fechamento por cima de outro |
+| clube | clube só marcando a forma sem zerar o preço; usos contados só depois de concluir (agenda dois no mesmo mês de graça); cancelado gastando uso; assinatura duplicada |
+| fidelidade | resgate sem prêmio; resgate que cobra; resgate que não gasta o prêmio |
+| fila do dia | previsão sem a duração; chamar com o profissional ocupado; chamado sem chegada; chamado continuando na fila; concluir sem liberar o resto do horário |
+| clínica | qualquer convênio aceito; página listando convênios que o procedimento não aceita; anamnese em toda consulta; retorno contado de hoje em vez do atendimento |
+| perfil | perfil inválido aceito; página pública com as palavras fixas |
+| ficha | falta que some da ficha; cliente duplicado por agendamento; anotação que não salva |
+| telas | botão de chamar sem chamar; diálogo de concluir sem mandar o produto ou sem o valor do serviço; página escondendo o sinal ou sem mandar o adicional; gerenciar sem o botão de confirmar |
 ## Suporte (`13-helpdesk.spec.ts`, preset `helpdesk`)
 
 | Teste | Causas comuns |

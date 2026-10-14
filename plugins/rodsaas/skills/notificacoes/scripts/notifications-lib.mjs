@@ -126,6 +126,11 @@ export const PRESET_TYPES = [
   { type: "agenda.rescheduled", appId: "agenda", label: "Agendamento remarcado", template: "{data.client} remarcou {title} para {data.when}", group: { by: "none" } },
   { type: "agenda.canceled", appId: "agenda", label: "Agendamento cancelado", template: "{data.client} cancelou {title}", group: { by: "none" } },
   { type: "agenda.daily", appId: "agenda", label: "Agenda do dia", template: "Você tem {data.count} atendimentos hoje", group: { by: "none" } },
+  { type: "agenda.deposit_paid", appId: "agenda", label: "Sinal pago", template: { one: "{data.client} pagou o sinal de {title}", many: "{count} sinais pagos" }, group: { by: "key", windowMinutes: 30 } },
+  { type: "agenda.deposit_expired", appId: "agenda", label: "Sinal não pago (horário liberado)", template: "{data.client} não pagou o sinal de {title}: o horário foi liberado", group: { by: "none" } },
+  { type: "agenda.waitlist_booked", appId: "agenda", label: "Vaga preenchida pela lista de espera", template: "{data.client} pegou a vaga de {title} pela lista de espera", group: { by: "none" } },
+  { type: "agenda.recalls_due", appId: "agenda", label: "Retornos vencendo", template: "{data.count} retornos vencem esta semana", group: { by: "none" } },
+  { type: "agenda.club_past_due", appId: "agenda", label: "Assinatura do clube em atraso", template: "A assinatura de {data.client} ({title}) está em atraso", group: { by: "none" } },
   // helpdesk
   { type: "helpdesk.ticket_created", appId: "helpdesk", label: "Chamado novo na fila", template: { one: "Chamado novo: {title}", many: "{count} chamados novos em {data.queue}" }, group: { by: "key", windowMinutes: 5 } },
   { type: "helpdesk.assigned", appId: "helpdesk", label: "Chamado atribuído a você", template: { one: "{actor} atribuiu {title} a você", many: "{count} chamados atribuídos a você" }, group: { by: "key" } },

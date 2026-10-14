@@ -334,29 +334,30 @@
    "category": "atendimento",
    "icon": "CalendarCheck",
    "phase": 1,
-   "tagline": "Seu cliente marca sozinho, no horário livre, sem troca de mensagens.",
-   "description": "Link público de agendamento com a disponibilidade da equipe, feriados nacionais, lembretes por e-mail e agenda por profissional para encaixar e remarcar arrastando.",
+   "tagline": "Seu cliente marca sozinho e o balcão anda sem papel: da barbearia à clínica.",
+   "description": "Agendamento online com equipe e salas, combos, sinal no Pix, confirmação no WhatsApp, recepção do dia, comissões, clube, fidelidade, fila e, na clínica, convênio, anamnese e retornos.",
    "benefits": [
     {
      "title": "Fim do vai e vem",
-     "text": "O cliente escolhe dia, horário e profissional no link. Nunca marca duas vezes o mesmo horário."
+     "text": "O cliente escolhe serviço, profissional, dia e horário no link. Nunca marca duas vezes o mesmo horário, nem a mesma sala."
     },
     {
      "title": "Menos faltas",
-     "text": "Confirmação e lembretes automáticos, com remarcar e cancelar pelo próprio cliente."
+     "text": "Confirmação no lembrete, mensagem pronta no WhatsApp e sinal no Pix para quem costuma faltar."
     },
     {
-     "title": "Equipe organizada",
-     "text": "Agenda por profissional, rodízio, turmas com vagas e aprovação manual quando precisar."
+     "title": "Balcão no controle",
+     "text": "Recepção do dia por profissional, fila de quem chega sem hora, concluir com produto e a comissão de cada um calculada sozinha."
     }
    ],
    "features": [
-    "Link público no fuso do cliente",
-    "Disponibilidade semanal com exceções e feriados",
-    "Rodízio entre profissionais",
-    "Turmas com vagas",
-    "Lembretes e convite para Google Agenda e Outlook",
-    "Compareceu/faltou e relatórios"
+    "Link público no fuso do cliente, com combos (corte + barba)",
+    "Cadeiras, salas e equipamentos sem conflito",
+    "Sinal no Pix e lista de espera",
+    "Recepção do dia, fila e conclusão com produto",
+    "Comissões, clube de assinatura e fidelidade",
+    "Convênio, anamnese e retornos para clínicas",
+    "Perfis de barbearia, salão, clínica, odonto e pet"
    ],
    "replaces": "agendamento por WhatsApp e agendas de papel",
    "pricing": {
@@ -414,12 +415,16 @@
    },
    "faq": [
     {
-     "q": "Serve para clínica e salão?",
-     "a": "Sim. Cada profissional tem a própria agenda, e o cliente pode escolher com quem quer ser atendido."
+     "q": "Serve para barbearia, salão e clínica?",
+     "a": "Sim. Você escolhe o tipo de negócio e a Agenda já vem com as palavras e os recursos certos: comissão e clube na barbearia, salas, convênio e retornos na clínica."
     },
     {
      "q": "Avisa no WhatsApp?",
-     "a": "Hoje avisa por e-mail. O aviso por WhatsApp chega com o app WhatsApp."
+     "a": "Cada aviso já tem a mensagem pronta para mandar pelo WhatsApp com um toque. O envio automático chega com o app WhatsApp."
+    },
+    {
+     "q": "Dá para cobrar sinal?",
+     "a": "Sim, no Pix ou cartão pelo Financeiro: o horário fica segurado até o pagamento e a devolução segue a sua regra."
     }
    ]
   },

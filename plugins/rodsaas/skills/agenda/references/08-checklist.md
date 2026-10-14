@@ -35,6 +35,26 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER que aten
 - [ ] com o CRM: contato ligado, atividade "Reunião", botão de enviar link no negócio
 - [ ] webhooks com assinatura e novas tentativas
 
+## Operação (núcleo novo)
+- [ ] recurso: dois profissionais e uma sala → o segundo no mesmo horário não consegue; segunda sala libera; restrição `EXCLUDE` do recurso testada à mão no banco
+- [ ] combo: corte + barba soma duração e preço na página e na agenda
+- [ ] bloqueio some da página; encaixe no passado lança o atendimento que já aconteceu
+- [ ] série semanal com um conflito (pula e lista); cancelar "esta e as próximas"
+- [ ] lista de espera: cancelar oferece ao primeiro, aceitar agenda, oferta vencida passa ao próximo
+- [ ] sinal: aguarda pagamento segurando o horário, pago confirma (Financeiro em modo de teste), vencido libera; faltou N vezes → sinal; devolução pela antecedência
+- [ ] confirmação pelo link do lembrete; selo na agenda; mensagens de WhatsApp abrindo o app com o texto e o link certos
+- [ ] recepção do dia: colunas por profissional, chegou, atrasado, concluir com serviço + produto + forma de pagamento
+- [ ] ficha do cliente com o resumo, fidelidade, clube, convênio e anotações
+
+## Perfis e balcão
+- [ ] trocar o perfil (barbearia → odonto) muda as palavras nas telas, nos e-mails e na página; nada some
+- [ ] comissões: regra mais específica, extrato por pessoa, fechar o período trava e gera as contas a pagar
+- [ ] clube: assinante agenda e sai por R$ 0; esgotou cobra; em atraso não cobre; recorrência no Financeiro
+- [ ] fidelidade: a 10ª libera o prêmio, resgatar zera o serviço sem comissão
+- [ ] fila do dia: posição e previsão, chamar vira atendimento, tela de TV
+- [ ] clínica: convênio aceito/recusado e preço do convênio, anamnese na primeira vez, termo pelo Comercial, retorno sugerido na lista com o link
+- [ ] produto vendido na conclusão baixa o estoque do ERP (se instalado)
+
 ## Segurança
 - [ ] 20 agendamentos simultâneos no mesmo horário → 1 criado; coletiva com uma pessoa ocupada → nenhum; turma respeita as vagas
 - [ ] outra empresa não vê nada; página pública não expõe dados da equipe nem de outros clientes; token de um agendamento não abre outro
@@ -45,4 +65,4 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER que aten
 - [ ] claro/escuro, 360 px, teclado
 - [ ] `/rodsaas:verify` verde, incluindo a parte da Agenda (`-g "Agenda"` roda só ela)
 - [ ] README do projeto atualizado (o que a Agenda faz, tabelas públicas sem RLS, variáveis do Google/Outlook, fora da v1)
-- [ ] **conferência final**: tabela item a item de `04-pagina-publica.md` e `05-app-interno.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório
+- [ ] **conferência final**: tabela item a item de `04-pagina-publica.md`, `05-app-interno.md`, `09-perfis-de-segmento.md` e `10-atendimento-e-comissoes.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

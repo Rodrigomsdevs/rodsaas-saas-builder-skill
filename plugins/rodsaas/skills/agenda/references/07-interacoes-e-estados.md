@@ -13,12 +13,17 @@ Parte do escopo, não acabamento.
 | bloquear horário | aparece na hora; erro desfaz |
 | ligar/desligar tipo | otimista; desligar com agendamentos futuros avisa que eles continuam |
 | salvar disponibilidade | botão com loading; a prévia atualiza; erros nos intervalos |
+| chegou (check-in) | otimista; desfazer por 8 s |
+| concluir | diálogo com o total ao vivo; botão com loading; erro de pagamento no campo; depois, toast com a comissão |
+| chamar da fila | otimista (sai da fila, aparece na coluna); 409 volta e diz quando a pessoa fica livre |
+| fechar comissões | confirmação com o total e o efeito ("trava 132 atendimentos"); sem desfazer |
+| série | prévia das datas com os conflitos marcados antes de criar |
 
 Toda mutação invalida agenda, lista, contadores do trilho e widgets do Início. A agenda recarrega ao focar a janela e a cada 30 s (mantendo a posição e o que está sendo arrastado); agendamento novo vindo da página pública aparece com um destaque breve.
 
 ## Atalhos (agenda, fora de campos de texto)
 
-`T` hoje · `←/→` período anterior/seguinte · `D`/`S`/`M` dia, semana, mês · `N` novo agendamento · `B` bloquear · `Esc` fecha o painel · `?` atalhos.
+`T` hoje · `←/→` período anterior/seguinte · `D`/`S`/`M` dia, semana, mês · `N` novo agendamento · `B` bloquear · `F` adicionar na fila · `R` recepção · `Esc` fecha o painel · `?` atalhos.
 
 ## Estados
 
@@ -34,7 +39,12 @@ Agenda (grade com 3 blocos por coluna), lista (8 linhas), painel (blocos de resu
 | aguardando aprovação | "Nada esperando aprovação" | — |
 | clientes | "Seus clientes aparecem aqui depois do primeiro agendamento" | **Compartilhar meu link** |
 | relatórios | "Os números aparecem com os primeiros agendamentos" | — |
-| página pública sem horários | "Sem horários disponíveis nos próximos dias" | WhatsApp da empresa |
+| página pública sem horários | "Sem horários disponíveis nos próximos dias" | WhatsApp da empresa · **Entrar na lista de espera** |
+| recepção sem atendimentos hoje | "Ninguém marcado para hoje" | **+ Agendamento** · **+ Na fila** |
+| fila vazia | "Ninguém esperando" | **+ Na fila** |
+| retornos | "Nenhum retorno vencendo" | — |
+| clube sem planos | "Crie um plano e venda assinatura de cortes" | **+ Plano** |
+| comissões sem regras | "Defina quanto cada profissional ganha" | **Definir regras** |
 
 ### Erro
 - Bloco com mensagem e **Tentar de novo**; agenda continua navegável.
@@ -49,7 +59,8 @@ Confirmar agendamento (público) · Remarcar/Cancelar (público e interno) · Ap
 ## Detalhes que fazem diferença
 - Horários sempre com o fuso visível quando difere do da pessoa que está vendo ("09:00 (10:00 em Lisboa)").
 - Durações e antecedências escritas em português natural ("1 h 30 min", "até 2 dias antes").
-- Status com cor **e** texto: Confirmado (sucesso), Aguardando (aviso), Cancelado (neutro riscado), Recusado (destrutivo), Faltou (destrutivo), Compareceu (sucesso).
+- Status com cor **e** texto: Confirmado (sucesso), Aguardando (aviso), Aguardando sinal (aviso, com o prazo), Cancelado (neutro riscado), Recusado (destrutivo), Faltou (destrutivo), Compareceu (sucesso), Chegou (informação), Atrasado (aviso), Concluído (sucesso).
+- Palavras do perfil em todo lugar ("Pacientes", "Barbeiros", "Procedimentos").
 - Título da aba: "Agenda · qui, 15 out · {Produto}"; com pendentes, "(2) Agenda…".
 - Copiar link mostra "Link copiado" no botão.
 - Página pública pensada primeiro para o celular: alvos de 44 px, calendário que cabe em 360 px, teclado numérico no WhatsApp.

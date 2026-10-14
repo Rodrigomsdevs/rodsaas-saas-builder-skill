@@ -14,6 +14,7 @@ test("suggestApps: landing primeiro, depois o segmento, só disponíveis", () =>
   assert.ok(!r.selected.includes("pessoas"), "em breve fora");
   assert.deepEqual([...r.selected, ...r.others].sort(), [...AVAIL].sort());
   assert.ok(W.suggestApps({ segment: "nada", available: AVAIL }).selected.includes("tarefas"), "segmento desconhecido = outro");
+  assert.deepEqual(["barbearia", "odonto", "saude", "beleza", "outro"].map(W.agendaProfileFor), ["BARBERSHOP", "DENTAL", "CLINIC", "SALON", "GENERAL"], "segmento do onboarding vira o perfil da Agenda");
   const many = W.suggestApps({ segment: "saude", available: AVAIL, preselected: ["crm", "forms", "agenda", "helpdesk", "tarefas"] });
   assert.equal(many.selected.length, 5, "tudo o que veio da landing fica marcado");
 });

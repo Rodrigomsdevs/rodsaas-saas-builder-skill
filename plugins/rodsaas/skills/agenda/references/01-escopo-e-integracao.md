@@ -13,7 +13,20 @@
 | **Clientes** | quem agendou (sem duplicar por e-mail/telefone), histórico, faltas, ligação com contato do CRM |
 | **Relatórios** | agendamentos por período e por tipo, comparecimento × faltas, cancelamentos e remarcações (e com quanta antecedência), horários e dias mais procurados, ocupação por profissional, receita estimada |
 | **Avisos** | e-mails para o cliente (confirmação com `.ics`, aguardando aprovação, aprovado/recusado, lembretes, remarcado, cancelado, pesquisa depois) e para a equipe (novo, pendente de aprovação, cancelado, resumo do dia) |
-| **Integrações** | feed `.ics` por pessoa; CRM (contato + atividade "Reunião"); Forms (perguntas e pesquisa depois); webhooks assinados; Google Agenda e Outlook (ocupados + criar evento + Meet), opcional |
+| **Integrações** | feed `.ics` por pessoa; CRM (contato + atividade "Reunião"); Forms (perguntas, anamnese e pesquisa depois); Comercial (termo de consentimento); Financeiro (sinal, receita do atendimento, clube, comissões); ERP (produto vendido no atendimento); webhooks assinados; Google Agenda e Outlook (ocupados + criar evento + Meet), opcional |
+| **Recursos** | cadeiras, salas, macas e equipamentos (`AgendaResource`); o tipo diz de qual grupo precisa e basta **um** livre; trava no banco também por recurso (`09`, `02`) |
+| **Combos** | serviços somados num atendimento só (corte + barba): duração e preço somados, mesma pessoa, desconto opcional do combo (`combo`) |
+| **Bloqueios e encaixes** | bloquear horário (almoço, folga, consulta externa) e encaixe por cima da disponibilidade com confirmação; encaixe no passado (até 30 dias) para lançar o atendimento que já aconteceu |
+| **Recorrência** | série semanal, quinzenal ou mensal (`recurrenceStarts`), com o que conflita listado; editar ou cancelar só esta, esta e as próximas, ou todas |
+| **Lista de espera** | o cliente entra na fila de um tipo (período e dias que servem); vagou → o primeiro recebe o horário segurado com prazo para confirmar; não confirmou → o próximo (`waitlistCandidates`) |
+| **Sinal** | pagamento antecipado por Pix/cartão pelo Financeiro (valor fixo ou %, `depositAmount`), exigido pelo tipo ou para quem já faltou N vezes; horário segurado até pagar; devolução pela antecedência (`depositRefund`) |
+| **Confirmação** | o lembrete pede "confirmo / remarcar / cancelar"; status "confirmado pelo cliente" na agenda; mensagens prontas de **WhatsApp** (link `wa.me` com o texto) em cada aviso |
+| **Recepção** | visão do dia com colunas por profissional, chegada (check-in), atrasados, concluir o atendimento com serviços, produtos e forma de pagamento (`10`) |
+| **Comissões** | regras por pessoa e serviço, extrato do período e fechamento (`10`) |
+| **Clube e fidelidade** | assinatura mensal com usos e cobrança recorrente; cartão "a cada N, um grátis" (`10`) |
+| **Fila do dia** | quem chega sem hora marcada, com posição e previsão de espera; chamar vira atendimento (`10`) |
+| **Clínica** | convênios aceitos por procedimento e valor do convênio, anamnese antes da primeira consulta, termo de consentimento, retorno sugerido com lista de retornos vencendo (`09`) |
+| **Perfis de segmento** | barbearia, salão, clínica, odonto, pet, consultoria: vocabulário, o que vem ligado e tipos de exemplo (`09`) |
 
 ## App na casca
 
@@ -35,7 +48,7 @@ export const agendaApp: AppDef = {
 
 Acrescente `{ id: 'agenda', name: 'Agenda', home: '/agenda' }` em `rodsaas.json → apps` e `"agenda"` em `presets`.
 
-**Menu do app** (`AgendaSidebar`): Agenda (hoje em destaque) · Agendamentos (com contador de "aguardando aprovação") · Tipos de agendamento · Disponibilidade · Clientes · Relatórios · seção **Minha página** com o link público (copiar, abrir) · Configurações (owner/admin).
+**Menu do app** (`AgendaSidebar`): **Recepção do dia** (quando o perfil destaca) · Agenda (hoje em destaque) · Agendamentos (com contador de "aguardando aprovação") · Fila (com contador) · Tipos de agendamento (rótulo do perfil: "Serviços", "Procedimentos") · Disponibilidade · Clientes ("Pacientes", "Tutores") · Retornos (clínica) · Clube · Comissões · Relatórios · seção **Minha página** com o link público (copiar, abrir) · Configurações (owner/admin). Itens de recurso desligado ou fora do plano não aparecem (fora do plano: aparecem com selo para o owner). Os rótulos vêm do perfil (`09-perfis-de-segmento.md`).
 
 As páginas públicas (`/agendar/...`, `/agendamento/[token]`) ficam fora do grupo `(app)`: sem casca e sem login.
 
@@ -52,6 +65,10 @@ As páginas públicas (`/agendar/...`, `/agendamento/[token]`) ficam fora do gru
 | clientes e relatórios | todos | os seus clientes e números |
 | configurações da página, feriados da empresa, integrações da empresa, webhooks | ✅ | — |
 | conectar a própria agenda Google/Outlook | ✅ | ✅ |
+| check-in, concluir, fila do dia | qualquer agenda | os em que atende (e a fila toda) |
+| recursos, convênios, clube (planos), fidelidade, regras de comissão, fechar comissões | ✅ | — |
+| ver comissões | de todos | só as próprias |
+| ficha do cliente (anotações) | ✅ | dos seus clientes |
 
 Agendamento que a pessoa não pode ver responde **404**.
 
@@ -79,7 +96,15 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | feature `agenda_team` (rodízio, todos juntos, cliente escolhe, aprovação manual, turmas) | — | ✅ | ✅ |
 | feature `agenda_integrations` (Google/Outlook, webhooks, CRM) | — | ✅ | ✅ |
 | feature `agenda_branding` (sem o rodapé "Feito com {produto}", capa e cores próprias) | — | ✅ | ✅ |
-| e-mails, lembretes, `.ics`, feed, Jitsi, relatórios, perguntas | ✅ | ✅ | ✅ |
+| feature `agenda_resources` (cadeiras, salas, equipamentos) | — | ✅ | ✅ |
+| feature `agenda_recurring` (séries) | — | ✅ | ✅ |
+| feature `agenda_waitlist` (lista de espera) | — | ✅ | ✅ |
+| feature `agenda_deposits` (sinal pelo Financeiro) | — | ✅ | ✅ |
+| feature `agenda_commissions` (regras, extrato, fechamento) | — | ✅ | ✅ |
+| feature `agenda_club` (clube de assinatura) | — | ✅ | ✅ |
+| feature `agenda_loyalty` (fidelidade) | — | ✅ | ✅ |
+| feature `agenda_clinic` (convênios, anamnese, termo, retornos) | — | ✅ | ✅ |
+| e-mails, lembretes, `.ics`, feed, Jitsi, relatórios, perguntas, perfis de segmento, combos, bloqueios, confirmação, mensagens de WhatsApp, recepção (check-in e concluir), ficha do cliente, fila do dia | ✅ | ✅ | ✅ |
 
 Regras:
 - Limite mensal atingido: a página pública mostra "Agenda indisponível no momento" (sem detalhar), o owner recebe aviso em 80% e 100%, e a equipe ainda consegue criar encaixe interno (com aviso de que passou do plano). Nenhum agendamento é descartado em silêncio.

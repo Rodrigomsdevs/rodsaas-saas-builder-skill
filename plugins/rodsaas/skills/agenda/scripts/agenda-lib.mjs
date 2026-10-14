@@ -144,7 +144,9 @@ export function windowsFor(host, ymd, holidays) {
  *  hosts: [{ id, timeZone, weekly, overrides, busy: [{ start, end, eventTypeId?, seats? }], dayCounts: { ymd: n } }]
  *     busy já vem com os intervalos (buffers) dos compromissos existentes e os ocupados das agendas externas
  *  holidays: Set/array de "YYYY-MM-DD" (datas locais de cada pessoa)
- * Devolve { slots: [{ start, end, hostIds, seatsLeft }], byDay: { ymdExibição: slots[] } } com start/end em ISO UTC.
+ *  resources (opcional): grupo de recursos de que o tipo precisa — basta UM livre (cadeira, sala, equipamento):
+ *     [{ id, busy: [{ start, end, eventTypeId?, seats? }] }]; lista vazia = nenhum horário (o tipo exige recurso e não há)
+ * Devolve { slots: [{ start, end, hostIds, seatsLeft, resourceIds? }], byDay: { ymdExibição: slots[] } } com start/end em ISO UTC.
  */
 export function computeSlots(opts) {
   const now = toMs(opts.now ?? Date.now());
@@ -159,6 +161,9 @@ export function computeSlots(opts) {
   const earliest = now + (opts.minNoticeMin ?? 0) * MIN;
   const mode = opts.mode ?? "one";
   const perHost = new Map();
+  const pool = opts.resources ? opts.resources.map((r) => ({ id: r.id, busy: (r.busy ?? []).map((b) => ({ ...b, s: toMs(b.start), e: toMs(b.end) })) })) : null;
+  /** Recursos livres no intervalo [bs, be) — sessão da mesma turma não conta como ocupado. */
+  const freeIn = (bs, be, start, end) => pool.filter((r) => !r.busy.some((b) => bs < b.e && be > b.s && !(capacity > 1 && b.eventTypeId === opts.eventTypeId && b.s === start && b.e === end))).map((r) => r.id);
 
   for (const host of opts.hosts) {
     const tz = host.timeZone;
@@ -186,7 +191,9 @@ export function computeSlots(opts) {
             break;
           }
           if (conflict || taken >= capacity) continue;
-          found.set(start, { end, seatsLeft: capacity - taken });
+          let resourceIds;
+          if (pool) { resourceIds = freeIn(bs, be, start, end); if (!resourceIds.length) continue; }
+          found.set(start, { end, seatsLeft: capacity - taken, resourceIds });
         }
       }
     }
@@ -198,30 +205,30 @@ export function computeSlots(opts) {
   if (mode === "all") {
     const [first, ...rest] = hostIds.map((id) => perHost.get(id));
     for (const [start, v] of first ?? []) {
-      if (rest.every((m) => m.has(start))) merged.set(start, { end: v.end, hostIds: [...hostIds], seatsLeft: Math.min(v.seatsLeft, ...rest.map((m) => m.get(start).seatsLeft)) });
+      if (rest.every((m) => m.has(start))) merged.set(start, { end: v.end, hostIds: [...hostIds], seatsLeft: Math.min(v.seatsLeft, ...rest.map((m) => m.get(start).seatsLeft)), resourceIds: v.resourceIds });
     }
   } else {
     for (const id of mode === "one" ? hostIds.slice(0, 1) : hostIds) {
       for (const [start, v] of perHost.get(id)) {
         const cur = merged.get(start);
         if (cur) { cur.hostIds.push(id); cur.seatsLeft = Math.max(cur.seatsLeft, v.seatsLeft); }
-        else merged.set(start, { end: v.end, hostIds: [id], seatsLeft: v.seatsLeft });
+        else merged.set(start, { end: v.end, hostIds: [id], seatsLeft: v.seatsLeft, resourceIds: v.resourceIds });
       }
     }
   }
-  const slots = [...merged.entries()].sort((a, b) => a[0] - b[0]).map(([s, v]) => ({ start: new Date(s).toISOString(), end: new Date(v.end).toISOString(), hostIds: v.hostIds, seatsLeft: v.seatsLeft }));
+  const slots = [...merged.entries()].sort((a, b) => a[0] - b[0]).map(([s, v]) => ({ start: new Date(s).toISOString(), end: new Date(v.end).toISOString(), hostIds: v.hostIds, seatsLeft: v.seatsLeft, ...(v.resourceIds ? { resourceIds: v.resourceIds } : {}) }));
   const byDay = {};
   for (const sl of slots) (byDay[localOf(sl.start, tzView).ymd] ??= []).push(sl);
   return { slots, byDay };
 }
 
 /** Confere se um horário escolhido ainda é válido (antes de gravar) usando o mesmo motor. */
-export function isSlotAvailable(opts, startIso, hostId) {
+export function isSlotAvailable(opts, startIso, hostId, resourceId) {
   const tz = opts.displayTimeZone;
   const day = localOf(startIso, tz).ymd;
   const { slots } = computeSlots({ ...opts, from: addDays(day, -1), to: addDays(day, 1) });
   const s = slots.find((x) => x.start === new Date(toMs(startIso)).toISOString());
-  return !!s && (!hostId || s.hostIds.includes(hostId));
+  return !!s && (!hostId || s.hostIds.includes(hostId)) && (!resourceId || !s.resourceIds || s.resourceIds.includes(resourceId));
 }
 
 /**
@@ -354,3 +361,292 @@ export function formatAppointment(start, end, timeZone) {
   const tzName = timeZone === "America/Sao_Paulo" ? "horário de Brasília" : timeZone.replace(/_/g, " ");
   return `${formatDayLong(a.ymd)}, ${a.hm} – ${b.hm} (${tzName})`;
 }
+
+// ================================================================== operação (salão, barbearia, clínica)
+// Regras puras do balcão: combos, recorrência, lista de espera, sinal, confirmação, WhatsApp, ficha do cliente,
+// comissão, clube de assinatura, fidelidade, fila do dia, convênio, retorno e perfis de segmento.
+
+const roundHalfUp = (x) => Math.floor(x + 0.5);
+
+// ------------------------------------------------------------------ combos
+/**
+ * Vários serviços num atendimento só (corte + barba), em sequência com a mesma pessoa.
+ * services: [{ id, name, durationMin, priceCents?, bufferBeforeMin?, bufferAfterMin?, combinable? }] (o primeiro é o principal)
+ * → { ok, errors, durationMin, priceCents, bufferBeforeMin, bufferAfterMin, label, serviceIds }
+ * Duração = soma; intervalo antes = do primeiro; intervalo depois = do último; preço = soma − desconto do combo (%).
+ */
+export function combo(services, { discountPct = 0 } = {}) {
+  const errors = [];
+  if (!Array.isArray(services) || services.length < 1 || services.length > 5) errors.push({ path: "addOns", code: "COMBO_SIZE", message: "De 1 a 5 serviços por atendimento" });
+  const list = Array.isArray(services) ? services : [];
+  const ids = list.map((s) => s.id);
+  if (new Set(ids).size !== ids.length) errors.push({ path: "addOns", code: "COMBO_DUPLICATE", message: "Serviço repetido no combo" });
+  list.slice(1).forEach((s, i) => { if (s.combinable === false) errors.push({ path: `addOns.${i}`, code: "NOT_COMBINABLE", message: `${s.name} não pode ser somado a outro serviço` }); });
+  const durationMin = list.reduce((a, s) => a + (s.durationMin ?? 0), 0);
+  if (durationMin > 720) errors.push({ path: "addOns", code: "COMBO_TOO_LONG", message: "O atendimento passaria de 12 h" });
+  if (!(discountPct >= 0 && discountPct <= 100)) errors.push({ path: "discountPct", code: "DISCOUNT_INVALID", message: "Desconto de 0 a 100%" });
+  const gross = list.reduce((a, s) => a + (s.priceCents ?? 0), 0);
+  const priceCents = list.some((s) => s.priceCents != null) ? gross - roundHalfUp((gross * discountPct) / 100) : null;
+  return {
+    ok: !errors.length, errors, durationMin, priceCents, serviceIds: ids,
+    bufferBeforeMin: list[0]?.bufferBeforeMin ?? 0, bufferAfterMin: list[list.length - 1]?.bufferAfterMin ?? 0,
+    label: list.map((s) => s.name).join(" + "),
+  };
+}
+
+// ------------------------------------------------------------------ recorrência
+const daysInMonth = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate(); // m 1..12
+/**
+ * Inícios de uma série (retorno semanal, sessão quinzenal, manutenção mensal), mantendo a HORA LOCAL no fuso
+ * (atravessa horário de verão sem andar uma hora). Mensal no dia 31 cai no último dia dos meses curtos.
+ * rule: { freq: "WEEKLY" | "MONTHLY", interval = 1, count?, until? ("YYYY-MM-DD", local) } — count de 2 a 52; sem count, até `until` (máx. 1 ano)
+ * → [ISO UTC] (inclui o primeiro)
+ */
+export function recurrenceStarts(startIso, rule, timeZone) {
+  const { freq, interval = 1, count, until } = rule ?? {};
+  if (!["WEEKLY", "MONTHLY"].includes(freq) || !(Number.isInteger(interval) && interval >= 1 && interval <= 12)) return [];
+  if (count != null && !(Number.isInteger(count) && count >= 2 && count <= 52)) return [];
+  if (count == null && !until) return [];
+  const l = localOf(startIso, timeZone);
+  const limit = until ?? addDays(l.ymd, 366);
+  const maxN = count ?? 52;
+  const out = [];
+  for (let i = 0; out.length < maxN && i < 400; i++) {
+    let ymd;
+    if (freq === "WEEKLY") ymd = addDays(l.ymd, i * 7 * interval);
+    else ymd = addMonthsClamp(l.ymd, i * interval);
+    if (ymd > limit || ymd > addDays(l.ymd, 366)) break;
+    out.push(new Date(zonedToUtc(ymd, l.hm, timeZone)).toISOString());
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ lista de espera
+/** Período do dia de um horário local: MORNING (< 12:00), AFTERNOON (12:00–17:59), EVENING (≥ 18:00). */
+export const dayPeriod = (hm) => (hm < "12:00" ? "MORNING" : hm < "18:00" ? "AFTERNOON" : "EVENING");
+/**
+ * Quem da lista de espera serve para um horário que vagou, na ordem de chegada.
+ * entries: [{ id, eventTypeId, hostId?, dateFrom, dateTo, periods?: ["MORNING"|"AFTERNOON"|"EVENING"], status, createdAt }]
+ * freed: { eventTypeId, hostId, start }
+ */
+export function waitlistCandidates(entries, freed, timeZone) {
+  const l = localOf(freed.start, timeZone), per = dayPeriod(l.hm);
+  return (entries ?? [])
+    .filter((e) => e.status === "WAITING" && e.eventTypeId === freed.eventTypeId && (!e.hostId || e.hostId === freed.hostId)
+      && l.ymd >= e.dateFrom && l.ymd <= e.dateTo && (!e.periods?.length || e.periods.includes(per)))
+    .sort((a, b) => toMs(a.createdAt) - toMs(b.createdAt));
+}
+
+// ------------------------------------------------------------------ sinal (pagamento antecipado)
+/** Valor do sinal: { kind: "PERCENT", value: 50 } ou { kind: "FIXED", value: 2000 } sobre o preço; nunca passa do preço. */
+export function depositAmount(priceCents, deposit) {
+  if (!deposit || priceCents == null || priceCents <= 0) return 0;
+  if (deposit.kind === "FIXED") return Math.max(0, Math.min(priceCents, deposit.value));
+  if (deposit.kind === "PERCENT") return Math.max(0, Math.min(priceCents, roundHalfUp((priceCents * deposit.value) / 100)));
+  return 0;
+}
+/**
+ * Precisa de sinal? Do tipo (`deposit` configurado) ou porque o cliente falta demais (settings.depositAfterNoShows).
+ * → { required, reason: "TYPE" | "NO_SHOWS" | null, deposit }
+ */
+export function depositRequired({ typeDeposit, noShowCount = 0, depositAfterNoShows = null, defaultDeposit = { kind: "PERCENT", value: 50 } }) {
+  if (typeDeposit) return { required: true, reason: "TYPE", deposit: typeDeposit };
+  if (depositAfterNoShows != null && noShowCount >= depositAfterNoShows) return { required: true, reason: "NO_SHOWS", deposit: defaultDeposit };
+  return { required: false, reason: null, deposit: null };
+}
+/**
+ * Devolução do sinal ao cancelar: a empresa cancelou → tudo; o cliente cancelou com pelo menos `refundIfHoursBefore`
+ * horas de antecedência → tudo; depois disso (ou faltou) → fica retido.
+ */
+export function depositRefund({ paidCents, start, canceledAt, by, refundIfHoursBefore = 24 }) {
+  if (!paidCents) return { refundCents: 0, retainedCents: 0 };
+  const full = by === "TEAM" || (by === "CLIENT" && toMs(start) - toMs(canceledAt) >= refundIfHoursBefore * HOUR);
+  return full ? { refundCents: paidCents, retainedCents: 0 } : { refundCents: 0, retainedCents: paidCents };
+}
+
+// ------------------------------------------------------------------ WhatsApp (link manual; o add-on manda sozinho)
+/** Telefone brasileiro em E.164 sem "+": "(44) 99999-1234" → "5544999991234"; inválido → null. */
+export function normalizePhoneBR(raw) {
+  let d = String(raw ?? "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.length === 10 || d.length === 11) d = "55" + d;
+  if (!/^55[1-9][0-9]\d{8,9}$/.test(d)) return null;
+  if (d.length === 13 && d[4] !== "9") return null; // celular com 9 dígitos começa com 9
+  return d;
+}
+/** Link que abre o WhatsApp com a mensagem pronta (funciona sem integração). */
+export const waLink = (phone, text) => { const p = normalizePhoneBR(phone); return p ? `https://wa.me/${p}?text=${encodeURIComponent(text)}` : null; };
+/**
+ * Texto curto das mensagens ao cliente (o mesmo para WhatsApp e para o resumo do e-mail).
+ * kind: CONFIRMED | REMINDER | RESCHEDULED | CANCELED | WAITLIST_OFFER | PAYMENT | RECALL
+ * ctx: { company, clientName, service, when (texto), url?, amount? }
+ */
+export function clientMessage(kind, ctx) {
+  const first = String(ctx.clientName ?? "").trim().split(/\s+/)[0] || "Olá";
+  const T = {
+    CONFIRMED: `${first}, seu horário na ${ctx.company} está confirmado: ${ctx.service}, ${ctx.when}.`,
+    REMINDER: `${first}, lembrete: ${ctx.service} na ${ctx.company}, ${ctx.when}. Confirme ou remarque:`,
+    RESCHEDULED: `${first}, seu horário na ${ctx.company} mudou para ${ctx.when} (${ctx.service}).`,
+    CANCELED: `${first}, seu horário na ${ctx.company} (${ctx.service}, ${ctx.when}) foi cancelado. Para marcar outro:`,
+    WAITLIST_OFFER: `${first}, abriu um horário na ${ctx.company}: ${ctx.service}, ${ctx.when}. Quem confirmar primeiro fica com ele:`,
+    PAYMENT: `${first}, para garantir ${ctx.service} na ${ctx.company} (${ctx.when}), pague o sinal de ${ctx.amount}:`,
+    RECALL: `${first}, já está na hora do seu retorno na ${ctx.company} (${ctx.service}). Escolha o melhor horário:`,
+  };
+  const t = T[kind];
+  if (!t) throw new Error(`mensagem desconhecida: ${kind}`);
+  return ctx.url ? `${t} ${ctx.url}` : t;
+}
+
+// ------------------------------------------------------------------ ficha do cliente
+/**
+ * Resumo da ficha a partir do histórico: visitas, faltas, cancelamentos, gasto, último atendimento, profissional
+ * preferido e intervalo médio entre visitas (dias).
+ * appts: [{ start, status, attendance, serviceName, hostId, hostName, amountCents? }]
+ */
+export function clientSummary(appts, now = Date.now()) {
+  const list = [...(appts ?? [])].sort((a, b) => toMs(a.start) - toMs(b.start));
+  const done = list.filter((a) => a.attendance === "ATTENDED");
+  const byHost = new Map();
+  for (const a of done) byHost.set(a.hostId, (byHost.get(a.hostId) ?? 0) + 1);
+  const fav = [...byHost.entries()].sort((a, b) => b[1] - a[1])[0];
+  const gaps = done.slice(1).map((a, i) => (toMs(a.start) - toMs(done[i].start)) / DAY);
+  const last = done[done.length - 1];
+  const next = list.find((a) => ["CONFIRMED", "PENDING", "AWAITING_PAYMENT"].includes(a.status) && toMs(a.start) > toMs(now));
+  return {
+    visits: done.length,
+    noShows: list.filter((a) => a.attendance === "NO_SHOW").length,
+    cancellations: list.filter((a) => a.status === "CANCELED").length,
+    spentCents: done.reduce((s, a) => s + (a.amountCents ?? 0), 0),
+    lastVisit: last ? { start: last.start, serviceName: last.serviceName, hostId: last.hostId, hostName: last.hostName } : null,
+    favoriteHostId: fav?.[0] ?? null,
+    avgIntervalDays: gaps.length ? Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length) : null,
+    nextAppointment: next ? { start: next.start, serviceName: next.serviceName } : null,
+  };
+}
+
+// ------------------------------------------------------------------ comissão
+/**
+ * Regra que vale para uma linha (a mais específica ganha): pessoa + serviço > serviço > pessoa > padrão do tipo de linha.
+ * rules: [{ hostId?, serviceId?, kind: "SERVICE" | "PRODUCT", pct?, fixedCents? }]
+ */
+export function commissionRule(line, rules) {
+  const m = (rules ?? []).filter((r) => r.kind === line.kind && (!r.hostId || r.hostId === line.hostId) && (!r.serviceId || r.serviceId === line.serviceId));
+  const score = (r) => (r.hostId ? 1 : 0) + (r.serviceId ? 2 : 0);
+  return m.sort((a, b) => score(b) - score(a))[0] ?? null;
+}
+/**
+ * Comissão de uma linha do atendimento concluído. line: { hostId, kind, serviceId?, amountCents, baseCents?, qty? }
+ * baseCents (quando existe) é a base da comissão — ex.: serviço do clube sai por R$ 0 mas comissiona pelo preço de tabela.
+ * Percentual arredonda ao centavo; valor fixo é por unidade.
+ */
+export function commissionFor(line, rules) {
+  const r = commissionRule(line, rules);
+  if (!r) return 0;
+  if (r.fixedCents != null) return r.fixedCents * (line.qty ?? 1);
+  return roundHalfUp(((line.baseCents ?? line.amountCents) * (r.pct ?? 0)) / 100);
+}
+/** Extrato do período: { byHost: { [hostId]: { servicesCents, productsCents, commissionCents, lines } }, totalCommissionCents } */
+export function commissionStatement(lines, rules) {
+  const byHost = {};
+  let total = 0;
+  for (const l of lines ?? []) {
+    const h = (byHost[l.hostId] ??= { servicesCents: 0, productsCents: 0, commissionCents: 0, lines: 0 });
+    const c = commissionFor(l, rules);
+    if (l.kind === "SERVICE") h.servicesCents += l.amountCents; else h.productsCents += l.amountCents;
+    h.commissionCents += c; h.lines += 1; total += c;
+  }
+  return { byHost, totalCommissionCents: total };
+}
+
+// ------------------------------------------------------------------ clube de assinatura
+/**
+ * O que a assinatura cobre nesta visita. Uma visita consome UM uso (não importa quantos serviços do plano).
+ * sub: { status: "ACTIVE" | ..., periodStart, periodEnd ("YYYY-MM-DD", fim inclusive), usesPerPeriod (null = ilimitado), serviceIds }
+ * → { covered: [ids], charged: [ids], usesLeft (depois desta visita), reason? }
+ */
+export function clubCoverage(sub, serviceIds, { usedInPeriod = 0, date }) {
+  const none = (reason) => ({ covered: [], charged: [...serviceIds], usesLeft: null, reason });
+  if (!sub) return none("NO_SUBSCRIPTION");
+  if (sub.status !== "ACTIVE") return none("SUBSCRIPTION_INACTIVE");
+  if (date < sub.periodStart || date > sub.periodEnd) return none("OUT_OF_PERIOD");
+  const covered = serviceIds.filter((id) => sub.serviceIds.includes(id));
+  const charged = serviceIds.filter((id) => !sub.serviceIds.includes(id));
+  if (!covered.length) return { covered: [], charged, usesLeft: sub.usesPerPeriod == null ? null : Math.max(0, sub.usesPerPeriod - usedInPeriod), reason: "NOT_IN_PLAN" };
+  if (sub.usesPerPeriod != null && usedInPeriod >= sub.usesPerPeriod) return { covered: [], charged: [...serviceIds], usesLeft: 0, reason: "USES_EXHAUSTED" };
+  return { covered, charged, usesLeft: sub.usesPerPeriod == null ? null : sub.usesPerPeriod - usedInPeriod - 1 };
+}
+/** Soma meses a uma data mantendo o dia (31/01 + 1 mês = 28/02 ou 29/02). */
+export function addMonthsClamp(ymd, n) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const total = (m - 1) + n, ny = y + Math.floor(total / 12), nm = ((total % 12) + 12) % 12 + 1;
+  return `${ny}-${pad(nm)}-${pad(Math.min(d, daysInMonth(ny, nm)))}`;
+}
+/**
+ * Período mensal da assinatura que contém a data, contado a partir do dia em que ela começou (âncora; sem "escorregar"
+ * de 31 para 28 nos meses seguintes). → { periodStart, periodEnd } (fim inclusive) ou null se a data é antes do início.
+ */
+export function clubPeriodOf(anchorYmd, dateYmd) {
+  if (dateYmd < anchorYmd) return null;
+  for (let i = 0; i < 1200; i++) {
+    const start = addMonthsClamp(anchorYmd, i), end = addDays(addMonthsClamp(anchorYmd, i + 1), -1);
+    if (dateYmd >= start && dateYmd <= end) return { periodStart: start, periodEnd: end };
+  }
+  return null;
+}
+
+// ------------------------------------------------------------------ fidelidade
+/** Cartão fidelidade "a cada N, um grátis": visitas que contam (não inclui as resgatadas) → { stamps, rewardsAvailable, nextIn } */
+export function loyaltyStatus({ completedCount, redeemedCount = 0, everyN }) {
+  if (!(Number.isInteger(everyN) && everyN >= 2)) return { stamps: 0, rewardsAvailable: 0, nextIn: null };
+  const earned = Math.floor(completedCount / everyN);
+  const stamps = completedCount % everyN;
+  return { stamps, rewardsAvailable: Math.max(0, earned - redeemedCount), nextIn: everyN - stamps };
+}
+
+// ------------------------------------------------------------------ fila do dia (sem hora marcada)
+/**
+ * Previsão de espera de quem chegou sem horário, na ordem de chegada.
+ * queue: [{ id, durationMin, hostId? }] · hosts: [{ id, freeAt }] (quando cada um fica livre; ms ou ISO) · now
+ * Cada um vai para o profissional escolhido ou para quem fica livre primeiro; → [{ id, position, hostId, etaMin, startsAt }]
+ */
+export function queueEstimate(queue, hosts, now = Date.now()) {
+  const n = toMs(now);
+  const free = new Map((hosts ?? []).map((h) => [h.id, Math.max(n, toMs(h.freeAt ?? n))]));
+  return (queue ?? []).map((q, i) => {
+    let hostId = q.hostId && free.has(q.hostId) ? q.hostId : null;
+    if (!hostId) hostId = [...free.entries()].sort((a, b) => a[1] - b[1])[0]?.[0] ?? null; // empate: ordem da lista
+    if (!hostId) return { id: q.id, position: i + 1, hostId: null, etaMin: null, startsAt: null };
+    const at = free.get(hostId);
+    free.set(hostId, at + q.durationMin * MIN);
+    return { id: q.id, position: i + 1, hostId, etaMin: Math.round((at - n) / MIN), startsAt: new Date(at).toISOString() };
+  });
+}
+
+// ------------------------------------------------------------------ clínica: convênio e retorno
+/** Data sugerida do retorno: dias depois do atendimento (data local). */
+export const recallDate = (doneYmd, days) => addDays(doneYmd, days);
+/**
+ * Preço do atendimento conforme a forma: particular (preço do tipo) ou convênio aceito no tipo
+ * (valor do convênio, se houver tabela; senão o paciente não paga nada na hora).
+ * → { ok, paymentKind, priceCents, error? }
+ */
+export function insurancePrice(type, insuranceId, insurances) {
+  if (!insuranceId) return { ok: true, paymentKind: "PRIVATE", priceCents: type.priceCents ?? null };
+  const ins = (insurances ?? []).find((x) => x.id === insuranceId && x.active !== false);
+  if (!ins) return { ok: false, error: { path: "insuranceId", code: "INSURANCE_UNKNOWN", message: "Convênio não encontrado" } };
+  if (!(type.insuranceIds ?? []).includes(insuranceId)) return { ok: false, error: { path: "insuranceId", code: "INSURANCE_NOT_ACCEPTED", message: `${ins.name} não atende ${type.name}` } };
+  return { ok: true, paymentKind: "INSURANCE", priceCents: ins.prices?.[type.id] ?? 0 };
+}
+
+// ------------------------------------------------------------------ perfis de segmento
+/** Vocabulário e o que vem ligado em cada segmento (a empresa pode mudar tudo depois). */
+export const SEGMENTS = {
+  GENERAL:    { label: "Serviços em geral",          words: { client: "cliente",  clients: "clientes",  pro: "profissional", pros: "profissionais", service: "serviço",       services: "serviços" },       on: [] },
+  BARBERSHOP: { label: "Barbearia",                  words: { client: "cliente",  clients: "clientes",  pro: "barbeiro",     pros: "barbeiros",     service: "serviço",       services: "serviços" },       on: ["combos", "queue", "commissions", "club", "loyalty", "confirmation"] },
+  SALON:      { label: "Salão de beleza e estética", words: { client: "cliente",  clients: "clientes",  pro: "profissional", pros: "profissionais", service: "serviço",       services: "serviços" },       on: ["combos", "resources", "commissions", "loyalty", "deposits", "confirmation"] },
+  CLINIC:     { label: "Clínica e consultório",      words: { client: "paciente", clients: "pacientes", pro: "profissional", pros: "profissionais", service: "procedimento",  services: "procedimentos" }, on: ["resources", "recurring", "intake", "insurance", "recall", "confirmation", "waitlist"] },
+  DENTAL:     { label: "Odontologia",                words: { client: "paciente", clients: "pacientes", pro: "dentista",     pros: "dentistas",     service: "procedimento",  services: "procedimentos" }, on: ["resources", "recurring", "intake", "insurance", "recall", "confirmation", "waitlist", "consent"] },
+  PET:        { label: "Pet shop e veterinária",     words: { client: "tutor",    clients: "tutores",   pro: "profissional", pros: "profissionais", service: "serviço",       services: "serviços" },       on: ["combos", "resources", "recall", "confirmation"] },
+  CONSULTING: { label: "Consultoria e reuniões",     words: { client: "cliente",  clients: "clientes",  pro: "consultor",    pros: "consultores",   service: "reunião",       services: "reuniões" },       on: ["deposits"] },
+};
+export const vocabulary = (segment) => (SEGMENTS[segment] ?? SEGMENTS.GENERAL).words;

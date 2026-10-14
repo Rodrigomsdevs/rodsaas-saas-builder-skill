@@ -1,5 +1,5 @@
 {
-  "version": 17,
+  "version": 18,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -739,7 +739,15 @@
         "/agendar/[pagina]",
         "/agendar/[pagina]/[tipo]",
         "/agendar/[pagina]/p/[pessoa]",
-        "/agendamento/[token]"
+        "/agendamento/[token]",
+        "/agenda/recepcao",
+        "/agenda/fila",
+        "/agenda/fila/tv",
+        "/agenda/retornos",
+        "/agenda/clube",
+        "/agenda/comissoes",
+        "/espera/[token]",
+        "/agendar/[pagina]/clube"
       ],
       "testids": [
         "agenda-calendar",
@@ -769,7 +777,65 @@
         "agenda-manage-reschedule",
         "agenda-manage-cancel",
         "agenda-manage-cancel-confirm",
-        "agenda-manage-canceled"
+        "agenda-manage-canceled",
+        "data-appointment-id",
+        "data-dow",
+        "data-type",
+        "data-host",
+        "data-date",
+        "data-start",
+        "agenda-manage-confirm",
+        "agenda-manage-confirmed",
+        "agenda-manage-payment",
+        "agenda-public-addon",
+        "data-slug",
+        "agenda-public-total",
+        "data-cents",
+        "agenda-public-insurance",
+        "agenda-public-payment",
+        "agenda-public-pay-link",
+        "agenda-public-intake",
+        "agenda-public-waitlist",
+        "agenda-public-waitlist-form",
+        "agenda-public-waitlist-done",
+        "agenda-offer",
+        "agenda-offer-accept",
+        "agenda-offer-expired",
+        "agenda-reception",
+        "agenda-day-column",
+        "agenda-reception-card",
+        "data-state",
+        "agenda-checkin",
+        "agenda-complete",
+        "agenda-complete-dialog",
+        "agenda-complete-product-add",
+        "agenda-complete-method",
+        "agenda-complete-total",
+        "agenda-complete-confirm",
+        "agenda-whatsapp",
+        "agenda-client-confirmed",
+        "agenda-queue",
+        "agenda-queue-add",
+        "agenda-queue-name",
+        "agenda-queue-service",
+        "agenda-queue-submit",
+        "agenda-queue-row",
+        "data-id",
+        "data-position",
+        "agenda-queue-eta",
+        "agenda-queue-call",
+        "agenda-client-summary",
+        "agenda-client-loyalty",
+        "agenda-recall-row",
+        "agenda-club-plan-new",
+        "agenda-club-plan-row",
+        "agenda-club-subscriber-row",
+        "agenda-commission-row",
+        "agenda-commission-close",
+        "agenda-resource-new",
+        "agenda-resource-row",
+        "agenda-complete-product-name",
+        "agenda-complete-product-price"
       ],
       "api": [
         {
@@ -897,6 +963,157 @@
           "body": [
             "start"
           ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/settings"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/resources"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/resources",
+          "body": [
+            "name"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/insurances"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/insurances",
+          "body": [
+            "name"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/insurances/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/blocks",
+          "body": [
+            "start",
+            "end"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/agenda/blocks/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/check-in"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/appointments/{id}/complete"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/clients/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/agenda/clients/{id}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/clients"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/waitlist"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/queue"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/queue",
+          "body": [
+            "name",
+            "serviceIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/queue/{id}/call"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/recalls"
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/commission-rules"
+        },
+        {
+          "method": "put",
+          "path": "/v1/agenda/commission-rules",
+          "body": [
+            "rules"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/reports/commissions"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/commissions/close",
+          "body": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/agenda/club/plans"
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/club/plans",
+          "body": [
+            "name",
+            "priceCents",
+            "serviceIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/agenda/club/subscriptions",
+          "body": [
+            "planId"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/{page}/types/{type}/waitlist",
+          "body": [
+            "name",
+            "email",
+            "dateFrom",
+            "dateTo"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/agenda/waitlist/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/waitlist/{token}/accept"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/agenda/manage/{token}/confirm"
         }
       ]
     },

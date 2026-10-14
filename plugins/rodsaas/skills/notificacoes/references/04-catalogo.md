@@ -83,6 +83,11 @@ Ao instalar (ou revisar) um preset com este add-on presente, o preset chama `not
 | `agenda.rescheduled` | remarcado pelo cliente | quem atende | appointment | idem |
 | `agenda.canceled` | cancelado pelo cliente | quem atende | appointment | idem |
 | `agenda.daily` | job 7 h | quem tem atendimento no dia | user | `/agenda` |
+| `agenda.deposit_paid` | sinal pago (webhook do Financeiro) | quem atende | appointment (`groupUrl` `/agenda/recepcao`) | `/agenda/agendamentos/<id>` |
+| `agenda.deposit_expired` | job: sinal não pago no prazo, horário liberado | quem atende | appointment | idem |
+| `agenda.waitlist_booked` | cliente aceitou a vaga oferecida pela lista de espera | quem atende | appointment | idem |
+| `agenda.recalls_due` | job segunda 8 h (`agenda_clinic`) | owner/admin e quem atende | organização | `/agenda/retornos` |
+| `agenda.club_past_due` | recorrência do clube não paga (Financeiro) | owner/admin | assinatura | `/agenda/clube` |
 
 O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O que a própria equipe faz pelo painel tem o membro como ator (e ele não recebe).
 

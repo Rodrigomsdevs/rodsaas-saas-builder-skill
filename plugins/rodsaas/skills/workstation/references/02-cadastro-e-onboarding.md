@@ -44,7 +44,7 @@ Passos (cada um numa tela, com voltar e o progresso no topo):
 
 ★ `POST /v1/workstation/onboarding` (owner) `{ segment, teamSize?, apps: [], invites: [] }` → `validateOnboarding` →
 
-1. grava segmento e tamanho no `WorkstationProfile`;
+1. grava segmento e tamanho no `WorkstationProfile`; com a Agenda entre os apps, o perfil dela nasce do segmento (`agendaProfileFor`: barbearia → `BARBERSHOP`, odonto → `DENTAL`, clínica → `CLINIC`, salão → `SALON`, pet → `PET`, agência → `CONSULTING`; o resto `GENERAL`), com os tipos de exemplo e o que o perfil liga (`skills/agenda/references/09-perfis-de-segmento.md`);
 2. **liga os apps escolhidos**: tira de `disabledApps`; os outros disponíveis entram em `disabledApps` (podem ser ligados depois pela loja); `activateApp()` de cada um (abaixo); acesso padrão (`defaultAccess`: no teste, todos os membros);
 3. fixa os escolhidos no trilho do owner (`pinnedApps`);
 4. cria os convites pelo serviço da base (`createInvitation`, com `access` = os apps escolhidos, sem papéis de dentro dos apps), respeitando o limite de pessoas do modelo;

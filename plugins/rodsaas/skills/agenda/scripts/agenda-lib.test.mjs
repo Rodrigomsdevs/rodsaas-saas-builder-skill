@@ -176,3 +176,200 @@ test("tokens, Jitsi, slug e textos", () => {
   assert.equal(L.formatDayLong("2026-10-15"), "quinta, 15 de outubro");
   assert.equal(L.formatAppointment("2026-10-15T12:00:00Z", "2026-10-15T12:30:00Z", SP), "quinta, 15 de outubro, 09:00 – 09:30 (horário de Brasília)");
 });
+
+// ================================================================== operação (salão, barbearia, clínica)
+test("recursos: precisa de UM livre do grupo (cadeira/sala); dois profissionais disputam a mesma sala", () => {
+  const ana = host({ id: "ana", weekly: { 2: [["09:00", "11:00"]] } });
+  const bia = host({ id: "bia", weekly: { 2: [["09:00", "11:00"]] } });
+  const salaOcupada = { id: "sala1", busy: [{ start: "2026-10-13T12:00:00Z", end: "2026-10-13T13:00:00Z" }] }; // 09:00–10:00 SP
+  const day = (resources, extra = {}) => L.computeSlots(base({ mode: "any", hosts: [ana, bia], durationMin: 60, resources, ...extra })).byDay["2026-10-13"] ?? [];
+  assert.deepEqual(hms(day([salaOcupada])), ["10:00"], "uma sala ocupada às 09:00: só sobra 10:00, mesmo com duas pessoas livres");
+  assert.deepEqual(day([salaOcupada, { id: "sala2", busy: [] }]).map((s) => [L.localOf(s.start, SP).hm, s.resourceIds.join("+")]), [["09:00", "sala2"], ["10:00", "sala1+sala2"]]);
+  assert.deepEqual(day([]), [], "tipo exige recurso e não há nenhum: sem horários");
+  assert.equal(day(undefined).length, 2, "sem recursos no tipo, o motor ignora");
+  assert.deepEqual(hms(day([{ id: "s", busy: [{ start: "2026-10-13T13:30:00Z", end: "2026-10-13T14:30:00Z" }] }])), ["09:00"], "sala ocupada a partir de 10:30 derruba o horário das 10:00");
+  const opts = base({ hosts: [ana], durationMin: 60, resources: [salaOcupada, { id: "sala2", busy: [] }] });
+  assert.ok(L.isSlotAvailable(opts, "2026-10-13T12:00:00Z", "ana", "sala2"));
+  assert.ok(!L.isSlotAvailable(opts, "2026-10-13T12:00:00Z", "ana", "sala1"), "sala escolhida ocupada");
+  const turma = L.computeSlots(base({ hosts: [ana], durationMin: 60, capacity: 4, eventTypeId: "aula", resources: [{ id: "estudio", busy: [{ start: "2026-10-13T12:00:00Z", end: "2026-10-13T13:00:00Z", eventTypeId: "aula" }] }] })).byDay["2026-10-13"];
+  assert.deepEqual(hms(turma), ["09:00", "10:00"], "a sessão da própria turma não ocupa a sala dela");
+});
+
+test("combos: soma duração e preço, intervalo antes do primeiro e depois do último, desconto e erros", () => {
+  const corte = { id: "c", name: "Corte", durationMin: 30, priceCents: 4000, bufferBeforeMin: 5, bufferAfterMin: 10 };
+  const barba = { id: "b", name: "Barba", durationMin: 20, priceCents: 3000, bufferAfterMin: 15 };
+  const r = L.combo([corte, barba]);
+  assert.deepEqual([r.ok, r.durationMin, r.priceCents, r.bufferBeforeMin, r.bufferAfterMin, r.label], [true, 50, 7000, 5, 15, "Corte + Barba"]);
+  assert.equal(L.combo([corte, barba], { discountPct: 10 }).priceCents, 6300);
+  assert.equal(L.combo([{ ...corte, priceCents: 3333 }, { ...barba, priceCents: 3333 }], { discountPct: 15 }).priceCents, 5666, "15% de 6666 = 999,9 → 1000 (meio para cima)");
+  assert.equal(L.combo([{ ...corte, priceCents: null }, { ...barba, priceCents: null }]).priceCents, null, "sem preço continua sem preço");
+  assert.deepEqual(L.combo([corte, corte]).errors.map((e) => e.code), ["COMBO_DUPLICATE"]);
+  assert.deepEqual(L.combo([corte, { ...barba, combinable: false }]).errors.map((e) => e.path), ["addOns.0"]);
+  assert.deepEqual(L.combo([]).errors.map((e) => e.code), ["COMBO_SIZE"]);
+  assert.deepEqual(L.combo([corte, { ...barba, durationMin: 700 }]).errors.map((e) => e.code), ["COMBO_TOO_LONG"]);
+  assert.ok(L.combo([corte]).ok, "um serviço só também vale");
+});
+
+test("recorrência: mantém a hora local, quinzenal, mensal no dia 31 e limites", () => {
+  const w = L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "WEEKLY", count: 4 }, SP);
+  assert.deepEqual(w.map((x) => L.localOf(x, SP).ymd), ["2026-10-13", "2026-10-20", "2026-10-27", "2026-11-03"]);
+  assert.ok(w.every((x) => L.localOf(x, SP).hm === "09:00"));
+  const ny = L.recurrenceStarts("2026-10-27T13:00:00Z", { freq: "WEEKLY", count: 2 }, "America/New_York"); // 09:00 EDT
+  assert.deepEqual(ny.map((x) => L.localOf(x, "America/New_York").hm), ["09:00", "09:00"], "atravessa o fim do horário de verão sem mudar a hora");
+  assert.deepEqual(ny, ["2026-10-27T13:00:00.000Z", "2026-11-03T14:00:00.000Z"]);
+  assert.deepEqual(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "WEEKLY", interval: 2, count: 3 }, SP).map((x) => L.localOf(x, SP).ymd), ["2026-10-13", "2026-10-27", "2026-11-10"]);
+  assert.deepEqual(L.recurrenceStarts("2027-01-31T12:00:00Z", { freq: "MONTHLY", count: 4 }, SP).map((x) => L.localOf(x, SP).ymd), ["2027-01-31", "2027-02-28", "2027-03-31", "2027-04-30"], "dia 31 cai no último dia dos meses curtos e volta ao 31");
+  assert.deepEqual(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "WEEKLY", until: "2026-10-27" }, SP).length, 3, "até a data (inclusive)");
+  assert.deepEqual(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "WEEKLY", count: 1 }, SP), [], "série tem pelo menos 2");
+  assert.deepEqual(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "WEEKLY", count: 53 }, SP), [], "no máximo 52");
+  assert.deepEqual(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "DAILY", count: 3 }, SP), []);
+  assert.equal(L.recurrenceStarts("2026-10-13T12:00:00Z", { freq: "MONTHLY", until: "2030-01-01" }, SP).length, 13, "sem count: no máximo 1 ano");
+});
+
+test("lista de espera: tipo, profissional, janela de datas, período do dia e ordem de chegada", () => {
+  const e = (id, extra) => ({ id, eventTypeId: "corte", hostId: null, dateFrom: "2026-10-13", dateTo: "2026-10-16", periods: [], status: "WAITING", createdAt: "2026-10-10T10:00:00Z", ...extra });
+  const entries = [
+    e("tarde", { periods: ["AFTERNOON"], createdAt: "2026-10-09T10:00:00Z" }),
+    e("bia", { hostId: "bia", createdAt: "2026-10-08T10:00:00Z" }),
+    e("segundo", { createdAt: "2026-10-10T11:00:00Z" }),
+    e("primeiro", { createdAt: "2026-10-10T09:00:00Z" }),
+    e("outro-tipo", { eventTypeId: "barba" }),
+    e("fora", { dateFrom: "2026-10-20", dateTo: "2026-10-30" }),
+    e("passou", { dateFrom: "2026-10-01", dateTo: "2026-10-10" }),
+    e("atendido", { status: "BOOKED" }),
+  ];
+  const freed = { eventTypeId: "corte", hostId: "ana", start: "2026-10-14T13:00:00Z" }; // 10:00 SP
+  assert.deepEqual(L.waitlistCandidates(entries, freed, SP).map((x) => x.id), ["primeiro", "segundo"]);
+  assert.deepEqual(L.waitlistCandidates(entries, { ...freed, hostId: "bia", start: "2026-10-14T17:00:00Z" }, SP).map((x) => x.id), ["bia", "tarde", "primeiro", "segundo"], "14:00 com a Bia");
+  assert.equal(L.dayPeriod("11:59"), "MORNING");
+  assert.equal(L.dayPeriod("12:00"), "AFTERNOON");
+  assert.equal(L.dayPeriod("18:00"), "EVENING");
+});
+
+test("sinal: valor, quando é exigido (tipo ou faltas) e devolução pela antecedência", () => {
+  assert.equal(L.depositAmount(8000, { kind: "PERCENT", value: 50 }), 4000);
+  assert.equal(L.depositAmount(3333, { kind: "PERCENT", value: 50 }), 1667, "meio para cima");
+  assert.equal(L.depositAmount(3000, { kind: "FIXED", value: 5000 }), 3000, "nunca passa do preço");
+  assert.equal(L.depositAmount(null, { kind: "FIXED", value: 1000 }), 0, "sem preço, sem sinal");
+  assert.equal(L.depositAmount(8000, null), 0);
+  assert.deepEqual(L.depositRequired({ typeDeposit: { kind: "FIXED", value: 2000 } }).reason, "TYPE");
+  assert.deepEqual(L.depositRequired({ noShowCount: 2, depositAfterNoShows: 2 }), { required: true, reason: "NO_SHOWS", deposit: { kind: "PERCENT", value: 50 } });
+  assert.equal(L.depositRequired({ noShowCount: 1, depositAfterNoShows: 2 }).required, false);
+  assert.equal(L.depositRequired({ noShowCount: 9, depositAfterNoShows: null }).required, false, "regra desligada");
+  const start = "2026-10-15T12:00:00Z";
+  assert.deepEqual(L.depositRefund({ paidCents: 4000, start, canceledAt: "2026-10-14T12:00:00Z", by: "CLIENT", refundIfHoursBefore: 24 }), { refundCents: 4000, retainedCents: 0 }, "24 h antes exatas: devolve");
+  assert.deepEqual(L.depositRefund({ paidCents: 4000, start, canceledAt: "2026-10-14T12:01:00Z", by: "CLIENT", refundIfHoursBefore: 24 }), { refundCents: 0, retainedCents: 4000 });
+  assert.deepEqual(L.depositRefund({ paidCents: 4000, start, canceledAt: "2026-10-15T11:00:00Z", by: "TEAM" }), { refundCents: 4000, retainedCents: 0 }, "a empresa cancelou: devolve sempre");
+  assert.deepEqual(L.depositRefund({ paidCents: 0, start, canceledAt: start, by: "CLIENT" }), { refundCents: 0, retainedCents: 0 });
+});
+
+test("WhatsApp: telefone BR, link com a mensagem e textos curtos", () => {
+  assert.equal(L.normalizePhoneBR("(44) 99999-1234"), "5544999991234");
+  assert.equal(L.normalizePhoneBR("+55 44 3222-1234"), "554432221234", "fixo");
+  assert.equal(L.normalizePhoneBR("005544999991234"), "5544999991234");
+  assert.equal(L.normalizePhoneBR("44 89999-1234"), null, "celular com 9 dígitos começa com 9");
+  assert.equal(L.normalizePhoneBR("123"), null);
+  assert.equal(L.normalizePhoneBR("(04) 99999-1234"), null, "DDD inválido");
+  const txt = L.clientMessage("REMINDER", { company: "Barbearia do Zé", clientName: "Ana Souza", service: "Corte", when: "quinta, 15 de outubro, 09:00", url: "https://x.app/agendamento/t" });
+  assert.equal(txt, "Ana, lembrete: Corte na Barbearia do Zé, quinta, 15 de outubro, 09:00. Confirme ou remarque: https://x.app/agendamento/t");
+  assert.equal(L.waLink("44999991234", "Olá & tchau"), "https://wa.me/5544999991234?text=Ol%C3%A1%20%26%20tchau");
+  assert.equal(L.waLink("abc", "x"), null);
+  assert.match(L.clientMessage("PAYMENT", { company: "C", clientName: "", service: "S", when: "w", amount: "R$ 40,00" }), /^Olá, para garantir S na C \(w\), pague o sinal de R\$ 40,00:$/);
+  assert.throws(() => L.clientMessage("XPTO", {}));
+});
+
+test("ficha do cliente: visitas, faltas, gasto, último atendimento, preferido, intervalo e próximo", () => {
+  const a = (start, extra) => ({ start, status: "CONFIRMED", attendance: "ATTENDED", serviceName: "Corte", hostId: "ana", hostName: "Ana", amountCents: 4000, ...extra });
+  const s = L.clientSummary([
+    a("2026-09-01T12:00:00Z"), a("2026-09-29T12:00:00Z", { hostId: "bia", hostName: "Bia" }), a("2026-09-15T12:00:00Z"),
+    a("2026-10-05T12:00:00Z", { attendance: "NO_SHOW", amountCents: 0 }), a("2026-10-06T12:00:00Z", { status: "CANCELED", attendance: null }),
+    a("2026-11-01T12:00:00Z", { attendance: null, serviceName: "Barba" }),
+  ], "2026-10-13T00:00:00Z");
+  assert.deepEqual([s.visits, s.noShows, s.cancellations, s.spentCents, s.favoriteHostId, s.avgIntervalDays], [3, 1, 1, 12000, "ana", 14]);
+  assert.deepEqual(s.lastVisit, { start: "2026-09-29T12:00:00Z", serviceName: "Corte", hostId: "bia", hostName: "Bia" }, "último é o mais recente, não o último da lista");
+  assert.deepEqual(s.nextAppointment, { start: "2026-11-01T12:00:00Z", serviceName: "Barba" });
+  assert.deepEqual(L.clientSummary([]), { visits: 0, noShows: 0, cancellations: 0, spentCents: 0, lastVisit: null, favoriteHostId: null, avgIntervalDays: null, nextAppointment: null });
+});
+
+test("comissão: regra mais específica, % arredondado, fixo por unidade, base do clube e extrato", () => {
+  const rules = [
+    { kind: "SERVICE", pct: 40 },
+    { kind: "SERVICE", hostId: "bia", pct: 50 },
+    { kind: "SERVICE", serviceId: "barba", fixedCents: 1000 },
+    { kind: "SERVICE", hostId: "bia", serviceId: "barba", pct: 60 },
+    { kind: "PRODUCT", pct: 10 },
+  ];
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "SERVICE", serviceId: "corte", amountCents: 4000 }, rules), 1600);
+  assert.equal(L.commissionFor({ hostId: "bia", kind: "SERVICE", serviceId: "corte", amountCents: 4000 }, rules), 2000, "pessoa vale mais que o padrão");
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "SERVICE", serviceId: "barba", amountCents: 3000 }, rules), 1000, "serviço vale mais que a pessoa");
+  assert.equal(L.commissionFor({ hostId: "bia", kind: "SERVICE", serviceId: "barba", amountCents: 3000 }, rules), 1800, "pessoa + serviço vale mais que tudo");
+  assert.equal(L.commissionFor({ hostId: "bia", kind: "SERVICE", serviceId: "barba", amountCents: 3000 }, rules.slice(0, 3)), 1000, "sem a regra combinada: serviço vale mais que a pessoa");
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "PRODUCT", amountCents: 2999 }, rules), 300, "10% de 29,99 = 2,999 → 3,00");
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "SERVICE", serviceId: "corte", amountCents: 0, baseCents: 4000 }, rules), 1600, "clube comissiona pela base");
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "SERVICE", serviceId: "barba", amountCents: 3000, qty: 2 }, rules), 2000, "fixo por unidade");
+  assert.equal(L.commissionFor({ hostId: "ana", kind: "PRODUCT", amountCents: 1000 }, [{ kind: "SERVICE", pct: 40 }]), 0, "sem regra de produto");
+  const st = L.commissionStatement([
+    { hostId: "ana", kind: "SERVICE", serviceId: "corte", amountCents: 4000 },
+    { hostId: "ana", kind: "PRODUCT", amountCents: 2000 },
+    { hostId: "bia", kind: "SERVICE", serviceId: "corte", amountCents: 4000 },
+  ], rules);
+  assert.deepEqual(st.byHost.ana, { servicesCents: 4000, productsCents: 2000, commissionCents: 1800, lines: 2 });
+  assert.equal(st.totalCommissionCents, 3800);
+});
+
+test("clube: cobre os serviços do plano, um uso por visita, esgotado, fora do período e período ancorado", () => {
+  const sub = { status: "ACTIVE", periodStart: "2026-10-05", periodEnd: "2026-11-04", usesPerPeriod: 4, serviceIds: ["corte", "barba"] };
+  assert.deepEqual(L.clubCoverage(sub, ["corte", "barba"], { usedInPeriod: 1, date: "2026-10-13" }), { covered: ["corte", "barba"], charged: [], usesLeft: 2 }, "corte + barba = um uso");
+  assert.deepEqual(L.clubCoverage(sub, ["corte", "sobrancelha"], { usedInPeriod: 0, date: "2026-10-13" }), { covered: ["corte"], charged: ["sobrancelha"], usesLeft: 3 });
+  assert.deepEqual(L.clubCoverage(sub, ["corte"], { usedInPeriod: 4, date: "2026-10-13" }), { covered: [], charged: ["corte"], usesLeft: 0, reason: "USES_EXHAUSTED" });
+  assert.equal(L.clubCoverage(sub, ["corte"], { usedInPeriod: 0, date: "2026-11-05" }).reason, "OUT_OF_PERIOD");
+  assert.equal(L.clubCoverage({ ...sub, status: "PAST_DUE" }, ["corte"], { date: "2026-10-13" }).reason, "SUBSCRIPTION_INACTIVE", "assinatura em atraso não cobre");
+  assert.equal(L.clubCoverage(sub, ["sobrancelha"], { usedInPeriod: 0, date: "2026-10-13" }).reason, "NOT_IN_PLAN");
+  assert.equal(L.clubCoverage({ ...sub, usesPerPeriod: null }, ["corte"], { usedInPeriod: 99, date: "2026-10-13" }).usesLeft, null, "ilimitado");
+  assert.equal(L.clubCoverage(null, ["corte"], { date: "2026-10-13" }).reason, "NO_SUBSCRIPTION");
+  assert.deepEqual(L.clubPeriodOf("2026-01-31", "2026-02-15"), { periodStart: "2026-01-31", periodEnd: "2026-02-27" });
+  assert.deepEqual(L.clubPeriodOf("2026-01-31", "2026-02-28"), { periodStart: "2026-02-28", periodEnd: "2026-03-30" });
+  assert.deepEqual(L.clubPeriodOf("2026-01-31", "2026-04-01"), { periodStart: "2026-03-31", periodEnd: "2026-04-29" }, "volta ao dia 31 (não escorrega para 28)");
+  assert.equal(L.clubPeriodOf("2026-01-31", "2026-01-30"), null);
+  assert.equal(L.addMonthsClamp("2028-01-31", 1), "2028-02-29", "ano bissexto");
+  assert.equal(L.addMonthsClamp("2026-12-15", 1), "2027-01-15");
+});
+
+test("fidelidade: a cada N um grátis", () => {
+  assert.deepEqual(L.loyaltyStatus({ completedCount: 4, everyN: 5 }), { stamps: 4, rewardsAvailable: 0, nextIn: 1 });
+  assert.deepEqual(L.loyaltyStatus({ completedCount: 5, everyN: 5 }), { stamps: 0, rewardsAvailable: 1, nextIn: 5 });
+  assert.deepEqual(L.loyaltyStatus({ completedCount: 11, redeemedCount: 1, everyN: 5 }), { stamps: 1, rewardsAvailable: 1, nextIn: 4 });
+  assert.equal(L.loyaltyStatus({ completedCount: 5, redeemedCount: 3, everyN: 5 }).rewardsAvailable, 0, "nunca negativo");
+  assert.equal(L.loyaltyStatus({ completedCount: 5, everyN: 1 }).nextIn, null, "regra inválida desliga");
+});
+
+test("fila do dia: previsão por ordem de chegada, profissional escolhido e quem fica livre primeiro", () => {
+  const now = "2026-10-13T13:00:00Z";
+  const hosts = [{ id: "ana", freeAt: "2026-10-13T13:40:00Z" }, { id: "bia", freeAt: "2026-10-13T12:00:00Z" }];
+  const q = L.queueEstimate([{ id: "1", durationMin: 30 }, { id: "2", durationMin: 30, hostId: "ana" }, { id: "3", durationMin: 20 }, { id: "4", durationMin: 30 }], hosts, now);
+  assert.deepEqual(q.map((x) => [x.id, x.position, x.hostId, x.etaMin]), [["1", 1, "bia", 0], ["2", 2, "ana", 40], ["3", 3, "bia", 30], ["4", 4, "bia", 50]], "o 2 espera a Ana (escolhida) mesmo com a Bia livre antes");
+  assert.equal(L.queueEstimate([{ id: "x", durationMin: 30 }], [{ id: "ana", freeAt: now }, { id: "bia", freeAt: now }], now)[0].hostId, "ana", "empate: ordem da lista");
+  assert.equal(q[0].startsAt, "2026-10-13T13:00:00.000Z", "livre no passado conta a partir de agora");
+  assert.deepEqual(L.queueEstimate([{ id: "x", durationMin: 30 }], [], now)[0], { id: "x", position: 1, hostId: null, etaMin: null, startsAt: null });
+  assert.equal(L.queueEstimate([{ id: "x", durationMin: 30, hostId: "zé" }], hosts, now)[0].hostId, "bia", "profissional que não está na lista: quem estiver livre");
+});
+
+test("clínica: convênio aceito, preço do convênio, particular e data de retorno", () => {
+  const type = { id: "limpeza", name: "Limpeza", priceCents: 20000, insuranceIds: ["uni"] };
+  const ins = [{ id: "uni", name: "Uniodonto", prices: { limpeza: 0 } }, { id: "amil", name: "Amil Dental" }, { id: "velho", name: "X", active: false }];
+  assert.deepEqual(L.insurancePrice(type, null, ins), { ok: true, paymentKind: "PRIVATE", priceCents: 20000 });
+  assert.deepEqual(L.insurancePrice(type, "uni", ins), { ok: true, paymentKind: "INSURANCE", priceCents: 0 });
+  assert.equal(L.insurancePrice(type, "amil", ins).error.code, "INSURANCE_NOT_ACCEPTED");
+  assert.equal(L.insurancePrice(type, "velho", ins).error.code, "INSURANCE_UNKNOWN", "convênio desligado");
+  assert.equal(L.insurancePrice({ ...type, insuranceIds: ["uni"] }, "uni", [{ id: "uni", name: "U", prices: { limpeza: 5000 } }]).priceCents, 5000, "coparticipação");
+  assert.equal(L.recallDate("2026-10-13", 180), "2027-04-11");
+});
+
+test("segmentos: vocabulário e o que vem ligado", () => {
+  assert.equal(L.vocabulary("DENTAL").client, "paciente");
+  assert.equal(L.vocabulary("BARBERSHOP").pro, "barbeiro");
+  assert.equal(L.vocabulary("XPTO").service, "serviço", "desconhecido cai no geral");
+  assert.ok(L.SEGMENTS.BARBERSHOP.on.includes("club") && !L.SEGMENTS.DENTAL.on.includes("club"));
+  assert.ok(L.SEGMENTS.DENTAL.on.includes("insurance") && L.SEGMENTS.DENTAL.on.includes("recall"));
+  for (const [k, v] of Object.entries(L.SEGMENTS)) assert.deepEqual(Object.keys(v.words).sort(), ["client", "clients", "pro", "pros", "service", "services"], k);
+});
