@@ -13,7 +13,8 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 
 1. `api/`, `web/` e `rodsaas.json`, com typecheck, lint, build e testes **verdes**, já na casca de apps (existe `web/src/config/apps.ts`). Projeto com menu antigo: rode antes o `/rodsaas:apps`.
 2. **Add-on `uploads`** (pergunta de arquivo, capa e logo do formulário): se `rodsaas.json` não tiver `uploads` em `addons`, rode o fluxo da skill `uploads` primeiro.
-3. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, gerador de QR code, leitor de planilha para exportar `.xlsx`).
+3. **Add-on `notificacoes`** (sino, e-mails de aviso para a equipe, preferências): se `rodsaas.json` não tiver `notificacoes` em `addons`, rode o fluxo da skill `notificacoes` primeiro (leia o `SKILL.md` dela) e volte. Os avisos deste preset são registrados no catálogo dele e disparados pelo `notify()` dele (`skills/notificacoes/references/04-catalogo.md`, seção do app); nenhum aviso para membro é gravado ou enviado por conta própria.
+4. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, gerador de QR code, leitor de planilha para exportar `.xlsx`).
 
 ## Como trabalhar (obrigatório)
 

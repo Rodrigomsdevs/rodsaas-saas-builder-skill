@@ -34,6 +34,7 @@ Confira **usando o app** (API e front rodando), com dois usuários de papéis di
 - [ ] editar/excluir comentário, reações, seguir/deixar de seguir
 - [ ] resumo diário e lembrete de prazo (rodar o job manualmente em dev)
 - [ ] preferências desligam o que devem
+- [ ] nenhum `Notification` gravado direto: tudo pelo `notify()` do add-on, com os tipos `task.*`/`sprint.*` registrados no catálogo
 
 ## Anexos e horas
 - [ ] anexar por arrastar, clicar e colar; pré-visualizar imagem e PDF; excluir; limite/cota com mensagem certa

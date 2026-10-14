@@ -240,36 +240,9 @@ model TaskActivity {
 - Mudanças seguidas do mesmo autor no mesmo campo em menos de 2 min são **agrupadas** (atualiza a última atividade) para o histórico não virar ruído — exceto status.
 - Descrição: registra "editou a descrição" no máximo uma vez a cada 10 min por pessoa.
 
-## Notificações (módulo genérico `notifications`)
+## Notificações
 
-```prisma
-model Notification {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  organizationId String    @db.Uuid
-  userId         String    @db.Uuid         // destinatário
-  type           String                     // task.assigned, task.mentioned, task.commented, task.status, task.due_soon, task.overdue, sprint.started, sprint.completed
-  actorId        String?   @db.Uuid
-  entityType     String                     // task, sprint
-  entityId       String    @db.Uuid
-  data           Json                       // título, código, trecho do comentário, de/para
-  readAt         DateTime?
-  emailedAt      DateTime?
-  createdAt      DateTime  @default(now())
-  @@index([userId, readAt, createdAt])
-}
-
-enum EmailMode { IMMEDIATE DAILY OFF }
-
-model NotificationPreference {
-  organizationId String    @db.Uuid
-  userId         String    @db.Uuid
-  emailMode      EmailMode @default(IMMEDIATE)
-  disabledTypes  String[]  @default([])     // tipos que a pessoa desligou (no app e no e-mail)
-  @@id([organizationId, userId])
-}
-```
-
-Além do RLS por empresa, **toda** leitura filtra `userId = auth.userId` (ninguém lê notificação de outro).
+Os models `Notification` e `NotificationPreference` são do add-on `notificacoes` (`skills/notificacoes/references/02-modelo.md`); este preset não cria tabela de notificação. Ao apagar tarefa, `retract({ entityType: "task", entityId })` na mesma transação; ao tirar alguém de projeto privado, `retract` das tarefas daquele projeto para essa pessoa.
 
 ## Sprints
 

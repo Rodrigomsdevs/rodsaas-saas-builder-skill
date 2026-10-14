@@ -45,7 +45,7 @@ export const tarefasApp: AppDef = {
 
 ### 3. Início, busca e notificações
 - **Widgets do Início** e **provedor do Ctrl+K** vão no `AppDef` (`widgets`, `search`); o Início e a busca globais leem do registro.
-- **Sino**: o módulo genérico `notifications` (criado aqui se não existir) fornece o sino, que a casca põe no trilho (ou no rodapé do menu clássico); a página `/notificacoes` é global, fora de qualquer app.
+- **Sino**: vem do add-on `notificacoes` (pré-requisito), que a casca põe no trilho (ou no rodapé do menu clássico); a página `/notificacoes` é global, fora de qualquer app. Este preset só registra os tipos dele e chama `notify()`.
 
 ### 4. Topo
 O topo da casca tem o ponto de extensão `topbarItems` (à direita, antes da busca): o Tarefas acrescenta ali o **cronômetro ativo**, visível em qualquer app.
@@ -57,7 +57,7 @@ Se o app tiver configurações próprias, elas ficam dentro do app (configuraç�
 Reutilize se existirem, crie aqui se não: `Kanban` (colunas + arrastar, usado pelo database do notion e pelos módulos), `SidePeek`, `RelationSelect`, `MemberSelect`, `UserAvatar`, `Dropzone`/`FileList` (do uploads), editor de blocos (do notion; se não houver notion, instale o mesmo editor aqui seguindo `03-editor.md` da skill notion).
 
 ### 7. Backend
-Plugins de rota próprios registrados no `app.ts`; contadores em `lib/usage.ts`; features/limites em `config/plans.ts`; códigos de erro no catálogo; o módulo `notifications` em `modules/notifications/` (genérico: outros presets disparam notificações por ele).
+Plugins de rota próprios registrados no `app.ts`; contadores em `lib/usage.ts`; features/limites em `config/plans.ts`; códigos de erro no catálogo; avisos pelo `notify()` do add-on `notificacoes` (`modules/notifications/`), com os tipos registrados no boot do módulo de tarefas.
 
 ## Planos
 

@@ -13,7 +13,8 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos
 
 1. `api/`, `web/` e `rodsaas.json`, com typecheck, lint, build e testes **verdes**.
 2. **Add-on `uploads`** (anexos e importação): se `rodsaas.json` não tiver `uploads` em `addons`, rode o fluxo da skill `uploads` primeiro (leia o `SKILL.md` dela) e volte.
-3. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, recharts, leitor de planilha).
+3. **Add-on `notificacoes`** (sino, e-mails de aviso para a equipe, preferências): se `rodsaas.json` não tiver `notificacoes` em `addons`, rode o fluxo da skill `notificacoes` primeiro (leia o `SKILL.md` dela) e volte. Os avisos deste preset são registrados no catálogo dele e disparados pelo `notify()` dele (`skills/notificacoes/references/04-catalogo.md`, seção do app); nenhum aviso para membro é gravado ou enviado por conta própria.
+4. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, recharts, leitor de planilha).
 
 ## Como trabalhar (obrigatório)
 

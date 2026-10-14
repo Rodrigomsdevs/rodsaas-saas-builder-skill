@@ -119,7 +119,7 @@ E-mails (verificação, reset, convite) chegam no **Mailpit** em dev, com links 
 
 ## Presets
 
-Quando `rodsaas.json → presets` tem um preset listado em `contract.json → presets`, a auditoria passa a exigir as rotas, testids e rotas de API dele, e a bateria roda a parte correspondente.
+Quando `rodsaas.json → presets` (ou `addons`) tem um item listado em `contract.json → presets`, a auditoria passa a exigir as rotas, testids e rotas de API dele, e a bateria roda a parte correspondente.
 
 | Preset | Onde está o contrato | Testes |
 |---|---|---|
@@ -129,6 +129,8 @@ Quando `rodsaas.json → presets` tem um preset listado em `contract.json → pr
 | `helpdesk` | `skills/helpdesk/references/05-app-interno.md` (seção "Contrato testável"), `04-portal-e-widget.md` (rótulos e testids do portal e do chamado do cliente) e os formatos ★ de `03-api.md` | `suite/tests/13-helpdesk.spec.ts` |
 | `tarefas` | `skills/tarefas/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` | `suite/tests/14-tarefas.spec.ts` |
 | `notion` | `skills/notion/references/04-frontend.md` (seção "Contrato testável"), `03-editor.md` e os formatos ★ de `02-api.md` | `suite/tests/15-paginas.spec.ts` |
+| `uploads` (add-on) | rotas ★ de `skills/uploads/references/01-backend.md` | `suite/tests/16-uploads.spec.ts` |
+| `notificacoes` (add-on) | `skills/notificacoes/references/06-telas.md` (seção "Contrato testável") e os formatos ★ de `03-api.md` (inclui o descadastro público e os avisos da base `org.member_joined`/`org.role_changed`) | `suite/tests/17-notificacoes.spec.ts` |
 
 Em todos os presets, o contrato é o **mínimo** que dá para conferir de fora; o escopo de cada um é a referência inteira da skill (cada SKILL.md tem "Como trabalhar" e "Pronto quando" por fase).
 

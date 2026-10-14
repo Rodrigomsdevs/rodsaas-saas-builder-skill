@@ -48,7 +48,7 @@ Pela fila (pg-boss), com 3 novas tentativas; falha final → `deliveryStatus: FA
 | cliente | resolvido | "Seu chamado #N foi resolvido" + pesquisa (👍 / 👎 levando a `/chamado/<token>?avaliar=bom|ruim`) quando `csatEnabled` e `helpdesk_csat`; "Não resolveu? Responda este e-mail" |
 | cliente | aguardando há `pendingReminderDays` | lembrete "Ainda precisamos da sua resposta" (uma vez) |
 | cliente | link mágico | "Seus chamados em <empresa>" (24 h) |
-| equipe | chamado novo na fila / atribuído a você / cliente respondeu / menção em nota / prazo vencendo (warning) e estourado / resumo diário (8 h no fuso da empresa) | pelo módulo `notifications` (sino + e-mail conforme a preferência), tipos `helpdesk.ticket_created`, `helpdesk.assigned`, `helpdesk.customer_replied`, `helpdesk.mentioned`, `helpdesk.sla_warning`, `helpdesk.sla_breached`, `helpdesk.daily` |
+| equipe | chamado novo na fila / atribuído a você / cliente respondeu / menção em nota / prazo vencendo (warning) e estourado / resumo diário (8 h no fuso da empresa) | pelo `notify()` do add-on `notificacoes` (sino + e-mail conforme a preferência; `canSee` = atendente com acesso à fila), tipos `helpdesk.ticket_created`, `helpdesk.assigned`, `helpdesk.customer_replied`, `helpdesk.mentioned`, `helpdesk.sla_warning`, `helpdesk.sla_breached`, `helpdesk.daily` |
 
 O ponto de extensão para **WhatsApp** fica pronto: `ingestMessage({ channel: 'WHATSAPP', from: { phone, name }, text, attachments, externalId })` cria/encadeia chamados pelo telefone do contato, e `deliverPublicReply(ticket, message)` escolhe o canal de saída pelo canal do chamado (hoje só e-mail).
 

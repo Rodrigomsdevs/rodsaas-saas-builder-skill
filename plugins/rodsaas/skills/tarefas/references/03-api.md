@@ -131,20 +131,13 @@ Imagens coladas na descrição/comentário usam `purpose: editor_image` (mesmo f
 
 `GET/POST/PATCH/DELETE /v1/task-views` — pessoais livres; do projeto (`ownerId: null`) exigem a feature e papel owner/admin/líder.
 
-## Notificações (módulo `notifications`)
+## Notificações (add-on `notificacoes`)
 
-| Rota | Faz |
-|---|---|
-| ★ `GET /v1/notifications?unread=true&cursor=` | caixa de entrada do usuário |
-| ★ `GET /v1/notifications/unread-count` | contador do sino (o front consulta ao focar a janela e a cada 60 s) |
-| `POST /v1/notifications/:id/read` · `POST /v1/notifications/read-all` | — |
-| `GET/PUT /v1/notification-preferences` | `emailMode`, `disabledTypes` |
+As rotas da caixa de entrada, do contador e das preferências (`/v1/notifications…`, `/v1/notification-preferences`) são do add-on (`skills/notificacoes/references/03-api.md`). Este preset registra os tipos dele no catálogo e chama `notify()` **na mesma transação** de cada evento:
 
-### Quando notificar (service `notify()`)
-
-| Evento | Destinatários | Tipo |
+| Evento | Destinatários (candidatos) | Tipo |
 |---|---|---|
-| atribuição | novo responsável | `task.assigned` |
+| atribuição | novo responsável | `task.assigned` (`groupKey` = projectId) |
 | menção em comentário/descrição | mencionados | `task.mentioned` |
 | comentário novo | seguidores | `task.commented` |
 | mudança de status | seguidores | `task.status` |
@@ -152,9 +145,7 @@ Imagens coladas na descrição/comentário usam `purpose: editor_image` (mesmo f
 | prazo vencido (job 8 h) | responsável | `task.overdue` |
 | sprint iniciada/concluída | membros com tarefas na sprint | `sprint.started` / `sprint.completed` |
 
-Regras: **nunca notificar quem fez a ação**; não notificar quem perdeu acesso (projeto privado); respeitar `disabledTypes`; agrupar eventos iguais da mesma tarefa para a mesma pessoa em 2 min (atualiza a notificação existente).
-
-E-mail (pg-boss): `IMMEDIATE` envia em até 1 min (já agrupado); `DAILY` envia um resumo às 8 h no fuso da empresa ("Você tem 3 tarefas vencendo hoje e 5 novidades"); links levam para a tarefa. Templates em português com a marca do `rodsaas.json` e link para as preferências.
+Sempre com `actorId` (o add-on nunca avisa quem fez), `canSee` = acesso ao projeto (privado: só membros), `data.title` = "MKT-12 · Título" e `url` = `/tarefas/t/MKT-12`. Agrupamento, preferências, e-mail imediato e resumo diário são do add-on (`references/04-catalogo.md` dele, seção Tarefas).
 
 ## Erros novos
 

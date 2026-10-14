@@ -27,7 +27,7 @@
 
 ## Avisos (notificações e e-mails)
 
-Pelo módulo `notifications` (crie se não existir, como no `tarefas`):
+Pelo `notify()` do add-on `notificacoes` (pré-requisito; tipos `forms.*` registrados no catálogo, `canSee` = quem pode ver as respostas daquele formulário):
 
 | Evento | Quem recebe | Tipo |
 |---|---|---|

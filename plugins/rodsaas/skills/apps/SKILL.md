@@ -30,7 +30,7 @@ Levante e mostre ao usuário, numa tabela curta, **o que vira cada app**:
 | `rodsaas.json → presets` | `notion` → app **Páginas**; `tarefas` → **Tarefas**; `crm` → **CRM** |
 | casca do notion (`app-sidebar` com árvore de páginas, rotas `/pagina/[id]`, Início com recentes) | a árvore vira o menu do app Páginas; rotas vão para `/paginas` |
 | `config/home-widgets.ts`, `config/search-providers.ts`, `topbarItems` | widgets e provedores passam para o `AppDef` de cada app; `topbarItems` continua como ponto de extensão do topo |
-| `features/notifications`, sino no topo | o sino vai para o trilho |
+| `features/notifications`, sino no topo | o sino vai para o trilho; se o módulo de notificações foi criado por um preset (sem `notificacoes` em `rodsaas.json → addons`), registre para depois o `/rodsaas:notificacoes` em modo revisão |
 | itens de configurações dentro do menu | viram `config/settings-navigation.ts` (abas de Configurações) |
 
 Pergunte **só** se algum item do menu não tiver dono claro (ex.: uma tela solta que tanto pode ser um cadastro quanto parte do CRM). O resto segue a tabela. Se ninguém estiver acompanhando, use os padrões e registre no topo do relatório.

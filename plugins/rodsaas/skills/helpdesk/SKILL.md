@@ -1,6 +1,6 @@
 ---
 name: helpdesk
-description: Preset que soma ao projeto rodsaas o app Suporte, um helpdesk de atendimento ao cliente no estilo Zendesk/Freshdesk/Movidesk — chamados com número, status, prioridade, fila e responsável, vindos do e-mail (caixa conectada por IMAP/SMTP ou webhook de recebimento, com encadeamento das respostas e sem loop de resposta automática), do portal de ajuda, do widget no site, da API com chave e criados pela equipe; caixa de entrada com visões e contadores, conversa com resposta pública e nota interna, @menções, respostas prontas (macros), anexos, aviso de colisão, mesclar chamados, SLA com horário comercial e feriados (pausa quando aguarda o cliente), distribuição automática (rodízio ou por carga), gatilhos automáticos, pesquisa de satisfação (CSAT), fechamento automático, portal do cliente com base de conhecimento (busca em português, "isso ajudou?", sugestões antes de abrir chamado) e acompanhamento pelo link sem senha, relatórios, CRM, Forms e webhooks. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir helpdesk, suporte, atendimento ao cliente, chamados, tickets, central de ajuda, base de conhecimento, SAC, clone do Zendesk/Freshdesk/Movidesk, ou chamar /rodsaas:helpdesk.
+description: Preset que soma ao projeto rodsaas o app Suporte, um helpdesk no estilo Zendesk/Freshdesk/Movidesk — chamados com número, status, prioridade, fila e responsável, vindos do e-mail (IMAP/SMTP ou webhook, com encadeamento e sem loop de resposta automática), do portal de ajuda, do widget, da API com chave e da equipe; caixa de entrada com visões, resposta pública e nota interna, @menções, macros, anexos, aviso de colisão, mesclar, SLA em horário comercial com pausa, distribuição automática, gatilhos, CSAT, fechamento automático, portal com base de conhecimento (busca em português, sugestões antes de abrir) e acompanhamento pelo link sem senha, relatórios, CRM, Forms e webhooks. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir helpdesk, suporte, atendimento ao cliente, chamados, tickets, central de ajuda, base de conhecimento, SAC, clone do Zendesk/Movidesk, ou chamar /rodsaas:helpdesk.
 ---
 
 # rodsaas · helpdesk
@@ -13,9 +13,10 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 
 1. `api/`, `web/` e `rodsaas.json` verdes e já na casca de apps (existe `web/src/config/apps.ts`; senão, `/rodsaas:apps` antes).
 2. Add-on **`uploads`** para anexos: se `rodsaas.json` não tiver `uploads`, rode as fases do `/rodsaas:uploads` antes (como o `tarefas` e o `crm` fazem).
-3. Fila de jobs da base (pg-boss) rodando: e-mails, leitura das caixas IMAP, prazos de SLA, fechamento automático e webhooks dependem dela.
-4. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (`imapflow`, `mailparser`, `nodemailer` se ainda não houver, `sanitize-html`, editor de texto rico — o mesmo do Notion/Tarefas se o projeto já tiver, senão TipTap).
-5. Se o preset `forms` existir, reaproveite o `forms-lib` dele para os **campos do chamado** e a assinatura dos webhooks; se não existir, copie `skills/forms/scripts/forms-lib.mjs` (com os testes) para o projeto.
+3. **Add-on `notificacoes`** (sino, e-mails de aviso para a equipe, preferências): se `rodsaas.json` não tiver `notificacoes` em `addons`, rode o fluxo da skill `notificacoes` primeiro (leia o `SKILL.md` dela) e volte. Os avisos deste preset são registrados no catálogo dele e disparados pelo `notify()` dele (`skills/notificacoes/references/04-catalogo.md`, seção do app); nenhum aviso para membro é gravado ou enviado por conta própria.
+4. Fila de jobs da base (pg-boss) rodando: e-mails, leitura das caixas IMAP, prazos de SLA, fechamento automático e webhooks dependem dela.
+5. Mesma regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (`imapflow`, `mailparser`, `nodemailer` se ainda não houver, `sanitize-html`, editor de texto rico — o mesmo do Notion/Tarefas se o projeto já tiver, senão TipTap).
+6. Se o preset `forms` existir, reaproveite o `forms-lib` dele para os **campos do chamado** e a assinatura dos webhooks; se não existir, copie `skills/forms/scripts/forms-lib.mjs` (com os testes) para o projeto.
 
 ## Como trabalhar (obrigatório)
 

@@ -43,7 +43,7 @@ export const crmApp: AppDef = {
    O nome exibido pode ser "Vendas" se o usuário preferir. Acrescente em `config/apps.ts` e em `rodsaas.json → apps`. Projeto com menu antigo (lista ou seções): rode antes o `/rodsaas:apps`.
 3. **Início**: os widgets acima, lidos do registro.
 4. **Busca global**: o provedor `crm` do `AppDef`, resultados agrupados em Negócios, Leads, Contatos e Empresas.
-5. **Sino**: o do módulo genérico `notifications` (criado pelo `tarefas`; crie aqui se não existir, seguindo `tarefas/references/02-modelo.md` e `03-api.md`, seção Notificações), que a casca põe no trilho.
+5. **Sino**: o do add-on `notificacoes` (pré-requisito; rode o `/rodsaas:notificacoes` antes se `rodsaas.json → addons` não tiver `notificacoes`), que a casca põe no trilho. O CRM registra os tipos `crm.*` no catálogo e chama `notify()`.
 6. **Componentes compartilhados** (`web/src/components/app/`): reutilize `Kanban`, `SidePeek`, `RelationSelect`, `MemberSelect`, `UserAvatar`, `Dropzone`/`FileList`; crie aqui os que faltarem, no mesmo lugar, para os próximos presets usarem. Máscaras, validação de CPF/CNPJ e formatação de moeda vêm de `web/src/lib/masks.ts` e `format.ts` da base; não duplique.
 7. **Backend**: plugin de rotas `modules/crm/` registrado no `app.ts`; contadores em `lib/usage.ts`; limites e features em `config/plans.ts`; códigos de erro no catálogo; notificações pelo `notify()` do módulo `notifications`.
 8. **Relações para módulos futuros**: `GET /v1/crm/contacts?q=` e `GET /v1/crm/companies?q=` seguem o formato que o `RelationSelect` espera, para módulos criados pelo `/rodsaas:module` ("agendamento ligado a contatos") poderem apontar para o CRM.

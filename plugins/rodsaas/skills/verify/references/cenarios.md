@@ -232,3 +232,14 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | conflito (tela) | aviso de conflito ausente; recarregar e sobrescrever sem perguntar |
 | quadro e tabela (tela) | arrastar só na tela; linha nova sem chamar a API; side peek ausente |
 
+## Notificações (`17-notificacoes.spec.ts`, add-on `notificacoes`)
+
+| Teste | Causas comuns |
+|---|---|
+| convite aceito | aviso `org.member_joined` não disparado no cadastro com convite (só no `POST /v1/invitations/accept`, ou o contrário); avisando todos os membros em vez de owners/admins; quem entrou recebendo a própria entrada; sem agrupamento (dois aceites = duas notificações); `actor` = o primeiro e não o mais recente; `text` diferente dos `segments` |
+| papel alterado e e-mail | `org.role_changed` não disparado; e-mail sem `List-Unsubscribe`/`List-Unsubscribe-Post`; POST de um clique barrado pela checagem de Origin ou exigindo JSON; descadastro desligando também o sino; e-mail imediato esperando o resumo |
+| ler, não lida, todas | contador contando lidas; ler/remover sem filtrar `userId` (outra pessoa marca a sua); `read-all` marcando de toda a empresa; `unread=true` (formato antigo) ignorado; remover sem apagar |
+| preferências | "no app" desligado ignorado no `notify()`; aviso obrigatório aceitando desligar; tipo desconhecido aceito; `disabledTypes` (formato antigo) ignorado; catálogo mostrando ao membro tipos só de owner; preset instalado sem registrar os tipos dele |
+| descadastro | abrir a página (GET) já descadastra (antivírus de e-mail abrem links); desfazer sem efeito; token sem conferir a assinatura |
+| sino e painel (tela) | contador sem sumir em zero; abrir a notificação sem marcar como lida; marcar todas só na tela; sem sino no celular (ou dois sinos no DOM) |
+| página e preferências (tela) | filtro Não lidas só visual; filtro de app sem a opção Geral; interruptor que não salva; aviso obrigatório sem travar; membro vendo "Pagamento recusado" |

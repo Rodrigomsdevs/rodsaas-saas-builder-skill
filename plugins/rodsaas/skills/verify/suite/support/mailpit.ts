@@ -53,3 +53,11 @@ export const pathOf = (link: string) => {
   const u = new URL(link);
   return u.pathname + u.search;
 };
+
+/** Cabeçalhos de um e-mail do Mailpit (nome → valores). */
+export async function emailHeaders(req: APIRequestContext, id: string): Promise<Record<string, string[]>> {
+  const res = await req.get(`${cfg.mailpitURL}/api/v1/message/${id}/headers`, { failOnStatusCode: false });
+  expect(res.ok(), `cabeçalhos do e-mail ${id} no Mailpit`).toBeTruthy();
+  const raw = (await res.json()) as Record<string, string[]>;
+  return Object.fromEntries(Object.entries(raw).map(([k, v]) => [k.toLowerCase(), v]));
+}

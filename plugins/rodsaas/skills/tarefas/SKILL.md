@@ -13,7 +13,8 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos
 
 1. `api/`, `web/` e `rodsaas.json`, com typecheck, lint, build e testes **verdes**.
 2. **Add-on `uploads`** (para os anexos): se `rodsaas.json` não tiver `uploads` em `addons`, rode o fluxo da skill `uploads` primeiro (leia o `SKILL.md` dela) e volte.
-3. Regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, recharts, editor).
+3. **Add-on `notificacoes`** (sino, e-mails de aviso, preferências): se `rodsaas.json` não tiver `notificacoes` em `addons`, rode o fluxo da skill `notificacoes` primeiro (leia o `SKILL.md` dela) e volte. Os avisos deste preset são registrados no catálogo dele e disparados pelo `notify()` dele (`skills/notificacoes/references/04-catalogo.md`, seção do app); nenhum aviso para membro é gravado ou enviado por conta própria.
+4. Regra de versões das outras skills: `npm view` + doc atual para cada pacote novo (dnd-kit, recharts, editor).
 
 ## Como trabalhar (obrigatório)
 
@@ -41,7 +42,7 @@ Se `rodsaas.json → presets` já tem `tarefas` (ou existe `api/src/modules/task
 | Fluxo de status | **personalizável por projeto**, cada status numa de 5 categorias fixas |
 | Estimativa | escolhida **por projeto**: nenhuma, pontos ou horas |
 | Sprints | manuais (criar, planejar, iniciar, concluir) |
-| Notificações | sino no app + e-mail (imediato ou resumo diário), num módulo genérico `notifications` reutilizável |
+| Notificações | pelo add-on `notificacoes` (sino, e-mail imediato ou resumo diário, preferências por tipo); este preset registra os tipos `task.*`/`sprint.*` e chama `notify()` |
 | Planos | Free: 3 projetos, horas e anexos; Pro: projetos ilimitados, sprints, relatórios, projetos privados; Business: igual ao Pro com mais limites |
 | Projeto inicial | workspaces novos ganham o projeto "Primeiros passos" com tarefas de exemplo |
 

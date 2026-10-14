@@ -13,7 +13,7 @@ Pela fila (pg-boss) e pelo SMTP da base, na marca do produto (ou da empresa), em
 | cliente | remarcado | novo horário; `.ics` com o mesmo `UID` e `SEQUENCE` maior (o calendário do cliente atualiza o evento) |
 | cliente | cancelado (por qualquer lado) | `.ics` com `METHOD:CANCEL`; link para agendar de novo |
 | cliente | depois do atendimento (compareceu) | pesquisa do Forms (se configurada) |
-| equipe | novo agendamento, pendente de aprovação, remarcado/cancelado pelo cliente | pelo módulo `notifications` (sino + e-mail conforme a preferência), tipos `agenda.booked`, `agenda.pending`, `agenda.rescheduled`, `agenda.canceled` |
+| equipe | novo agendamento, pendente de aprovação, remarcado/cancelado pelo cliente | pelo `notify()` do add-on `notificacoes` (sino + e-mail conforme a preferência; ator nulo quando foi o cliente), tipos `agenda.booked`, `agenda.pending`, `agenda.rescheduled`, `agenda.canceled` |
 | equipe | resumo do dia (7 h no fuso da empresa) | agenda do dia de cada pessoa |
 
 **Lembretes**: ao confirmar (ou remarcar), agende os jobs com `reminderTimes(start, offsets, { createdAt, now })` (chave única por agendamento + offset, para remarcar/cancelar apagar ou trocar). No disparo, confira de novo se o agendamento continua confirmado e no mesmo horário (evita lembrete de horário velho). Grave `AgendaEvent` "reminder_sent".

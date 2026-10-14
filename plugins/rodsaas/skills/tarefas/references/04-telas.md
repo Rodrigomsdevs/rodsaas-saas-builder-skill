@@ -13,8 +13,6 @@ Todas dentro da casca existente (base ou notion), seguindo os componentes e esta
 | `/tarefas/p/[key]/configuracoes` | configurações do projeto |
 | `/tarefas/t/[codigo]` | tarefa em página inteira (`/tarefas/t/MKT-123`) |
 | `/tarefas/horas` | folha de horas e relatório de horas |
-| `/notificacoes` | caixa de entrada completa |
-| `/configuracoes/notificacoes` | preferências de notificação |
 
 Qualquer visão abre a tarefa no **painel lateral** com `?tarefa=MKT-123` na URL (voltar fecha; link abre direto).
 
@@ -108,8 +106,7 @@ Abas: **Geral** (nome, chave com aviso de alias, ícone, cor, descrição, líde
 
 ## Notificações
 
-- `/notificacoes`: lista com filtro Não lidas / Todas e por tipo; cada item com avatar do autor, frase ("**Ana** mencionou você em **MKT-12 · Revisar contrato**"), trecho, hora relativa; clicar marca como lida e abre a tarefa; "Marcar todas como lidas".
-- `/configuracoes/notificacoes`: e-mail (imediato / resumo diário às 8 h / desligado) e liga/desliga por tipo, com descrição de cada um.
+- Sino, painel, `/notificacoes` e `/configuracoes/notificacoes` são do add-on `notificacoes` (`skills/notificacoes/references/06-telas.md`). Aqui: a tela da tarefa abre pela `url` da notificação (com `#comentario-<id>` rolando até o comentário e destacando-o por 2 s), e os tipos `task.*`/`sprint.*` aparecem no grupo "Tarefas" das preferências.
 
 ## Home (widgets)
 

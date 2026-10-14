@@ -133,7 +133,7 @@ Todos aceitam `pipelineId`, `ownerId` (`me`, ids; no modo restrito MEMBER só v�
 
 Tudo calculado em SQL no servidor (agregações + `CrmDealStageHistory`), com teste de cada número sobre um conjunto de dados montado no teste.
 
-## Notificações (módulo `notifications`)
+## Notificações (add-on `notificacoes`)
 
 | Evento | Destinatários | Tipo |
 |---|---|---|
@@ -145,7 +145,7 @@ Tudo calculado em SQL no servidor (agregações + `CrmDealStageHistory`), com te
 | resumo das atividades do dia (job 8 h, fuso da empresa) | quem tem atividade hoje ou atrasada | `crm.activity.digest` |
 | negócio ganho | owners/admins e responsável (se outro ganhou) | `crm.deal.won` |
 
-Mesmas regras do `tarefas`: nunca notificar quem fez a ação, respeitar visibilidade e preferências, agrupar repetidos em 2 min; e-mail imediato ou resumo diário conforme a preferência.
+Tudo pelo `notify()` do add-on, na mesma transação do evento, com `actorId`, `canSee` = visibilidade do registro (modo "só os meus": responsável e owners/admins), `data.title` e `url` do registro (`skills/notificacoes/references/04-catalogo.md`, seção CRM). Regras (nunca o ator, preferências, agrupamento, e-mail imediato ou resumo) são do add-on. Negócio que muda de responsável no modo "só os meus" → `retract` para o antigo.
 
 ## Erros novos
 

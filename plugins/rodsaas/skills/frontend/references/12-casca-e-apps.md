@@ -83,7 +83,7 @@ Faixa de **60 px** sempre visível, de cima para baixo:
 4. **App aberto que não está fixado**: aparece temporariamente depois dos fixados, com contorno tracejado, até a pessoa sair dele.
 5. **Todos os apps** (`app-launcher-open`, ícone de grade).
 6. Espaço flexível. A área dos apps rola sozinha se a tela for baixa (sem barra visível).
-7. **Buscar** (abre o Ctrl+K) · **Notificações** (sino com contador) · **Configurações** · **Abrir menu** (só quando o menu está recolhido) · **usuário** (`user-menu`: avatar → Perfil, Tema, Ajuda, Sair com `user-menu-logout`).
+7. **Buscar** (abre o Ctrl+K) · **Notificações** (sino com contador; só existe com o add-on `notificacoes`, que entrega o sino, o painel e as páginas) · **Configurações** · **Abrir menu** (só quando o menu está recolhido) · **usuário** (`user-menu`: avatar → Perfil, Tema, Ajuda, Sair com `user-menu-logout`).
 
 Detalhes:
 - Cada botão: 40×40, raio 10, ícone 18 px, **tooltip à direita** com o nome (e o atalho, quando houver). Botão de app é um link (`<Link>`), com `aria-label` e `aria-current="page"` no ativo.
