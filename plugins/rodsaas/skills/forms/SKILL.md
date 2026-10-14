@@ -45,7 +45,7 @@ Se `rodsaas.json → presets` já tem `forms` (ou existe `api/src/modules/forms`
 | Planos | Free: 3 formulários publicados, 100 respostas/mês, rodapé "Feito com {produto}"; Pro: ilimitados, 5.000/mês, lógica, arquivos, integrações (webhook e CRM), sem rodapé; Business: 50.000/mês |
 | Modelos | 8 prontos (`scripts/templates.json`): Fale conosco, Orçamento, NPS, Satisfação, Inscrição em evento, Cadastro de cliente, Feedback interno, Candidatura |
 
-Fora da v1 (registre no README do projeto como próximos passos): respostas parciais salvas no servidor, pagamento dentro do formulário (vai com o `pagamento-br`), assinatura desenhada, cálculos/pontuação (quiz), tradução, domínio próprio, Google Sheets/Slack nativos, testes A/B, edição colaborativa em tempo real.
+Fora da v1 (registre no README do projeto como próximos passos): respostas parciais salvas no servidor, pagamento dentro do formulário (vai com as cobranças do `/rodsaas:financeiro`), assinatura desenhada, cálculos/pontuação (quiz), tradução, domínio próprio, Google Sheets/Slack nativos, testes A/B, edição colaborativa em tempo real.
 
 ## Fases
 

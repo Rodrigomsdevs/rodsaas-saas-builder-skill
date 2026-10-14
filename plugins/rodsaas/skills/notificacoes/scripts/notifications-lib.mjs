@@ -148,6 +148,15 @@ export const PRESET_TYPES = [
   { type: "rh.survey.open", appId: "pessoas", label: "Pesquisa para responder", template: "Responda {title} até {data.when} (anônima)", group: { by: "none" } },
   { type: "rh.expense.paid", appId: "pessoas", label: "Reembolso pago", template: "O reembolso de {title} ({data.amount}) foi pago", group: { by: "none" } },
   { type: "rh.birthday", appId: "pessoas", label: "Aniversários e tempo de casa", template: { one: "Hoje é aniversário de {title}", many: "{count} aniversários hoje" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "OFF" },
+  // financeiro
+  { type: "fin.due_today", appId: "financeiro", label: "Vencimentos do dia", template: "Hoje vencem {data.payableCount} contas a pagar ({data.payable}); {data.overdueCount} a receber venceram ontem", group: { by: "none" }, defaultEmail: "DAILY" },
+  { type: "fin.charge.paid", appId: "financeiro", label: "Cobrança recebida", template: { one: "{data.customer} pagou {title} ({data.amount}) por {data.method}", many: "{count} cobranças recebidas" }, group: { by: "key", windowMinutes: 30 } },
+  { type: "fin.charge.failed", appId: "financeiro", label: "Cobrança não paga", template: "A cobrança {title} de {data.customer} {data.reason}", group: { by: "none" } },
+  { type: "fin.approval.requested", appId: "financeiro", label: "Pagamento para aprovar", template: { one: "{actor} lançou {title} ({data.amount}): aprove ou recuse", many: "{count} pagamentos aguardando a sua aprovação" }, group: { by: "key", windowMinutes: 10 }, defaultEmail: "IMMEDIATE" },
+  { type: "fin.approval.decided", appId: "financeiro", label: "Pagamento aprovado ou recusado", template: "{actor} {data.verb} o pagamento {title}", group: { by: "none" } },
+  { type: "fin.import.done", appId: "financeiro", label: "Extrato importado", template: "Extrato de {title} importado: {data.fresh} novas transações, {data.pending} para conciliar", group: { by: "none" } },
+  { type: "fin.stripe.account", appId: "financeiro", label: "Conta Stripe", template: "A conta Stripe da empresa {data.status}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "fin.subscription.past_due", appId: "financeiro", label: "Assinatura de cliente atrasada", template: "A assinatura {title} de {data.customer} não foi paga", group: { by: "none" } },
 ].map(defineType);
 
 /** Catálogo ativo: tipos base + os dos apps instalados (+ add-ons exigidos). */

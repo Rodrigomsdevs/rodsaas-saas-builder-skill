@@ -275,3 +275,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | clima | resultado com menos de 5 respostas; recorte pequeno escondido mas descobrível por subtração (sem "outros"); `employeeId`/`userId` gravado na resposta ou devolvido no resultado; responder duas vezes |
 | pré-admissão | link sem expirar ou reaproveitável depois de efetivar; efetivar sem conferir os documentos; página pública devolvendo dados internos |
 | telas | erro da CLT só em toast (não aparece no trecho); enviar habilitado com erro; abas de salário/documentos aparecendo para colega; caixa de aprovações sem atualizar depois de decidir |
+
+## Financeiro (`21-financeiro.spec.ts`, `/rodsaas:financeiro`)
+
+| Teste | Causas comuns |
+|---|---|
+| estrutura | plano de contas sem `key` estável ou sem grupo da DRE; saldo da conta guardado num campo (desencontra depois de transferir/estornar); conta Caixa não criada na ativação; limite de contas do plano não conferido |
+| validação do lançamento | valor em reais com ponto flutuante (`10.5` aceito); categoria de despesa num a receber; data inexistente (`2027-02-30`) aceita; CNPJ só com máscara, sem dígito verificador |
+| parcelas e recorrência | divisão com `Math.round` em cada parcela (soma dá um centavo a mais/menos); "+30 dias" em vez do mesmo dia do mês; dia 31 estourando para o mês seguinte |
+| baixa | baixa acima do saldo aceita; juros somados ao pago (quita a dívida errado) ou fora do caixa; estorno que apaga a baixa; "vencido" dependente de job (aparece só no dia seguinte ao job); sem multa/juros sugeridos |
+| fluxo de caixa | vencidos fora do previsto; transferência entre contas contada como entrada e saída; saldo inicial sem as contas |
+| DRE e inadimplência | DRE pelo vencimento em vez da competência; cancelado entrando no resultado; aporte dentro do lucro; cancelado na inadimplência |
+| conciliação | importar o mesmo OFX duas vezes duplica (sem FITID único por conta); OFX SGML não lido (só XML); sugestão sem considerar o tipo pelo sinal; baixa na data de hoje em vez da data do extrato; regra não aplicada; transação conciliada duas vezes |
+| cobranças | cobrança marcada como paga ao criar ou pelo retorno do navegador (deveria ser só pelo pagamento confirmado); boleto sem CPF/CNPJ aceito; pagar duas vezes; página pública devolvendo ids internos; cobrar uma despesa |
+| papéis e aprovação | admin da empresa vendo o financeiro sem papel; `VIEWER` escrevendo; pagamento acima do limite sem aprovação; `FIN` aprovando; recusa sem motivo |
+| telas | campo de valor com `parseFloat` ("1.500,00" vira R$ 1,50); lista que não atualiza depois de baixar; conciliação sem sugestão na tela; página pública sem o modo de teste |

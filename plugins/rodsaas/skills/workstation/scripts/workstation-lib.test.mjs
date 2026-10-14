@@ -85,6 +85,9 @@ test("buildFeatureMap e classifyFeature: features e limites do plano mais alto v
   assert.equal(W.classifyFeature("projects"), "_paid");
   assert.equal(W.classifyFeature("rh_performance"), "pessoas");
   assert.equal(W.classifyFeature("rhEmployees"), "pessoas", "limite em camelCase do preset");
+  assert.equal(W.classifyFeature("fin_charges"), "financeiro");
+  assert.equal(W.classifyFeature("finAccounts"), "financeiro");
+  assert.equal(W.classifyFeature("finalize"), "_paid", "fin sem _ ou maiúscula não é do Financeiro");
   assert.equal(W.classifyFeature("helpdeskAgents"), "helpdesk");
   assert.equal(W.classifyFeature("rhythm_x"), "_paid", "prefixo exige _ ou maiúscula");
   assert.deepEqual(m._baseLimits, { paid: { projects: null }, free: { projects: 3 } }, "limite do Cadastros fica na base");

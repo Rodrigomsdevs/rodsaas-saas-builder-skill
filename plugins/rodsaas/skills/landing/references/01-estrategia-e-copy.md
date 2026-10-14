@@ -82,7 +82,7 @@ Escreva `site/MENSAGEM.md` e mostre ao usuário antes de construir:
 - **Calculadora** (`03-estrutura.md`): liga apps, informa pessoas por app e colaboradores (RH), mostra o total avulso, o Completo e qual sai mais barato, e o valor no anual.
 - Tabela com o preço de cada app disponível e a unidade ("por vendedor", "por profissional com agenda").
 - Add-ons por uso explicados em uma linha cada.
-- FAQ de cobrança: como conta "usuário", troca de plano a qualquer momento, cancelamento, formas de pagamento (as que existirem de verdade: cartão; Pix e boleto quando o `pagamento-br` existir), nota fiscal (só se emitir).
+- FAQ de cobrança: como conta "usuário", troca de plano a qualquer momento, cancelamento, formas de pagamento (as que existirem de verdade na Stripe do projeto: cartão e boleto; Pix só em pagamento avulso), nota fiscal (só se emitir).
 
 ## FAQ geral (escolha e adapte)
 

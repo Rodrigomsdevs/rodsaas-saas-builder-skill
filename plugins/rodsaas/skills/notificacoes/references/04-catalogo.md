@@ -121,6 +121,21 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 
 `canSee`: a regra de visibilidade do próprio Pessoas (pedido: quem pediu, aprovadores e RH; ficha: `visibleGroups`). Nunca coloque salário, CID, motivo de atestado ou nota de avaliação no texto do aviso nem no e-mail. A pesquisa nunca avisa "fulano respondeu".
 
+### Financeiro (`financeiro`)
+
+| Tipo | Evento | Destinatários | entity · groupKey | url |
+|---|---|---|---|---|
+| `fin.due_today` | job 8 h (dias com algo) | `FIN_ADMIN` e `FIN` | organization (`entityId` = orgId) | `/financeiro/lancamentos?status=OVERDUE` |
+| `fin.charge.paid` | baixa automática de cobrança (ator nulo) | `FIN_ADMIN` e `FIN` | charge · `paid` (`groupUrl` `/financeiro/cobrancas?status=PAID`) | `/financeiro/lancamentos/<id>` |
+| `fin.charge.failed` | cobrança expirou ou falhou | quem criou a cobrança (ou `FIN_ADMIN`) | charge | idem |
+| `fin.approval.requested` | `FIN` lançou pagamento acima do limite | `FIN_ADMIN` | entry · `to_approve` (`groupUrl` `/financeiro/lancamentos?status=AWAITING_APPROVAL`) | `/financeiro/lancamentos/<id>` |
+| `fin.approval.decided` | aprovado/recusado | quem lançou | entry | idem |
+| `fin.import.done` | importação de extrato terminou | quem importou | statement_import | `/financeiro/conciliacao?conta=<id>` |
+| `fin.stripe.account` | `account.updated` mudou o status (pendência, restrição, ativa) | `FIN_ADMIN` | organization | `/financeiro/configuracoes/cobrancas` |
+| `fin.subscription.past_due` | `invoice.payment_failed` | `FIN_ADMIN` e `FIN` | subscription | `/financeiro/assinaturas` |
+
+`canSee`: ter papel no Financeiro. Tirar o papel → `retract` das notificações do app dessa pessoa. Nunca coloque saldo de conta no aviso.
+
 ## Regras que valem para todos os apps
 
 - Nunca gravar `Notification` direto nem mandar e-mail de aviso para membro por conta própria: tudo por `notify()`. (E-mails para **clientes** — confirmação de agendamento, resposta do chamado, resposta automática do formulário — continuam no app, porque cliente não é membro.)

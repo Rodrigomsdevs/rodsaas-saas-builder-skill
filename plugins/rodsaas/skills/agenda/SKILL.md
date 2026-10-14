@@ -45,7 +45,7 @@ Se `rodsaas.json → presets` já tem `agenda` (ou existe `api/src/modules/agend
 | Google Agenda e Outlook | fase **opcional**: só liga quando houver credenciais OAuth no `.env`; sem elas, tudo funciona com convite `.ics` e feed de agenda |
 | Feriados | nacionais bloqueados automaticamente; pontos facultativos (Carnaval, Corpus Christi) desligados por padrão; feriados municipais e da empresa à mão |
 | Endereços públicos | `/agendar/<empresa>`, `/agendar/<empresa>/<tipo>`, `/agendar/<empresa>/p/<pessoa>` no domínio do painel; o cliente gerencia em `/agendamento/<token>` |
-| Pagamento | mostra o preço e "pagamento no local"; pagamento antecipado/sinal fica para o add-on `pagamento-br` |
+| Pagamento | mostra o preço e "pagamento no local"; pagamento antecipado/sinal fica para as cobranças do `/rodsaas:financeiro` (Stripe da própria empresa) |
 | Nome do app | **Agenda** |
 | Planos | Free: 2 tipos, 1 pessoa com agenda, 50 agendamentos/mês; Pro: tipos ilimitados, 10 pessoas, 2.000/mês, equipe, aprovação, turmas, integrações, sem rodapé; Business: pessoas ilimitadas, 20.000/mês |
 

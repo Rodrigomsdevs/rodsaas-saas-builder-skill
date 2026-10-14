@@ -89,7 +89,7 @@
    "pricePerUser": 69,
    "minUsers": 3,
    "label": "Completo",
-   "includes": "todos os apps disponíveis, menos os de uso (WhatsApp, Cobranças, Assinatura, E-mail marketing)"
+   "includes": "todos os apps disponíveis, menos os de uso (WhatsApp, Assinatura, E-mail marketing)"
   },
   "suites": {
    "rh": {
@@ -366,7 +366,7 @@
     "crm",
     "forms",
     "whatsapp",
-    "cobrancas"
+    "financeiro"
    ],
    "shots": [
     {
@@ -717,50 +717,107 @@
    "faq": []
   },
   {
-   "id": "cobrancas",
-   "slug": "cobrancas",
-   "name": "Cobranças",
-   "preset": "pagamento-br",
+   "id": "financeiro",
+   "slug": "financeiro",
+   "name": "Financeiro",
+   "preset": "financeiro",
    "category": "financeiro",
-   "icon": "QrCode",
-   "phase": 2,
-   "tagline": "Pix e boleto saindo sozinhos, com baixa automática.",
-   "description": "Cobranças avulsas e recorrentes por Pix e boleto, lembrete de vencimento e baixa quando o cliente paga.",
+   "icon": "Wallet",
+   "phase": 3,
+   "tagline": "Contas a pagar e a receber, fluxo de caixa e cobrança com baixa automática.",
+   "description": "Lançamentos com parcelas e recorrência, contas bancárias com saldo do dia, fluxo de caixa realizado e previsto, DRE gerencial, conciliação por extrato OFX e cobranças pela sua própria conta Stripe, com baixa sozinha quando o cliente paga.",
    "benefits": [
     {
-     "title": "Recebe mais rápido",
-     "text": "Pix com QR code e boleto no e-mail do cliente."
+     "title": "Caixa à vista",
+     "text": "Saldo de hoje e o previsto dos próximos meses, com os vencidos destacados."
     },
     {
-     "title": "Sem conferir extrato",
-     "text": "A baixa acontece sozinha quando o pagamento cai."
+     "title": "Recebe sem correr atrás",
+     "text": "Link de pagamento com boleto, Pix e cartão, lembretes automáticos e baixa quando o pagamento cai."
     },
     {
-     "title": "Recorrência",
-     "text": "Mensalidades geradas todo mês, com lembrete antes do vencimento."
+     "title": "Extrato que bate",
+     "text": "Importe o OFX do banco: o sistema sugere cada lançamento e não duplica nada."
     }
    ],
    "features": [
-    "Pix e boleto",
-    "Cobrança recorrente",
-    "Lembrete de vencimento",
-    "Baixa automática",
-    "Ligação com Agenda e CRM",
-    "Relatório de recebimentos"
+    "Contas a pagar e a receber com parcelas e recorrência",
+    "Baixa parcial com juros, multa e desconto",
+    "Contas bancárias, caixa e cartão com saldo do dia",
+    "Fluxo de caixa realizado e previsto",
+    "DRE gerencial e inadimplência",
+    "Conciliação bancária por OFX e CSV",
+    "Cobrança por boleto, Pix e cartão (Stripe)",
+    "Régua de lembretes e cobrança recorrente",
+    "Exportação para a contabilidade"
    ],
-   "replaces": "emitir boleto no banco e conferir extrato",
+   "replaces": "planilha financeira, emitir boleto no banco e conferir extrato à mão",
    "pricing": {
-    "unit": "uso",
-    "note": "tarifa do provedor + pequeno valor por cobrança paga"
+    "unit": "empresa",
+    "price": 49,
+    "note": "+ tarifas da Stripe nas cobranças, pagas pela empresa direto à Stripe"
    },
    "integrations": [
-    "agenda",
     "crm",
-    "contas"
+    "agenda",
+    "pessoas",
+    "estoque"
    ],
-   "shots": [],
-   "video": null,
-   "faq": []
+   "shots": [
+    {
+     "id": "financeiro-inicio",
+     "path": "/financeiro",
+     "waitFor": "fin-home",
+     "caption": "Saldo das contas, vencimentos e fluxo dos próximos 30 dias"
+    },
+    {
+     "id": "financeiro-lancamentos",
+     "path": "/financeiro/lancamentos",
+     "waitFor": "fin-entry-row",
+     "caption": "Contas a pagar e a receber com situação e totais"
+    },
+    {
+     "id": "financeiro-fluxo",
+     "path": "/financeiro/fluxo-de-caixa",
+     "waitFor": "fin-cashflow",
+     "caption": "Fluxo de caixa realizado e previsto"
+    }
+   ],
+   "video": {
+    "id": "financeiro-demo",
+    "path": "/financeiro/lancamentos",
+    "steps": [
+     {
+      "waitFor": "fin-entry-row"
+     },
+     {
+      "pause": 800
+     },
+     {
+      "click": "fin-entry-pay"
+     },
+     {
+      "waitFor": "fin-pay-form"
+     },
+     {
+      "pause": 1500
+     }
+    ]
+   },
+   "faq": [
+    {
+     "q": "O dinheiro das cobranças cai onde?",
+     "a": "Na conta Stripe da sua empresa, que você conecta em poucos minutos. As tarifas são as da Stripe, cobradas direto por ela."
+    },
+    {
+     "q": "Emite nota fiscal?",
+     "a": "Ainda não. A nota continua no sistema que você usa hoje; o Financeiro exporta tudo para a sua contabilidade."
+    },
+    {
+     "q": "Funciona com o extrato do meu banco?",
+     "a": "Sim: qualquer banco que exporte OFX (quase todos) ou CSV."
+    }
+   ]
   },
   {
    "id": "pessoas",
@@ -806,7 +863,7 @@
     "agenda",
     "recrutamento",
     "ativos",
-    "contas"
+    "financeiro"
    ],
    "shots": [
     {
@@ -1273,7 +1330,7 @@
    "integrations": [
     "crm",
     "assinatura",
-    "cobrancas"
+    "financeiro"
    ],
    "shots": [],
    "video": null,
@@ -1369,52 +1426,6 @@
    "faq": []
   },
   {
-   "id": "contas",
-   "slug": "financeiro",
-   "name": "Financeiro",
-   "preset": "contas",
-   "category": "financeiro",
-   "icon": "Wallet",
-   "phase": 4,
-   "tagline": "Contas a pagar e a receber com fluxo de caixa sempre atualizado.",
-   "description": "Lançamentos, categorias, contas bancárias e fluxo de caixa, com recebimentos vindos das Cobranças.",
-   "benefits": [
-    {
-     "title": "Caixa à vista",
-     "text": "Fluxo de caixa realizado e previsto."
-    },
-    {
-     "title": "Nada atrasa",
-     "text": "Lembretes de vencimento."
-    },
-    {
-     "title": "Integrado",
-     "text": "Recebimentos e despesas entram sozinhos."
-    }
-   ],
-   "features": [
-    "Contas a pagar e receber",
-    "Categorias e centros de custo",
-    "Fluxo de caixa",
-    "Conciliação",
-    "Recorrências",
-    "Relatórios"
-   ],
-   "replaces": "planilha financeira",
-   "pricing": {
-    "unit": "empresa",
-    "price": 49
-   },
-   "integrations": [
-    "cobrancas",
-    "pessoas",
-    "estoque"
-   ],
-   "shots": [],
-   "video": null,
-   "faq": []
-  },
-  {
    "id": "estoque",
    "slug": "estoque",
    "name": "Estoque",
@@ -1453,7 +1464,7 @@
    },
    "integrations": [
     "crm",
-    "contas"
+    "financeiro"
    ],
    "shots": [],
    "video": null,

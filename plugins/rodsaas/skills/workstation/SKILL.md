@@ -57,7 +57,7 @@ Se `rodsaas.json → addons` tem `workstation` (ou existe `api/src/modules/works
 | Pagamento com problema | aviso no topo; a Stripe tenta de novo; se cancelar de vez, vira Grátis |
 | Quem mexe na assinatura | só o **owner**; admin vê e gerencia o acesso das pessoas (sem mudar valor) |
 
-Fora do escopo (registre no README): cupons e parceiros/revenda, cobrança por uso automática de WhatsApp/Cobranças (fica a cargo de cada add-on), nota fiscal (fica com o `pagamento-br`), apps de terceiros na loja.
+Fora do escopo (registre no README): cupons e parceiros/revenda, cobrança por uso automática de WhatsApp (fica a cargo do add-on), nota fiscal (fora da v1, inclusive do `/rodsaas:financeiro`), apps de terceiros na loja.
 
 ## Fases
 

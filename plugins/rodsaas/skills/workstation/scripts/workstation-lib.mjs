@@ -17,13 +17,13 @@ const toMs = (v) => (v == null ? null : typeof v === "number" ? v : v instanceof
 
 /** Segmentos do onboarding e os apps sugeridos para cada um (na ordem de importância). */
 export const SEGMENTS = [
-  { id: "saude", label: "Clínica ou consultório", icon: "Stethoscope", apps: ["agenda", "crm", "forms", "helpdesk", "tarefas"] },
-  { id: "beleza", label: "Salão, estética ou academia", icon: "Scissors", apps: ["agenda", "crm", "forms", "tarefas"] },
-  { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk"] },
-  { id: "comercio", label: "Loja ou comércio", icon: "Store", apps: ["crm", "helpdesk", "forms", "tarefas"] },
-  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas"] },
-  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas"] },
-  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm"] },
+  { id: "saude", label: "Clínica ou consultório", icon: "Stethoscope", apps: ["agenda", "crm", "forms", "helpdesk", "tarefas", "financeiro"] },
+  { id: "beleza", label: "Salão, estética ou academia", icon: "Scissors", apps: ["agenda", "crm", "forms", "tarefas", "financeiro"] },
+  { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk", "financeiro"] },
+  { id: "comercio", label: "Loja ou comércio", icon: "Store", apps: ["crm", "helpdesk", "forms", "tarefas", "financeiro"] },
+  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas", "financeiro"] },
+  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro"] },
+  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro"] },
   { id: "outro", label: "Outro", icon: "Sparkles", apps: ["tarefas", "crm", "paginas"] },
 ];
 export const TEAM_SIZES = ["1", "2-5", "6-15", "16-50", "51+"];
@@ -243,6 +243,7 @@ export function prorate({ fromMonthly, toMonthly, periodStart, periodEnd, now = 
 export const FEATURE_PREFIXES = [
   [/^crm(_|[A-Z])/, "crm"], [/^forms(_|[A-Z])/, "forms"], [/^agenda(_|[A-Z])/, "agenda"], [/^helpdesk(_|[A-Z])/, "helpdesk"],
   [/^rh(_|[A-Z])/, "pessoas"], // rh_performance (feature) e rhEmployees (limite)
+  [/^fin(_|[A-Z])/, "financeiro"], // fin_charges (feature) e finAccounts (limite)
   [/^(tasks?_|private_projects$|sprints$|time_tracking$)/, "tarefas"], [/^(pages_|public_pages$|databases?_)/, "paginas"],
   [/^priority_support$/, "_completo"],
 ];

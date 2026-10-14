@@ -9,8 +9,8 @@ const available = new Set(C.withStatus(catalog, RODSAAS).filter((a) => a.status 
 
 test("catálogo entregue é válido e cobre o roadmap inteiro", () => {
   assert.deepEqual(C.validateCatalog(catalog), []);
-  assert.ok(catalog.apps.length >= 28);
-  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "cobrancas", "pessoas", "estoque", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
+  assert.ok(catalog.apps.length >= 27);
+  for (const id of ["crm", "helpdesk", "agenda", "tarefas", "paginas", "forms", "whatsapp", "financeiro", "pessoas", "estoque", "chat", "email-marketing"]) assert.ok(catalog.apps.some((a) => a.id === id), id);
 });
 
 test("validateCatalog acusa os erros comuns", () => {
@@ -30,9 +30,9 @@ test("withStatus: disponível pelo rodsaas.json (apps, presets ou add-ons), o re
   assert.deepEqual([...available].sort(), ["agenda", "crm", "forms", "helpdesk", "paginas", "tarefas"]);
   assert.equal(list[0].status, "disponivel");
   assert.equal(list.find((a) => a.id === "pessoas").status, "em-breve");
-  const withWa = C.withStatus(catalog, { ...RODSAAS, addons: [...RODSAAS.addons, "whatsapp", "pagamento-br"] });
+  const withWa = C.withStatus(catalog, { ...RODSAAS, presets: [...(RODSAAS.presets ?? []), "financeiro"], addons: [...RODSAAS.addons, "whatsapp"] });
   assert.equal(withWa.find((a) => a.id === "whatsapp").status, "disponivel");
-  assert.equal(withWa.find((a) => a.id === "cobrancas").status, "disponivel", "add-on pagamento-br libera Cobranças");
+  assert.equal(withWa.find((a) => a.id === "financeiro").status, "disponivel", "preset financeiro libera o Financeiro");
 });
 
 test("formatBRL e priceLabel", () => {

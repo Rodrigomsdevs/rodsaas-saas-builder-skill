@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2058,6 +2058,291 @@
         {
           "method": "post",
           "path": "/v1/public/rh/admissions/{token}/submit"
+        }
+      ]
+    },
+    "financeiro": {
+      "when": "rodsaas.json → presets inclui \"financeiro\" (app Financeiro)",
+      "routes": [
+        "/financeiro",
+        "/financeiro/lancamentos",
+        "/financeiro/lancamentos/[id]",
+        "/financeiro/contas",
+        "/financeiro/fluxo-de-caixa",
+        "/financeiro/dre",
+        "/financeiro/relatorios",
+        "/financeiro/conciliacao",
+        "/financeiro/cobrancas",
+        "/financeiro/configuracoes",
+        "/pagar/[token]"
+      ],
+      "testids": [
+        "fin-home",
+        "fin-balance-total",
+        "fin-due-today",
+        "fin-overdue",
+        "fin-entries-tab",
+        "fin-entry-new",
+        "fin-entry-row",
+        "fin-entry-pay",
+        "fin-entries-totals",
+        "fin-entry-form",
+        "fin-entry-type",
+        "fin-entry-description",
+        "fin-entry-amount",
+        "fin-entry-due",
+        "fin-entry-category",
+        "fin-entry-contact",
+        "fin-entry-account",
+        "fin-entry-installments",
+        "fin-entry-save",
+        "fin-pay-form",
+        "fin-pay-account",
+        "fin-pay-date",
+        "fin-pay-amount",
+        "fin-pay-interest",
+        "fin-pay-fine",
+        "fin-pay-discount",
+        "fin-pay-confirm",
+        "fin-pay-violation",
+        "fin-entry-detail",
+        "fin-payment-row",
+        "fin-payment-reverse",
+        "fin-account-row",
+        "fin-account-balance",
+        "fin-account-new",
+        "fin-cashflow",
+        "fin-cashflow-period",
+        "fin-dre",
+        "fin-dre-line",
+        "fin-aging",
+        "fin-recon-account",
+        "fin-import-file",
+        "fin-import-result",
+        "fin-tx-row",
+        "fin-tx-suggestion",
+        "fin-tx-reconcile",
+        "fin-tx-create",
+        "fin-tx-ignore",
+        "fin-charge-row",
+        "fin-charge-new",
+        "fin-charge-copy-link",
+        "fin-stripe-connect",
+        "fin-stripe-status",
+        "pay-page",
+        "pay-amount",
+        "pay-status",
+        "pay-method",
+        "pay-test-mode",
+        "pay-simulate",
+        "pay-done"
+      ],
+      "api": [
+        {
+          "method": "get",
+          "path": "/v1/fin/me"
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/settings"
+        },
+        {
+          "method": "put",
+          "path": "/v1/fin/roles/{userId}",
+          "body": [
+            "role"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/categories"
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/accounts"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/accounts",
+          "body": [
+            "name",
+            "type",
+            "openingBalanceCents",
+            "openingDate"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/transfers",
+          "body": [
+            "fromAccountId",
+            "toAccountId",
+            "date",
+            "amountCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/contacts"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/contacts",
+          "body": [
+            "kind",
+            "name",
+            "document"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/entries"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/entries",
+          "body": [
+            "type",
+            "description",
+            "categoryId",
+            "amountCents",
+            "dueDate",
+            "competenceDate",
+            "installments"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/entries/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/entries/{id}/payments",
+          "body": [
+            "accountId",
+            "date",
+            "amountCents",
+            "interestCents",
+            "fineCents",
+            "discountCents"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/payments/{id}/reverse"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/entries/{id}/approval",
+          "body": [
+            "decision",
+            "comment"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/recurrences",
+          "body": [
+            "template",
+            "start",
+            "interval",
+            "count"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/cashflow"
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/reports/dre"
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/reports/aging"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/accounts/{id}/statements",
+          "body": [
+            "fileName",
+            "content"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/accounts/{id}/transactions"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/transactions/{id}/reconcile",
+          "body": [
+            "entryIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/transactions/{id}/create-entry"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/transactions/{id}/ignore",
+          "body": [
+            "reason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/rules"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/rules",
+          "body": [
+            "name",
+            "match",
+            "set"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/charges",
+          "body": [
+            "entryId",
+            "methods"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/charges"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/fin/charges/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/fin/charges/{token}/checkout"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/fin/charges/{token}/fake-pay",
+          "body": [
+            "method"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/subscriptions",
+          "body": [
+            "contactId",
+            "description",
+            "amountCents",
+            "interval",
+            "method",
+            "categoryId",
+            "startDate"
+          ]
         }
       ]
     }
