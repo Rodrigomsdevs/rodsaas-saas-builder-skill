@@ -133,6 +133,22 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | produtos pela tela | sem a seção de produtos no negócio; escolher produto não preenche o preço; valor do cabeçalho (`crm-deal-value`) não acompanha a resposta da API |
 | modo restrito na tela | quadro buscando de uma rota sem o filtro de visibilidade; página do negócio mostrando erro genérico em vez de "não encontrado" |
 
+## Suporte · operação (`29-helpdesk-operacao.spec.ts`, preset `helpdesk`)
+
+| Teste | Causas comuns |
+|---|---|
+| clientes | domínio gratuito aceito (todo gmail vira um cliente); conta casada por "termina com" (subdomínio); política do cliente ignorada no cálculo do prazo; piso de prioridade só na tela |
+| contrato de horas | não cobrável somado; ciclo pelo mês do calendário em vez do dia de início; excedente sem valor; aviso nunca dispara; contrato duplicado |
+| dividir | copia em vez de mover; deixa dividir tudo ou só a nota; novo chamado sem o solicitante ou sem a ligação |
+| aprovação | pedido sem pausar; duas pendentes; qualquer um decide; reprovar sem motivo; chamado não volta a andar |
+| categorias | campos só no front; opção fora da lista aceita; portal sem os campos da categoria (`ticketCategories`) |
+| sugestão | artigo interno no portal; rascunho sugerido; palavras vazias ("não", "consigo") pesando |
+| WhatsApp | cada mensagem abre um chamado novo; resposta sai por e-mail; nota interna enviada ao cliente |
+| chat | online sem ninguém disponível; nota aparecendo no chat; resposta do atendente não chega na consulta |
+| ordem de serviço | OS sem equipamento; pula etapas; peça com preço digitado em vez do cadastro; entrega sem baixar o estoque; garantia por texto exato do número de série |
+| bug → tarefa | tarefa duplicada; conclusão da tarefa sem voltar para o chamado |
+| telas | dividir sem marcar a mensagem; tempo lançado sem atualizar o saldo; chat do portal sem consultar as respostas |
+
 ## CRM · vendas (`28-crm-vendas.spec.ts`, preset `crm`)
 
 | Teste | Causas comuns |

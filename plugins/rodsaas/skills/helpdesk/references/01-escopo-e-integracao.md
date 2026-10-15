@@ -87,6 +87,9 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | feature `helpdesk_automation` (distribuição automática e gatilhos) | — | ✅ | ✅ |
 | feature `helpdesk_csat` (pesquisa de satisfação) | — | ✅ | ✅ |
 | feature `helpdesk_integrations` (webhooks, API com chave, CRM, Forms) | — | ✅ | ✅ |
+| feature `helpdesk_contracts` (contrato de horas por cliente) | — | ✅ | ✅ |
+| feature `helpdesk_chat` (chat ao vivo no widget) | — | ✅ | ✅ |
+| clientes com SLA próprio, dividir, aprovação, categorias com campos, sugestão de artigos, perfis, WhatsApp pelo motor | ✅ | ✅ | ✅ |
 | feature `helpdesk_branding` (sem "Feito com {produto}" no portal/widget/e-mails, cores e logo próprios) | — | ✅ | ✅ |
 | e-mail, portal, widget, macros, base de conhecimento, relatórios, anexos (limite do `uploads`) | ✅ | ✅ | ✅ |
 

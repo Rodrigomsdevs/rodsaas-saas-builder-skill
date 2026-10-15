@@ -42,6 +42,19 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER atendent
 - [ ] Forms: campos do chamado; formulário vira chamado
 - [ ] webhooks assinados, sem notas internas por padrão; chave da API mostrada uma vez e revogável
 
+## Operação avançada (`09`)
+- [ ] clientes por domínio (nunca gratuito) com SLA próprio e piso de prioridade; selo do cliente no chamado
+- [ ] contrato de horas: lançar tempo, saldo do ciclo, aviso aos 80%, excedente com valor (e faturar no Financeiro quando instalado)
+- [ ] dividir chamado pela tela; aprovação de membro e de fora pelo link; prazo pausado enquanto espera
+- [ ] categorias com campos no portal, no widget e na equipe; sugestão de artigos no chamado e no portal
+- [ ] WhatsApp pelo motor: mensagem abre ou entra no chamado, resposta pública sai (modelo fora da janela), nota nunca
+- [ ] chat no widget: online/offline, conversa vira chamado `CHAT`, visão "Chats ao vivo"
+
+## Perfis (`10`)
+- [ ] cada perfil aplica vocabulário e categorias uma vez só; trocar não apaga nada
+- [ ] assistência técnica: OS com equipamento, fluxo, orçamento com peças do ERP, aprovação do cliente, baixa na entrega, garantia, comprovante de entrada
+- [ ] software: bug vira tarefa e a conclusão volta para o chamado; TI interno e condomínio com as categorias e a aprovação
+
 ## Segurança
 - [ ] outra empresa não vê nada (404); membro que não é atendente recebe 403; visibilidade por fila
 - [ ] token de um chamado não abre outro; cada destinatário com o seu link; links sem dados de outros clientes

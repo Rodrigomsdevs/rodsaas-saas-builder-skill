@@ -28,7 +28,7 @@ export const SEGMENTS = [
   { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro", "comercial"], crmProfile: "B2B" },
   { id: "imobiliaria", label: "Imobiliária ou corretor", icon: "Building", apps: ["crm", "agenda", "comercial", "financeiro", "paginas"], agendaProfile: "CONSULTING", crmProfile: "REAL_ESTATE" },
   { id: "educacao", label: "Escola ou curso", icon: "GraduationCap", apps: ["crm", "agenda", "forms", "financeiro", "comercial", "helpdesk"], crmProfile: "EDUCATION" },
-  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro", "comercial"], crmProfile: "B2B" },
+  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro", "comercial"], crmProfile: "B2B", helpdeskProfile: "SOFTWARE" },
   { id: "outro", label: "Outro", icon: "Sparkles", apps: ["tarefas", "crm", "paginas"] },
 ];
 export const TEAM_SIZES = ["1", "2-5", "6-15", "16-50", "51+"];
@@ -36,6 +36,8 @@ export const TEAM_SIZES = ["1", "2-5", "6-15", "16-50", "51+"];
 export const agendaProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.agendaProfile ?? "GENERAL";
 /** Perfil do CRM (`skills/crm/references/09-perfis-de-segmento.md`) que nasce com o segmento do onboarding. */
 export const crmProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.crmProfile ?? "GENERAL";
+/** Perfil do Suporte (`skills/helpdesk/references/10-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
+export const helpdeskProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.helpdeskProfile ?? null;
 
 /**
  * Apps sugeridos: os que vieram da landing (?apps=) primeiro, depois os do segmento; só disponíveis.

@@ -1,5 +1,5 @@
 {
-  "version": 21,
+  "version": 22,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -1292,7 +1292,8 @@
         "/ajuda/[portal]/novo",
         "/ajuda/[portal]/meus-chamados",
         "/ajuda/[portal]/widget",
-        "/chamado/[token]"
+        "/chamado/[token]",
+        "/suporte/clientes"
       ],
       "testids": [
         "helpdesk-view",
@@ -1335,7 +1336,26 @@
         "helpdesk-csat-good",
         "helpdesk-csat-bad",
         "helpdesk-csat-submit",
-        "helpdesk-csat-thanks"
+        "helpdesk-csat-thanks",
+        "hd-split",
+        "hd-split-select",
+        "data-message",
+        "hd-split-subject",
+        "hd-split-confirm",
+        "hd-time-add",
+        "hd-time-minutes",
+        "hd-time-save",
+        "hd-time-row",
+        "hd-contract-usage",
+        "portal-chat-open",
+        "portal-chat-name",
+        "portal-chat-email",
+        "portal-chat-message",
+        "portal-chat-send",
+        "portal-chat-row",
+        "data-author",
+        "portal-chat-input",
+        "portal-chat-reply"
       ],
       "api": [
         {
@@ -1570,6 +1590,135 @@
           "path": "/v1/helpdesk/macros/{id}/apply",
           "body": [
             "ticketId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/accounts"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/accounts",
+          "body": [
+            "name"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/accounts/{id}/contracts",
+          "body": [
+            "name",
+            "hoursMonthly"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/contracts/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/time",
+          "body": [
+            "minutes"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/tickets/{id}/time"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/split",
+          "body": [
+            "messageIds",
+            "subject"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/approvals"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/approvals/{id}/decide",
+          "body": [
+            "decision"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/categories"
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/categories",
+          "body": [
+            "name",
+            "fields"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/helpdesk/tickets/{id}/suggested-articles"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/helpdesk/settings"
+        },
+        {
+          "method": "put",
+          "path": "/v1/helpdesk/tickets/{id}/os-status",
+          "body": [
+            "status"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/helpdesk/tickets/{id}/quote",
+          "body": [
+            "items"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/quote/send"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/quotes/{token}",
+          "body": [
+            "decision"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/helpdesk/tickets/{id}/task",
+          "body": [
+            "projectId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/{portal}/chat"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/{portal}/chat",
+          "body": [
+            "name",
+            "email",
+            "message"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/helpdesk/chat/{token}/messages"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/helpdesk/chat/{token}/messages",
+          "body": [
+            "body"
           ]
         }
       ]

@@ -202,3 +202,151 @@ test("base de conhecimento e chaves", () => {
   assert.match(key, /^hd_[A-Za-z0-9_-]{32}$/);
   assert.equal(H.apiKeyPrefix(key), key.slice(0, 10));
 });
+
+// ================================================================== operação avançada e perfis
+test("clientes: conta pelo e-mail ou domínio, nunca domínio gratuito; SLA e prioridade do cliente", () => {
+  const accts = [{ id: "acme", domains: ["acme.com.br"], contactEmails: [] }, { id: "vip", domains: [], contactEmails: ["Dono@Gmail.com"] }, { id: "beta", domains: ["beta.io", "beta.com"] }];
+  assert.equal(H.resolveAccount("joao@ACME.com.br", accts)?.id, "acme");
+  assert.equal(H.resolveAccount("dono@gmail.com", accts)?.id, "vip", "e-mail listado vence, mesmo gratuito");
+  assert.equal(H.resolveAccount("outro@gmail.com", accts), null, "domínio gratuito não casa");
+  assert.equal(H.resolveAccount("x@beta.com", accts)?.id, "beta");
+  assert.equal(H.resolveAccount("x@sub.acme.com.br", accts), null, "subdomínio não é o mesmo domínio");
+  assert.equal(H.resolveAccount("sem-arroba", accts), null);
+  assert.equal(H.resolveAccount("x@gmail.com", [{ id: "g", domains: ["gmail.com"] }]), null, "mesmo cadastrado, gratuito não casa");
+  assert.equal(H.emailDomain(" A@B.COM "), "b.com"); assert.equal(H.emailDomain(""), null);
+  assert.deepEqual(H.validateAccount({ name: "Acme", domains: ["acme.com.br"], slaPolicy: { HIGH: { firstResponse: 30, resolution: 120 } }, priorityFloor: "HIGH" }), []);
+  const paths = (a) => H.validateAccount(a).map((e) => e.path);
+  assert.deepEqual(paths({ name: " ", domains: ["acme", "gmail.com", "ok.com"] }), ["name", "domains.0", "domains.1"]);
+  assert.deepEqual(paths({ name: "x", slaPolicy: { HIGH: { firstResponse: 60, resolution: 30 } } }), ["slaPolicy.HIGH.resolution"]);
+  assert.deepEqual(paths({ name: "x", priorityFloor: "MAX" }), ["priorityFloor"]);
+  const org = { NORMAL: { firstResponse: 240, resolution: 1800 }, HIGH: { firstResponse: 60, resolution: 600 } };
+  assert.deepEqual(H.effectiveSlaPolicy(org, { slaPolicy: { NORMAL: { firstResponse: 60, resolution: 480 } } }), { NORMAL: { firstResponse: 60, resolution: 480 }, HIGH: { firstResponse: 60, resolution: 600 } });
+  assert.equal(H.effectiveSlaPolicy(org, null), org); assert.equal(H.effectiveSlaPolicy(org, {}), org);
+  assert.equal(H.applyPriorityFloor("NORMAL", "HIGH"), "HIGH"); assert.equal(H.applyPriorityFloor("URGENT", "HIGH"), "URGENT");
+  assert.equal(H.applyPriorityFloor("HIGH", "HIGH"), "HIGH"); assert.equal(H.applyPriorityFloor("LOW", null), "LOW");
+});
+
+test("contrato de horas: ciclo, consumo, aviso e excedente", () => {
+  assert.deepEqual(H.contractPeriod({ startDay: 1 }, "2026-10-14"), { start: "2026-10-01", end: "2026-10-31" });
+  assert.deepEqual(H.contractPeriod({ startDay: 10 }, "2026-10-14"), { start: "2026-10-10", end: "2026-11-09" });
+  assert.deepEqual(H.contractPeriod({ startDay: 10 }, "2026-10-09"), { start: "2026-09-10", end: "2026-10-09" });
+  assert.deepEqual(H.contractPeriod({ startDay: 10 }, "2026-10-10"), { start: "2026-10-10", end: "2026-11-09" }, "o dia de início abre o ciclo");
+  assert.deepEqual(H.contractPeriod({ startDay: 15 }, "2026-01-03"), { start: "2025-12-15", end: "2026-01-14" }, "virada do ano");
+  assert.deepEqual(H.contractPeriod({}, "2026-02-28"), { start: "2026-02-01", end: "2026-02-28" });
+  const c = { hoursMonthly: 10, startDay: 1, extraHourCents: 15000 };
+  const e = [{ minutes: 300, date: "2026-10-02" }, { minutes: 180, date: "2026-10-20", billable: true }, { minutes: 600, date: "2026-10-05", billable: false }, { minutes: 999, date: "2026-09-30" }, { minutes: 999, date: "2026-11-01" }];
+  assert.deepEqual(H.contractUsage(c, e, "2026-10-14"), { start: "2026-10-01", end: "2026-10-31", includedMinutes: 600, usedMinutes: 480, remainingMinutes: 120, overMinutes: 0, overAmountCents: 0, pct: 80, status: "WARNING" });
+  assert.equal(H.contractUsage(c, e.slice(0, 1), "2026-10-14").status, "OK");
+  const over = H.contractUsage(c, [...e, { minutes: 150, date: "2026-10-31" }], "2026-10-14");
+  assert.deepEqual([over.usedMinutes, over.overMinutes, over.overAmountCents, over.status, over.remainingMinutes], [630, 30, 7500, "EXCEEDED", 0]);
+  assert.equal(H.contractUsage(c, [{ minutes: 600, date: "2026-10-01" }], "2026-10-14").status, "WARNING", "exatamente o contratado não excede");
+  assert.equal(H.contractUsage({ hoursMonthly: 1.5 }, [], "2026-10-14").includedMinutes, 90);
+  assert.equal(H.contractUsage({ hoursMonthly: 0 }, [{ minutes: 10, date: "2026-10-01" }], "2026-10-14").pct, 0);
+  assert.deepEqual(H.validateTimeEntry({ minutes: 30, date: "2026-10-14" }), []);
+  assert.deepEqual(H.validateTimeEntry({ minutes: 0 }).map((x) => x.path), ["minutes"]);
+  assert.deepEqual(H.validateTimeEntry({ minutes: 1441 }).map((x) => x.path), ["minutes"]);
+  assert.deepEqual(H.validateTimeEntry({ minutes: 1.5, date: "14/10" }).map((x) => x.path), ["minutes", "date"]);
+  assert.deepEqual(H.validateTimeEntry({ minutes: 1440 }), []);
+});
+
+test("dividir chamado e aprovação", () => {
+  const ms = [{ id: "a", kind: "PUBLIC" }, { id: "b", kind: "NOTE" }, { id: "c", kind: "PUBLIC" }];
+  assert.deepEqual(H.splitPlan(ms, ["c", "c"]), { ok: true, move: [ms[2]], keep: [ms[0], ms[1]] });
+  assert.equal(H.splitPlan(ms, []).code, "SPLIT_EMPTY");
+  assert.equal(H.splitPlan(ms, ["z"]).code, "SPLIT_UNKNOWN");
+  assert.equal(H.splitPlan(ms, ["a", "b", "c"]).code, "SPLIT_ALL");
+  assert.equal(H.splitPlan(ms, ["b"]).code, "SPLIT_NOTES_ONLY");
+  assert.equal(H.splitPlan(ms, ["b", "c"]).ok, true);
+  const t = { id: "t", status: "OPEN" };
+  assert.deepEqual(H.canRequestApproval(t, []), { ok: true });
+  assert.equal(H.canRequestApproval({ ...t, status: "CLOSED" }).code, "TICKET_CLOSED");
+  assert.equal(H.canRequestApproval(t, [{ ticketId: "t", status: "PENDING" }]).code, "APPROVAL_PENDING");
+  assert.deepEqual(H.canRequestApproval(t, [{ ticketId: "t", status: "APPROVED" }, { ticketId: "u", status: "PENDING" }]), { ok: true });
+  const ap = { id: "p", status: "PENDING" };
+  assert.deepEqual(H.decideApproval(ap, "APPROVED"), { ok: true, approval: { id: "p", status: "APPROVED", comment: null } });
+  assert.equal(H.decideApproval(ap, "REJECTED", " no ").code, "COMMENT_REQUIRED");
+  assert.deepEqual(H.decideApproval(ap, "REJECTED", " Caro demais ").approval, { id: "p", status: "REJECTED", comment: "Caro demais" });
+  assert.equal(H.decideApproval({ ...ap, status: "APPROVED" }, "REJECTED", "xxx").code, "APPROVAL_DECIDED");
+  assert.equal(H.decideApproval(ap, "MAYBE").code, "DECISION_INVALID");
+});
+
+test("campos por categoria", () => {
+  const defs = [{ key: "versao", label: "Versão", type: "TEXT", required: true }, { key: "ambiente", label: "Ambiente", type: "SELECT", options: ["Produção", "Homologação"], required: true }, { key: "qtd", label: "Qtd", type: "NUMBER" }, { key: "quando", label: "Quando", type: "DATE" }, { key: "urgente", label: "Urgente", type: "BOOLEAN" }, { key: "contato", label: "E-mail", type: "EMAIL" }, { key: "tel", label: "Tel", type: "PHONE" }, { key: "obs", label: "Obs", type: "TEXTAREA" }];
+  assert.deepEqual(H.validateFieldDefs(defs), []);
+  const dp = (d) => H.validateFieldDefs(d).map((e) => e.path);
+  assert.deepEqual(dp([{ key: "Versão", label: "", type: "X" }, { key: "a", label: "A", type: "SELECT", options: [] }, { key: "a", label: "B", type: "TEXT" }]), ["fields.0.key", "fields.0.label", "fields.0.type", "fields.1.options", "fields.2.key"]);
+  assert.deepEqual(dp(Array.from({ length: 31 }, (_, i) => ({ key: "k" + i, label: "L", type: "TEXT" }))), ["fields"]);
+  const ok = H.validateTicketFields(defs, { versao: " 2.3.1 ", ambiente: "Produção", qtd: 3, quando: "2026-10-14", urgente: false, contato: "a@b.com", tel: "(44) 99999-1234", obs: "texto" });
+  assert.deepEqual(ok.errors, []);
+  assert.deepEqual(ok.value, { versao: "2.3.1", ambiente: "Produção", qtd: 3, quando: "2026-10-14", urgente: false, contato: "a@b.com", tel: "(44) 99999-1234", obs: "texto" });
+  const bad = H.validateTicketFields(defs, { versao: " ", ambiente: "Teste", qtd: "3", quando: "14/10", urgente: "sim", contato: "x", tel: "123", extra: 1 });
+  assert.deepEqual(bad.errors.map((e) => e.path), ["fields.extra", "fields.versao", "fields.ambiente", "fields.qtd", "fields.quando", "fields.urgente", "fields.contato", "fields.tel"]);
+  assert.deepEqual(H.validateTicketFields(defs, {}, { partial: true }).errors, [], "parcial não exige obrigatório");
+  assert.deepEqual(H.validateTicketFields(defs, {}).errors.map((e) => e.path), ["fields.versao", "fields.ambiente"]);
+  assert.deepEqual(H.validateTicketFields([{ key: "t", label: "T", type: "TEXT" }], { t: "x".repeat(201) }).errors.map((e) => e.message), ["Texto longo demais"]);
+  assert.deepEqual(H.validateTicketFields([{ key: "t", label: "T", type: "TEXTAREA" }], { t: "x".repeat(201) }).errors, []);
+});
+
+test("sugestão de artigos", () => {
+  assert.deepEqual(H.keywords("Olá, não consigo emitir a NOTA fiscal! Nota fiscal"), ["emitir", "nota", "fiscal"]);
+  assert.deepEqual(H.keywords("TV quebrou de novo"), ["quebrou", "novo"], "palavras de 2 letras ficam fora");
+  const arts = [
+    { id: 1, title: "Como emitir nota fiscal", bodyText: "Passo a passo para emitir a nota", status: "PUBLISHED" },
+    { id: 2, title: "Trocar a senha", bodyText: "Para trocar a senha, abra o perfil. Também serve para emitir nota", status: "PUBLISHED" },
+    { id: 3, title: "Nota fiscal com erro de NCM", bodyText: "Rejeição 778", status: "PUBLISHED", internal: true },
+    { id: 4, title: "Emitir nota fiscal (rascunho)", bodyText: "", status: "DRAFT" },
+    { id: 5, title: "Acesso", bodyText: "nada a ver", status: "PUBLISHED" },
+  ];
+  const r = H.suggestArticles("não consigo emitir nota fiscal", arts);
+  assert.deepEqual(r.map((x) => [x.article.id, x.score]), [[1, 8], [2, 2]], "título vale 2, corpo 1; interno e rascunho fora");
+  assert.deepEqual(H.suggestArticles("não consigo emitir nota fiscal", arts, { includeInternal: true }).map((x) => x.article.id), [1, 3, 2]);
+  assert.deepEqual(H.suggestArticles("não consigo emitir nota fiscal", arts, { limit: 1 }).map((x) => x.article.id), [1]);
+  assert.deepEqual(H.suggestArticles("olá bom dia", arts), [], "só palavras vazias");
+  assert.deepEqual(H.suggestArticles("senha", arts).map((x) => x.article.id), [2], "uma palavra no título e no corpo = 3");
+  assert.deepEqual(H.suggestArticles("perfil", arts), [], "só no corpo (1) não chega ao mínimo");
+  assert.deepEqual(H.suggestArticles("perfil", arts, { minScore: 1 }).map((x) => x.article.id), [2]);
+  const tie = [{ id: "a", title: "Boleto atrasado", bodyText: "", status: "PUBLISHED" }, { id: "b", title: "Boleto", bodyText: "", status: "PUBLISHED" }];
+  assert.deepEqual(H.suggestArticles("boleto", tie).map((x) => x.article.id), ["b", "a"], "empate em ordem alfabética do título");
+});
+
+test("chat: disponível só com alguém livre no horário", () => {
+  const cal = { timeZone: "America/Sao_Paulo", weekly: { 3: [["08:00", "18:00"]] }, holidays: [] };
+  const wedNoon = "2026-10-14T15:00:00Z", wedNight = "2026-10-14T23:30:00Z";
+  assert.deepEqual(H.chatAvailability({ agents: [{ active: true, available: true }, { active: true, available: false }], cal, now: wedNoon }), { online: true, agents: 1 });
+  assert.equal(H.chatAvailability({ agents: [{ active: true, available: true }], cal, now: wedNight }).online, false, "fora do horário");
+  assert.equal(H.chatAvailability({ agents: [{ active: false, available: true }], cal, now: wedNoon }).online, false, "inativo");
+  assert.equal(H.chatAvailability({ agents: [{ active: true, available: true }], cal: { alwaysOpen: true }, now: wedNight }).online, true);
+  assert.equal(H.chatAvailability({ agents: [], cal: { alwaysOpen: true } }).online, false);
+});
+
+test("ordem de serviço: fluxo, equipamento, orçamento e garantia", () => {
+  assert.equal(H.canMoveOs("RECEIVED", "DIAGNOSIS"), true); assert.equal(H.canMoveOs("RECEIVED", "REPAIR"), false);
+  assert.equal(H.canMoveOs("AWAITING_APPROVAL", "REPAIR"), true); assert.equal(H.canMoveOs("REPAIR", "DELIVERED"), false);
+  assert.equal(H.canMoveOs("READY", "DELIVERED"), true); assert.equal(H.canMoveOs("READY", "REPAIR"), false, "pronto não volta para reparo (vira nova OS em garantia)"); assert.equal(H.canMoveOs("DELIVERED", "REPAIR"), false); assert.equal(H.canMoveOs("X", "REPAIR"), false);
+  assert.deepEqual(H.validateEquipment({ type: "Celular", serial: "SN1" }), []);
+  assert.deepEqual(H.validateEquipment({ type: "Celular", model: "A15" }), []);
+  assert.deepEqual(H.validateEquipment({ type: " ", serial: " " }).map((e) => e.path), ["equipment.type", "equipment.serial"]);
+  const items = [{ kind: "PART", qty: 2, unitCents: 5000, productId: "p1" }, { kind: "LABOR", qty: 1.5, unitCents: 8000, discountCents: 2000 }];
+  assert.deepEqual(H.quoteTotals(items), { partsCents: 10000, laborCents: 12000, discountCents: 2000, totalCents: 20000 });
+  assert.deepEqual(H.quoteTotals([]), { partsCents: 0, laborCents: 0, discountCents: 0, totalCents: 0 });
+  assert.deepEqual(H.quoteTotals([{ kind: "LABOR", unitCents: 100 }]).laborCents, 100, "qty padrão 1");
+  assert.deepEqual(H.validateQuote(items), []);
+  assert.deepEqual(H.validateQuote([]).map((e) => e.path), ["items"]);
+  assert.deepEqual(H.validateQuote([{ kind: "X", qty: 0, unitCents: 1.5 }, { kind: "PART", qty: 1, unitCents: 100 }, { kind: "LABOR", qty: 1, unitCents: 100, discountCents: 101 }]).map((e) => e.path), ["items.0.kind", "items.0.qty", "items.0.unitCents", "items.1.description", "items.2.discountCents"]);
+  assert.deepEqual(H.validateQuote([{ kind: "PART", qty: 1, unitCents: 0, description: "Parafuso" }]), []);
+  const orders = [{ id: "o1", serial: "sn-1", deliveredOn: "2026-07-01", warrantyDays: 90 }, { id: "o2", serial: "SN-1", deliveredOn: "2026-09-01", warrantyDays: 30 }, { id: "o3", serial: "SN-2", deliveredOn: "2026-10-01", warrantyDays: 0 }, { id: "o4", serial: "SN-3", deliveredOn: null, warrantyDays: 90 }];
+  assert.deepEqual(H.warrantyStatus(" sn-1 ", orders, "2026-09-25"), { inWarranty: true, until: "2026-10-01", orderId: "o2" }, "a mais recente vale");
+  assert.deepEqual(H.warrantyStatus("SN-1", orders, "2026-10-01").inWarranty, true, "último dia ainda vale");
+  assert.deepEqual(H.warrantyStatus("SN-1", orders, "2026-10-02"), { inWarranty: false, until: "2026-10-01", orderId: "o2" });
+  assert.deepEqual(H.warrantyStatus("SN-2", orders, "2026-10-01"), { inWarranty: false, until: null, orderId: null }, "sem garantia");
+  assert.deepEqual(H.warrantyStatus("SN-3", orders, "2026-10-01").inWarranty, false, "não entregue");
+  assert.deepEqual(H.warrantyStatus("", orders, "2026-10-01").inWarranty, false);
+});
+
+test("perfis do Suporte", () => {
+  assert.deepEqual(H.HELPDESK_SEGMENTS.map((s) => s.id), ["GENERAL", "TECH_REPAIR", "IT_INTERNAL", "SOFTWARE", "CONDO"]);
+  assert.equal(H.helpdeskSegment("TECH_REPAIR").vocabulary.ticket[0], "ordem de serviço");
+  assert.equal(H.helpdeskSegment("CONDO").vocabulary.requester[1], "moradores");
+  assert.equal(H.helpdeskSegment("nada").id, "GENERAL");
+  for (const s of H.HELPDESK_SEGMENTS) for (const c of s.categories) assert.deepEqual(H.validateFieldDefs(c.fields), [], `${s.id}: ${c.name}`);
+});

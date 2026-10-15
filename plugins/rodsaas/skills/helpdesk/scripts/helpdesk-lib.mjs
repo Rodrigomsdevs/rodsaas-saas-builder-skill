@@ -567,3 +567,213 @@ export const hashToken = (t) => createHash("sha256").update(String(t)).digest("h
 /** Chave da API pública de chamados: mostrada uma vez; o banco guarda o hash e o prefixo. */
 export const newApiKey = () => `hd_${randomBytes(24).toString("base64url")}`;
 export const apiKeyPrefix = (k) => String(k).slice(0, 10);
+
+// ================================================================== operação avançada (references/09) e perfis (10)
+
+// ------------------------------------------------------------------ clientes (contas) e SLA por cliente
+/** Domínios de e-mail gratuitos: nunca servem para casar um contato com uma conta. */
+export const FREE_MAIL_DOMAINS = ["gmail.com", "googlemail.com", "hotmail.com", "hotmail.com.br", "outlook.com", "outlook.com.br", "live.com", "msn.com", "yahoo.com", "yahoo.com.br", "icloud.com", "me.com", "bol.com.br", "uol.com.br", "terra.com.br", "ig.com.br", "proton.me", "protonmail.com"];
+export const emailDomain = (email) => { const e = normalizeEmail(email); const i = e.lastIndexOf("@"); return i > 0 ? e.slice(i + 1) : null; };
+/** Conta do solicitante: e-mail listado na conta vence; senão o domínio (nunca um domínio gratuito). → conta ou null */
+export function resolveAccount(email, accounts) {
+  const e = normalizeEmail(email), d = emailDomain(e);
+  const byEmail = accounts.find((a) => (a.contactEmails ?? []).map(normalizeEmail).includes(e));
+  if (byEmail) return byEmail;
+  if (!d || FREE_MAIL_DOMAINS.includes(d)) return null;
+  return accounts.find((a) => (a.domains ?? []).map((x) => String(x).toLowerCase()).includes(d)) ?? null;
+}
+export function validateAccount(a) {
+  const e = [];
+  if (!String(a?.name ?? "").trim()) e.push({ path: "name", message: "Nome do cliente" });
+  (a?.domains ?? []).forEach((d, i) => {
+    const v = String(d ?? "").toLowerCase();
+    if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(v)) e.push({ path: `domains.${i}`, message: "Domínio inválido" });
+    else if (FREE_MAIL_DOMAINS.includes(v)) e.push({ path: `domains.${i}`, message: "Domínio de e-mail gratuito não identifica um cliente" });
+  });
+  if (a?.slaPolicy) for (const x of validateSlaPolicy(a.slaPolicy)) e.push({ path: `slaPolicy.${x.path}`, message: x.message });
+  if (a?.priorityFloor != null && !PRIORITIES.includes(a.priorityFloor)) e.push({ path: "priorityFloor", message: "Prioridade" });
+  return e;
+}
+/** Política que vale para o chamado: a do cliente (se tiver) por prioridade, senão a da empresa. */
+export const effectiveSlaPolicy = (orgPolicy, account) => (account?.slaPolicy ? { ...(orgPolicy ?? {}), ...account.slaPolicy } : orgPolicy);
+/** Prioridade com o piso do cliente (cliente VIP nunca fica abaixo de "Alta", por exemplo). */
+export const applyPriorityFloor = (priority, floor) => (floor && PRIORITIES.indexOf(floor) > PRIORITIES.indexOf(priority) ? floor : priority);
+
+// ------------------------------------------------------------------ contrato de horas
+const dnum = (ymd) => Math.floor(Date.UTC(+ymd.slice(0, 4), +ymd.slice(5, 7) - 1, +ymd.slice(8, 10)) / DAY);
+const ymdFromN = (n) => new Date(n * DAY).toISOString().slice(0, 10);
+const monthAdd = (y, m, k) => { const t = y * 12 + (m - 1) + k; return [Math.floor(t / 12), (t % 12) + 1]; };
+/** Ciclo do contrato que contém `ymd` (começa no dia `startDay`, 1 a 28, todo mês). → { start, end } */
+export function contractPeriod({ startDay = 1 }, ymd) {
+  const y = +ymd.slice(0, 4), m = +ymd.slice(5, 7), d = +ymd.slice(8, 10);
+  const [sy, sm] = d >= startDay ? [y, m] : monthAdd(y, m, -1);
+  const start = `${sy}-${pad(sm)}-${pad(startDay)}`;
+  const [ny, nm] = monthAdd(sy, sm, 1);
+  return { start, end: ymdFromN(dnum(`${ny}-${pad(nm)}-${pad(startDay)}`) - 1) };
+}
+export function validateTimeEntry({ minutes, date } = {}) {
+  const e = [];
+  if (!(Number.isInteger(minutes) && minutes >= 1 && minutes <= 1440)) e.push({ path: "minutes", message: "De 1 a 1440 minutos" });
+  if (date != null && !/^\d{4}-\d{2}-\d{2}$/.test(String(date))) e.push({ path: "date", message: "Data AAAA-MM-DD" });
+  return e;
+}
+/**
+ * Consumo do ciclo: só horas cobráveis com data dentro do ciclo. contract: { hoursMonthly, startDay, extraHourCents }
+ * → { start, end, includedMinutes, usedMinutes, remainingMinutes, overMinutes, overAmountCents, pct, status: OK | WARNING (≥ 80%) | EXCEEDED }
+ */
+export function contractUsage(contract, entries, ymd) {
+  const { start, end } = contractPeriod(contract, ymd);
+  const included = Math.round((contract.hoursMonthly ?? 0) * 60);
+  const used = entries.filter((x) => x.billable !== false && x.date >= start && x.date <= end).reduce((a, x) => a + x.minutes, 0);
+  const over = Math.max(0, used - included);
+  const pct = included > 0 ? Math.floor((used * 100) / included) : 0;
+  return { start, end, includedMinutes: included, usedMinutes: used, remainingMinutes: Math.max(0, included - used), overMinutes: over, overAmountCents: Math.round((over * (contract.extraHourCents ?? 0)) / 60), pct, status: used > included ? "EXCEEDED" : pct >= 80 ? "WARNING" : "OK" };
+}
+
+// ------------------------------------------------------------------ dividir chamado
+/** Quais mensagens vão para o chamado novo. → { ok, move, keep } | { ok: false, code: SPLIT_EMPTY | SPLIT_UNKNOWN | SPLIT_ALL } */
+export function splitPlan(messages, messageIds) {
+  const ids = [...new Set(messageIds ?? [])];
+  if (!ids.length) return { ok: false, code: "SPLIT_EMPTY" };
+  if (ids.some((id) => !messages.some((m) => m.id === id))) return { ok: false, code: "SPLIT_UNKNOWN" };
+  const move = messages.filter((m) => ids.includes(m.id)), keep = messages.filter((m) => !ids.includes(m.id));
+  if (!keep.length) return { ok: false, code: "SPLIT_ALL" };
+  if (!move.some((m) => m.kind === "PUBLIC")) return { ok: false, code: "SPLIT_NOTES_ONLY" };
+  return { ok: true, move, keep };
+}
+
+// ------------------------------------------------------------------ aprovação
+export function canRequestApproval(ticket, approvals = []) {
+  if (ticket.status === "CLOSED") return { ok: false, code: "TICKET_CLOSED" };
+  if (approvals.some((a) => a.ticketId === ticket.id && a.status === "PENDING")) return { ok: false, code: "APPROVAL_PENDING" };
+  return { ok: true };
+}
+/** Decisão: só pendente; reprovar exige comentário (3+ caracteres). → { ok, approval } | { ok: false, code } */
+export function decideApproval(approval, decision, comment) {
+  if (approval.status !== "PENDING") return { ok: false, code: "APPROVAL_DECIDED" };
+  if (!["APPROVED", "REJECTED"].includes(decision)) return { ok: false, code: "DECISION_INVALID" };
+  if (decision === "REJECTED" && String(comment ?? "").trim().length < 3) return { ok: false, code: "COMMENT_REQUIRED" };
+  return { ok: true, approval: { ...approval, status: decision, comment: String(comment ?? "").trim() || null } };
+}
+
+// ------------------------------------------------------------------ campos por categoria
+export const TICKET_FIELD_TYPES = ["TEXT", "TEXTAREA", "NUMBER", "DATE", "SELECT", "BOOLEAN", "EMAIL", "PHONE"];
+export function validateFieldDefs(defs) {
+  const e = [], seen = new Set();
+  (defs ?? []).forEach((f, i) => {
+    if (!/^[a-z][a-z0-9_]{0,39}$/.test(String(f?.key ?? ""))) e.push({ path: `fields.${i}.key`, message: "Chave em minúsculas (a-z, 0-9, _)" });
+    else if (seen.has(f.key)) e.push({ path: `fields.${i}.key`, message: "Chave repetida" });
+    seen.add(f?.key);
+    if (!String(f?.label ?? "").trim()) e.push({ path: `fields.${i}.label`, message: "Rótulo" });
+    if (!TICKET_FIELD_TYPES.includes(f?.type)) e.push({ path: `fields.${i}.type`, message: "Tipo" });
+    if (f?.type === "SELECT" && !(Array.isArray(f.options) && f.options.length >= 1)) e.push({ path: `fields.${i}.options`, message: "Opções" });
+  });
+  if ((defs ?? []).length > 30) e.push({ path: "fields", message: "Até 30 campos" });
+  return e;
+}
+/** Valores dos campos da categoria. → { value, errors: [{ path: "fields.<key>", message }] } (chave desconhecida é erro) */
+export function validateTicketFields(defs, values = {}, { partial = false } = {}) {
+  const errors = [], value = {};
+  const byKey = new Map((defs ?? []).map((f) => [f.key, f]));
+  for (const k of Object.keys(values ?? {})) if (!byKey.has(k)) errors.push({ path: `fields.${k}`, message: "Campo desconhecido" });
+  for (const f of defs ?? []) {
+    const v = values?.[f.key], p = `fields.${f.key}`;
+    const empty = v == null || v === "" || (typeof v === "string" && !v.trim());
+    if (empty) { if (f.required && !partial) errors.push({ path: p, message: "Obrigatório" }); continue; }
+    if (f.type === "NUMBER" && typeof v !== "number") errors.push({ path: p, message: "Número" });
+    else if (f.type === "DATE" && !/^\d{4}-\d{2}-\d{2}$/.test(String(v))) errors.push({ path: p, message: "Data" });
+    else if (f.type === "SELECT" && !(f.options ?? []).includes(v)) errors.push({ path: p, message: "Escolha uma das opções" });
+    else if (f.type === "BOOLEAN" && typeof v !== "boolean") errors.push({ path: p, message: "Sim ou não" });
+    else if (f.type === "EMAIL" && !isValidEmail(v)) errors.push({ path: p, message: "E-mail inválido" });
+    else if (f.type === "PHONE" && !/^\+?\d{10,13}$/.test(String(v).replace(/[\s().-]/g, ""))) errors.push({ path: p, message: "Telefone inválido" });
+    else if (["TEXT", "TEXTAREA"].includes(f.type) && String(v).length > (f.type === "TEXT" ? 200 : 5000)) errors.push({ path: p, message: "Texto longo demais" });
+    else value[f.key] = typeof v === "string" ? v.trim() : v;
+  }
+  return { value, errors };
+}
+
+// ------------------------------------------------------------------ sugestão de artigos
+export const PT_STOPWORDS = ["a", "o", "as", "os", "um", "uma", "de", "da", "do", "das", "dos", "em", "no", "na", "nos", "nas", "por", "para", "com", "sem", "que", "e", "ou", "se", "nao", "meu", "minha", "meus", "minhas", "seu", "sua", "como", "mais", "muito", "ja", "esta", "estou", "tem", "ter", "ser", "foi", "sao", "isso", "este", "esse", "essa", "ola", "bom", "dia", "boa", "tarde", "noite", "obrigado", "obrigada", "favor", "pois", "quando", "onde", "qual", "porque", "consigo", "preciso", "ajuda"];
+/** Palavras-chave sem acento, sem palavras vazias, 3+ letras, sem repetir. */
+export const keywords = (text) => [...new Set(fold(text).split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !PT_STOPWORDS.includes(w)))];
+/** Artigos publicados que combinam com o texto: título vale 2, corpo 1 por palavra; internos só com includeInternal. */
+export function suggestArticles(text, articles, { limit = 3, includeInternal = false, minScore = 2 } = {}) {
+  const kw = keywords(text);
+  if (!kw.length) return [];
+  return articles
+    .filter((a) => a.status === "PUBLISHED" && (includeInternal || !a.internal))
+    .map((a) => { const t = keywords(a.title), b = keywords(a.bodyText ?? ""); const score = kw.reduce((s, w) => s + (t.includes(w) ? 2 : 0) + (b.includes(w) ? 1 : 0), 0); return { article: a, score }; })
+    .filter((x) => x.score >= minScore)
+    .sort((x, y) => y.score - x.score || String(x.article.title).localeCompare(String(y.article.title)))
+    .slice(0, limit);
+}
+
+// ------------------------------------------------------------------ chat no widget
+/** Chat ao vivo só com alguém disponível dentro do horário (24 h se `alwaysOpen`). → { online, agents } */
+export function chatAvailability({ agents, cal, now = Date.now() }) {
+  const avail = (agents ?? []).filter((a) => a.active && a.available).length;
+  return { online: avail > 0 && isOpenAt(now, cal), agents: avail };
+}
+
+// ------------------------------------------------------------------ assistência técnica (ordem de serviço)
+export const OS_STATUSES = ["RECEIVED", "DIAGNOSIS", "AWAITING_APPROVAL", "REPAIR", "READY", "DELIVERED", "CANCELED"];
+export const OS_FLOW = { RECEIVED: ["DIAGNOSIS", "CANCELED"], DIAGNOSIS: ["AWAITING_APPROVAL", "REPAIR", "CANCELED"], AWAITING_APPROVAL: ["REPAIR", "DIAGNOSIS", "CANCELED"], REPAIR: ["READY"], READY: ["DELIVERED"], DELIVERED: [], CANCELED: [] };
+export const canMoveOs = (from, to) => (OS_FLOW[from] ?? []).includes(to);
+export function validateEquipment(eq) {
+  const e = [];
+  if (!String(eq?.type ?? "").trim()) e.push({ path: "equipment.type", message: "Tipo do equipamento" });
+  if (!String(eq?.serial ?? "").trim() && !String(eq?.model ?? "").trim()) e.push({ path: "equipment.serial", message: "Número de série ou modelo" });
+  return e;
+}
+/** Orçamento: peças e mão de obra. items: [{ kind: PART | LABOR, qty, unitCents, discountCents? }] */
+export function quoteTotals(items) {
+  const t = { partsCents: 0, laborCents: 0, discountCents: 0, totalCents: 0 };
+  for (const it of items ?? []) {
+    const gross = Math.round((it.qty ?? 1) * it.unitCents);
+    if (it.kind === "PART") t.partsCents += gross; else t.laborCents += gross;
+    t.discountCents += it.discountCents ?? 0;
+  }
+  t.totalCents = t.partsCents + t.laborCents - t.discountCents;
+  return t;
+}
+export function validateQuote(items) {
+  const e = [];
+  if (!(items ?? []).length) e.push({ path: "items", message: "Inclua peças ou mão de obra" });
+  (items ?? []).forEach((it, i) => {
+    if (!["PART", "LABOR"].includes(it?.kind)) e.push({ path: `items.${i}.kind`, message: "Peça ou mão de obra" });
+    if (!(it?.qty > 0)) e.push({ path: `items.${i}.qty`, message: "Quantidade" });
+    if (!(Number.isInteger(it?.unitCents) && it.unitCents >= 0)) e.push({ path: `items.${i}.unitCents`, message: "Valor em centavos" });
+    if (it?.discountCents != null && !(Number.isInteger(it.discountCents) && it.discountCents >= 0 && it.discountCents <= Math.round((it.qty ?? 1) * (it.unitCents ?? 0)))) e.push({ path: `items.${i}.discountCents`, message: "Desconto maior que o item" });
+    if (it?.kind === "PART" && !it.productId && !String(it.description ?? "").trim()) e.push({ path: `items.${i}.description`, message: "Peça" });
+  });
+  return e;
+}
+/** Garantia: a última OS entregue do mesmo número de série ainda dentro do prazo. → { inWarranty, until, orderId } */
+export function warrantyStatus(serial, deliveredOrders, today) {
+  const s = String(serial ?? "").trim().toUpperCase();
+  if (!s) return { inWarranty: false, until: null, orderId: null };
+  const last = deliveredOrders.filter((o) => String(o.serial ?? "").trim().toUpperCase() === s && o.deliveredOn && o.warrantyDays > 0).sort((a, b) => (a.deliveredOn < b.deliveredOn ? 1 : -1))[0];
+  if (!last) return { inWarranty: false, until: null, orderId: null };
+  const until = ymdFromN(dnum(last.deliveredOn) + last.warrantyDays);
+  return { inWarranty: today <= until, until, orderId: last.id };
+}
+
+// ------------------------------------------------------------------ perfis de segmento
+const W2 = (s, p) => [s, p];
+/** Perfis do Suporte (`references/10-perfis-de-segmento.md`). */
+export const HELPDESK_SEGMENTS = [
+  { id: "GENERAL", label: "Atendimento ao cliente", vocabulary: { ticket: W2("chamado", "chamados"), requester: W2("cliente", "clientes") }, categories: [{ name: "Dúvida", fields: [] }, { name: "Problema", fields: [] }], features: [] },
+  { id: "TECH_REPAIR", label: "Assistência técnica", vocabulary: { ticket: W2("ordem de serviço", "ordens de serviço"), requester: W2("cliente", "clientes") },
+    categories: [{ name: "Conserto", fields: [{ key: "defeito", label: "Defeito relatado", type: "TEXTAREA", required: true }, { key: "senha_aparelho", label: "Senha do aparelho", type: "TEXT" }, { key: "acessorios", label: "Acessórios entregues", type: "TEXT" }] }, { name: "Garantia", fields: [{ key: "os_anterior", label: "OS anterior", type: "TEXT" }] }],
+    features: ["service_orders", "quotes", "parts", "warranty"] },
+  { id: "IT_INTERNAL", label: "TI interno", vocabulary: { ticket: W2("chamado", "chamados"), requester: W2("colaborador", "colaboradores") },
+    categories: [{ name: "Acesso", fields: [{ key: "sistema", label: "Sistema", type: "TEXT", required: true }] }, { name: "Equipamento", fields: [{ key: "patrimonio", label: "Patrimônio", type: "TEXT" }, { key: "tipo", label: "Tipo", type: "SELECT", options: ["Notebook", "Desktop", "Celular", "Impressora", "Outro"], required: true }] }, { name: "Compra", fields: [{ key: "valor_estimado", label: "Valor estimado (R$)", type: "NUMBER" }] }],
+    features: ["approvals", "members_as_requesters"] },
+  { id: "SOFTWARE", label: "Empresa de software", vocabulary: { ticket: W2("chamado", "chamados"), requester: W2("cliente", "clientes") },
+    categories: [{ name: "Bug", fields: [{ key: "versao", label: "Versão", type: "TEXT", required: true }, { key: "ambiente", label: "Ambiente", type: "SELECT", options: ["Produção", "Homologação", "Celular", "Navegador"], required: true }, { key: "passos", label: "Passos para reproduzir", type: "TEXTAREA", required: true }] }, { name: "Dúvida", fields: [] }, { name: "Pedido de melhoria", fields: [{ key: "impacto", label: "Impacto", type: "SELECT", options: ["Baixo", "Médio", "Alto"] }] }],
+    features: ["bug_to_task", "contracts"] },
+  { id: "CONDO", label: "Condomínio", vocabulary: { ticket: W2("ocorrência", "ocorrências"), requester: W2("morador", "moradores") },
+    categories: [{ name: "Manutenção", fields: [{ key: "bloco", label: "Bloco", type: "TEXT" }, { key: "unidade", label: "Unidade", type: "TEXT", required: true }, { key: "local", label: "Local", type: "SELECT", options: ["Minha unidade", "Área comum", "Garagem", "Portaria"], required: true }] }, { name: "Barulho ou convivência", fields: [{ key: "unidade", label: "Unidade", type: "TEXT", required: true }] }, { name: "Encomenda", fields: [{ key: "unidade", label: "Unidade", type: "TEXT", required: true }] }],
+    features: ["approvals"] },
+];
+export const helpdeskSegment = (id) => HELPDESK_SEGMENTS.find((s) => s.id === id) ?? HELPDESK_SEGMENTS[0];

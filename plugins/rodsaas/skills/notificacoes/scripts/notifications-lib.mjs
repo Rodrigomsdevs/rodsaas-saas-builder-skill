@@ -149,6 +149,11 @@ export const PRESET_TYPES = [
   { type: "helpdesk.sla_warning", appId: "helpdesk", label: "Prazo vencendo", template: "O prazo de {title} vence {data.when}", group: { by: "none" } },
   { type: "helpdesk.sla_breached", appId: "helpdesk", label: "Prazo estourado", template: "O prazo de {title} estourou", group: { by: "none" } },
   { type: "helpdesk.daily", appId: "helpdesk", label: "Resumo diário do Suporte", template: "{data.open} chamados abertos, {data.breached} com prazo estourado", group: { by: "none" } },
+  { type: "helpdesk.approval.requested", appId: "helpdesk", label: "Aprovação pedida", template: "{actor} pediu a sua aprovação em {title}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "helpdesk.approval.decided", appId: "helpdesk", label: "Aprovação respondida", template: "{actor} respondeu a aprovação de {title}: {data.decision}", group: { by: "none" } },
+  { type: "helpdesk.contract.warning", appId: "helpdesk", label: "Contrato perto do limite", template: "O contrato de {data.account} já usou {data.pct}% das horas do mês", group: { by: "none" } },
+  { type: "helpdesk.contract.exceeded", appId: "helpdesk", label: "Contrato excedido", template: "O contrato de {data.account} passou das horas do mês: {data.over} a mais", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "helpdesk.chat.waiting", appId: "helpdesk", label: "Chat esperando", template: "Chat novo esperando atendimento: {title}", group: { by: "none" } },
   // pessoas (rh)
   { type: "rh.approval.requested", appId: "pessoas", label: "Pedido para você aprovar", template: { one: "{actor} pediu {title}: aprove ou recuse", many: "{count} pedidos aguardando a sua aprovação" }, group: { by: "key", windowMinutes: 10 } },
   { type: "rh.approval.reminder", appId: "pessoas", label: "Lembrete de aprovação", template: { one: "{title} aguarda a sua aprovação há {data.days} dias", many: "{count} pedidos aguardam a sua aprovação" }, group: { by: "key", windowMinutes: 60 } },

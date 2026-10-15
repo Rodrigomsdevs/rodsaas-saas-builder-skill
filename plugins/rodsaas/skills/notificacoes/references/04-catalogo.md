@@ -108,6 +108,11 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 | `helpdesk.mentioned` | @menção em nota | mencionados | ticket | idem |
 | `helpdesk.sla_warning` / `helpdesk.sla_breached` | job de SLA | responsável (estourado: também owners/admins) | ticket | idem |
 | `helpdesk.daily` | job 8 h | atendentes | user | `/suporte` |
+| `helpdesk.approval.requested` | pediram aprovação no chamado | o aprovador (membro) | ticket | `/suporte/chamados/<id>` |
+| `helpdesk.approval.decided` | o aprovador decidiu | responsável do chamado e quem pediu | ticket | `/suporte/chamados/<id>` |
+| `helpdesk.contract.warning` | contrato do cliente passou de 80% no ciclo | owners/admins | contract | `/suporte/clientes/<id>` |
+| `helpdesk.contract.exceeded` | contrato do cliente passou do contratado | owners/admins | contract | `/suporte/clientes/<id>` |
+| `helpdesk.chat.waiting` | chat novo sem atendente há 1 min | atendentes disponíveis da fila | ticket | `/suporte/chamados/<id>` |
 
 `canSee`: atendente (e, se a empresa restringe, da fila do chamado). Deixar de ser atendente → `retract` das notificações de chamados dessa pessoa.
 

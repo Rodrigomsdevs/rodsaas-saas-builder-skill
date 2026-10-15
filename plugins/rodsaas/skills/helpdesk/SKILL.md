@@ -1,6 +1,6 @@
 ---
 name: helpdesk
-description: Preset que soma ao projeto rodsaas o app Suporte, um helpdesk no estilo Zendesk/Freshdesk/Movidesk — chamados com número, status, prioridade, fila e responsável, vindos do e-mail (IMAP/SMTP ou webhook, com encadeamento e sem loop de resposta automática), do portal de ajuda, do widget, da API com chave e da equipe; caixa de entrada com visões, resposta pública e nota interna, @menções, macros, anexos, aviso de colisão, mesclar, SLA em horário comercial com pausa, distribuição automática, gatilhos, CSAT, fechamento automático, portal com base de conhecimento (busca em português, sugestões antes de abrir) e acompanhamento pelo link sem senha, relatórios, CRM, Forms e webhooks. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir helpdesk, suporte, atendimento ao cliente, chamados, tickets, central de ajuda, base de conhecimento, SAC, clone do Zendesk/Movidesk, ou chamar /rodsaas:helpdesk.
+description: Preset que soma ao projeto rodsaas o app Suporte, um helpdesk no estilo Zendesk/Freshdesk/Movidesk — chamados com número, status, prioridade, fila e responsável, vindos do e-mail (IMAP/SMTP ou webhook, com encadeamento e sem loop de resposta automática), do portal de ajuda, do widget, da API com chave e da equipe; caixa de entrada com visões, resposta pública e nota interna, @menções, macros, anexos, aviso de colisão, mesclar, SLA em horário comercial com pausa, distribuição automática, gatilhos, CSAT, fechamento automático, portal com base de conhecimento (busca em português, sugestões antes de abrir) e acompanhamento pelo link sem senha, relatórios, CRM, Forms e webhooks; WhatsApp (pelo motor) e chat ao vivo no widget, clientes com SLA próprio e contrato de horas, dividir chamado, aprovação, campos por categoria e sugestão de artigos; perfis de assistência técnica (ordem de serviço com orçamento, peças do ERP e garantia), TI interno, software (bug vira tarefa) e condomínio. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir helpdesk, suporte, atendimento ao cliente, chamados, tickets, central de ajuda, base de conhecimento, SAC, ordem de serviço, assistência técnica, clone do Zendesk/Movidesk, ou chamar /rodsaas:helpdesk.
 ---
 
 # rodsaas · helpdesk
@@ -31,7 +31,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 Se `rodsaas.json → presets` já tem `helpdesk` (ou existe `api/src/modules/helpdesk`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 6 (é onde mais se simplifica: e-mail sem encadeamento ou sem proteção contra loop, SLA em horas corridas, chamado sem as três colunas, sem macros, sem colisão, base de conhecimento sem busca em português).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 6 (é onde mais se simplifica: e-mail sem encadeamento ou sem proteção contra loop, SLA em horas corridas, chamado sem as três colunas, sem macros, sem colisão, base de conhecimento sem busca em português) e das fases 10 e 11 (clientes, contrato de horas, dividir, aprovação, categorias, sugestão, WhatsApp, chat e perfis — Suporte instalado antes da versão 0.29 não tem nada disso).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/08-checklist.md` e o `/rodsaas:verify` (`-g "Helpdesk"`).
 
@@ -41,7 +41,9 @@ Se `rodsaas.json → presets` já tem `helpdesk` (ou existe `api/src/modules/hel
 |---|---|
 | Nome do app | **Suporte** (rotas `/suporte/...`) |
 | Canais na v1 | **e-mail** (caixa conectada por IMAP/SMTP, ou webhook de recebimento de Postmark/Mailgun/SendGrid/Cloudflare), **portal de ajuda**, **widget** no site do cliente, **API com chave** e chamado criado pela equipe (telefone, balcão) |
-| WhatsApp e chat ao vivo | fora da v1; o ponto de extensão `ingestMessage(channel, ...)` fica pronto para o add-on `whatsapp` |
+| WhatsApp e chat ao vivo | WhatsApp pelo motor (`/rodsaas:whatsapp`) quando a empresa conectou; chat ao vivo no widget (Pro) com consulta a cada 3 s — sem WebSocket na v1 |
+| Clientes | conta por domínio do e-mail (nunca domínio gratuito) com SLA próprio e piso de prioridade; contrato de horas por cliente (Pro) |
+| Perfil | o segmento do onboarding ("Tecnologia e software" → `SOFTWARE`) ou a pergunta na primeira abertura; `GENERAL` se pular |
 | Status | Aberto · Aguardando cliente · Em espera · Resolvido · Fechado (fechado é definitivo; resposta depois disso abre um chamado novo ligado ao antigo) |
 | Prioridades | Baixa · Normal · Alta · Urgente |
 | Filas | uma fila "Suporte" pronta; a empresa cria outras ("Financeiro", "Técnico") com seus atendentes |
@@ -54,7 +56,7 @@ Se `rodsaas.json → presets` já tem `helpdesk` (ou existe `api/src/modules/hel
 | Endereços públicos | portal `/ajuda/<empresa>` (artigos, abrir chamado, meus chamados) e o chamado do cliente em `/chamado/<token>`, no domínio do painel |
 | Planos | Free: 2 atendentes, 1 caixa de e-mail, 100 chamados/mês; Pro: 10 atendentes, 5 caixas, 5.000/mês, SLA, automações, CSAT, integrações, sem rodapé; Business: atendentes e caixas ilimitados, 50.000/mês |
 
-Fora da v1 (registre no README do projeto): chat ao vivo e WhatsApp (add-on), telefonia/URA, redes sociais, chamados filhos/dividir chamado, aprovações, central com domínio próprio do cliente (CNAME), vários idiomas na base de conhecimento, assistente de IA para sugerir respostas, contrato de horas por cliente.
+Fora da v1 (registre no README do projeto): telefonia/URA, redes sociais (Instagram, Facebook), chat em tempo real por WebSocket, central com domínio próprio do cliente (CNAME), vários idiomas na base de conhecimento, assistente de IA para escrever respostas, inventário completo de ativos de TI (CMDB), faturamento TISS ou de convênio.
 
 ## Fases
 
@@ -74,7 +76,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(hel
    - *Pronto quando*: caixa de entrada com visões, filtros, busca e massa; chamado com conversa, propriedades e histórico do solicitante; editor com nota, macros, artigos, enviar como status e rascunho; colisão; contatos, base de conhecimento com editor, relatórios e todas as configurações; todos os testids da seção "Contrato testável".
 7. **E-mail e integrações** — caixas de e-mail, avisos, SLA e fechamento automático na fila, CRM, Forms, webhooks. → `references/06-email-e-integracoes.md`
 8. **Interações e estados** — atalhos, otimismo, colisão, todos os estados. → `references/07-interacoes-e-estados.md`
-9. **Fechamento** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Suporte: `-g "Helpdesk"`; ela exige os testids de `05-app-interno.md` e `04-portal-e-widget.md`, os rótulos do formulário do portal e os formatos ★ de `03-api.md`), README do projeto.
+9. **Fechamento do núcleo** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Suporte: `-g "Helpdesk"`; ela exige os testids de `05-app-interno.md` e `04-portal-e-widget.md`, os rótulos do formulário do portal e os formatos ★ de `03-api.md`), README do projeto.
+10. **Operação avançada** — clientes com SLA, contrato de horas, dividir, aprovação, categorias com campos, sugestão de artigos, WhatsApp pelo motor e chat no widget. → `references/09-operacao-avancada.md`
+    - *Pronto quando*: cliente casa pelo domínio e encurta o prazo; lançar tempo mostra o saldo e avisa o excedente; dividir move as mensagens; aprovação pausa e volta; categoria pede os campos no portal; artigos sugeridos no chamado; WhatsApp e chat viram chamados e a resposta volta pelo mesmo canal.
+11. **Perfis de segmento** — assistência técnica (OS, orçamento, peças, garantia), TI interno, software (bug → tarefa), condomínio. → `references/10-perfis-de-segmento.md`
+    - *Pronto quando*: escolher o perfil monta as categorias sem duplicar, as telas usam as palavras dele e a OS anda do recebimento à entrega com o estoque do ERP. Feche com `/rodsaas:verify -g "Helpdesk"` (inclui `29-helpdesk-operacao.spec.ts`).
 
 ## Princípios
 
@@ -102,4 +108,6 @@ O que foi adicionado (app, telas, endereços públicos), planos e limites novos,
 | `references/06-email-e-integracoes.md` | Fases 4 e 7 |
 | `references/07-interacoes-e-estados.md` | Fase 8 |
 | `references/08-checklist.md` | Fase 9 |
-| `scripts/helpdesk-lib.mjs` + `helpdesk-lib.test.mjs` | horário comercial, SLA (prazos, situação, pausa), estados, e-mail (endereços, assunto, encadeamento, citação, resposta automática), distribuição, gatilhos, macros, CSAT, relatórios, busca: porte para TS com os testes |
+| `references/09-operacao-avancada.md` | Fase 10: clientes, contrato de horas, dividir, aprovação, categorias, sugestão, WhatsApp, chat |
+| `references/10-perfis-de-segmento.md` | Fase 11: assistência técnica, TI interno, software, condomínio |
+| `scripts/helpdesk-lib.mjs` + `helpdesk-lib.test.mjs` | horário comercial, SLA (prazos, situação, pausa), estados, e-mail (endereços, assunto, encadeamento, citação, resposta automática), distribuição, gatilhos, macros, CSAT, relatórios, busca; clientes, contrato de horas, dividir, aprovação, campos por categoria, sugestão de artigos, chat, ordem de serviço, garantia, perfis: porte para TS com os testes |
