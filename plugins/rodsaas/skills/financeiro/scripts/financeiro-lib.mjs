@@ -441,3 +441,266 @@ export function toCsv(rows, columns) {
 }
 /** Centavos → "1234,56" (formato da contabilidade, sem R$). */
 export const centsToDecimal = (c) => (c < 0 ? "-" : "") + Math.floor(Math.abs(c) / 100) + "," + pad(Math.abs(c) % 100);
+
+// ================================================================== operação avançada (references/09) e perfis (10)
+const ferr = (list, code, message, path) => list.push({ code, message, path });
+const isMonth = (s) => typeof s === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(s);
+export { isMonth };
+
+// ------------------------------------------------------------------ rateio
+/**
+ * Rateio de um lançamento em categorias e centros de custo: partes [{ categoryId, costCenterId?, pct? | amountCents? }]
+ * (todas por porcentagem somando 100, ou todas em centavos somando o valor do lançamento).
+ */
+export function validateAllocations(parts, amountCents) {
+  const e = [];
+  if (!Array.isArray(parts) || parts.length < 2) { ferr(e, "ALLOCATION_MIN", "Rateio com pelo menos duas partes", "allocations"); return e; }
+  const byPct = parts.every((p) => p?.pct != null), byAmount = parts.every((p) => p?.amountCents != null);
+  if (!byPct && !byAmount) { ferr(e, "ALLOCATION_MIXED", "Use só porcentagem ou só valor em todas as partes", "allocations"); return e; }
+  parts.forEach((p, i) => {
+    if (!p.categoryId) ferr(e, "CATEGORY_REQUIRED", "Categoria da parte", `allocations.${i}.categoryId`);
+    if (byPct && !(typeof p.pct === "number" && p.pct > 0 && p.pct <= 100 && Math.abs(Math.round(p.pct * 100) - p.pct * 100) < 1e-6)) ferr(e, "PCT_INVALID", "Porcentagem entre 0 e 100, até 2 casas", `allocations.${i}.pct`);
+    if (byAmount && !(Number.isInteger(p.amountCents) && p.amountCents > 0)) ferr(e, "AMOUNT_INVALID", "Valor em centavos", `allocations.${i}.amountCents`);
+  });
+  if (e.length) return e;
+  if (byPct && Math.round(parts.reduce((s, p) => s + p.pct * 100, 0)) !== 10000) ferr(e, "ALLOCATION_SUM", "As porcentagens precisam somar 100%", "allocations");
+  if (byAmount && parts.reduce((s, p) => s + p.amountCents, 0) !== amountCents) ferr(e, "ALLOCATION_SUM", "As partes precisam somar o valor do lançamento", "allocations");
+  return e;
+}
+/** Centavos de cada parte: por porcentagem com o maior resto (soma exata); por valor como veio. */
+export function allocateAmount(amountCents, parts) {
+  if (parts.every((p) => p.amountCents != null && p.pct == null)) return parts.map((p) => ({ ...p }));
+  const raw = parts.map((p) => (amountCents * Math.round(p.pct * 100)) / 10000);
+  const out = raw.map(Math.floor);
+  let left = amountCents - out.reduce((s, v) => s + v, 0);
+  const order = raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  for (let k = 0; left > 0; k = (k + 1) % order.length, left--) out[order[k][1]] += 1;
+  return parts.map((p, i) => ({ ...p, amountCents: out[i] }));
+}
+/** Divide um valor (uma baixa, por exemplo) na proporção das partes já em centavos, com a soma exata. */
+export function splitByShares(cents, shares) {
+  const total = shares.reduce((s, x) => s + x, 0);
+  if (!total) return shares.map(() => 0);
+  return allocateAmount(cents, shares.map((x) => ({ pct: Math.round((x / total) * 1_000_000) / 10_000 }))).map((p) => p.amountCents);
+}
+/** Lançamentos com rateio viram uma linha por parte (para a DRE e os relatórios por categoria/centro de custo). */
+export function explodeAllocations(entries) {
+  const out = [];
+  for (const e of entries) {
+    if (!e.allocations?.length) { out.push(e); continue; }
+    for (const p of allocateAmount(e.amountCents, e.allocations)) out.push({ ...e, categoryId: p.categoryId, costCenterId: p.costCenterId ?? e.costCenterId ?? null, amountCents: p.amountCents, allocations: undefined });
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ previsto × realizado (orçamento)
+export function validateBudget(b) {
+  const e = [];
+  if (!b?.categoryId) ferr(e, "CATEGORY_REQUIRED", "Categoria", "categoryId");
+  if (!isMonth(b?.month)) ferr(e, "MONTH_INVALID", "Mês AAAA-MM", "month");
+  if (!(Number.isInteger(b?.amountCents) && b.amountCents >= 0)) ferr(e, "AMOUNT_INVALID", "Valor em centavos", "amountCents");
+  return e;
+}
+/**
+ * budgets [{ categoryId, month, amountCents }] × actuals [{ categoryId, month, amountCents }] → linhas por categoria e mês:
+ * { budgetCents, actualCents, diffCents (orçado − realizado), usedPct, status }. Despesa: OK · WARN (≥ warnPct) · OVER (passou);
+ * receita: OK (bateu a meta) · WARN (≥ warnPct) · UNDER; sem orçamento: NO_BUDGET.
+ */
+export function budgetVsActual(budgets, actuals, { typeOf = () => "EXPENSE", warnPct = 90 } = {}) {
+  const rows = new Map();
+  const key = (c, m) => c + "|" + m;
+  for (const b of budgets) rows.set(key(b.categoryId, b.month), { categoryId: b.categoryId, month: b.month, budgetCents: (rows.get(key(b.categoryId, b.month))?.budgetCents ?? 0) + b.amountCents, actualCents: 0, hasBudget: true });
+  for (const a of actuals) { const k = key(a.categoryId, a.month); const r = rows.get(k) ?? { categoryId: a.categoryId, month: a.month, budgetCents: 0, actualCents: 0, hasBudget: false }; r.actualCents += a.amountCents; rows.set(k, r); }
+  return [...rows.values()].sort((x, y) => x.month.localeCompare(y.month) || String(x.categoryId).localeCompare(String(y.categoryId))).map((r) => {
+    const usedPct = r.budgetCents ? Math.round((r.actualCents / r.budgetCents) * 1000) / 10 : null;
+    let status;
+    if (!r.hasBudget) status = "NO_BUDGET";
+    else if (typeOf(r.categoryId) === "INCOME") status = r.actualCents >= r.budgetCents ? "OK" : usedPct >= warnPct ? "WARN" : "UNDER";
+    else status = r.actualCents > r.budgetCents ? "OVER" : usedPct != null && usedPct >= warnPct ? "WARN" : "OK";
+    return { categoryId: r.categoryId, month: r.month, budgetCents: r.budgetCents, actualCents: r.actualCents, diffCents: r.budgetCents - r.actualCents, usedPct, status };
+  });
+}
+
+// ------------------------------------------------------------------ fatura de cartão de crédito
+export function validateCard(c) {
+  const e = [];
+  const day = (v) => Number.isInteger(v) && v >= 1 && v <= 31;
+  if (!day(c?.closingDay)) ferr(e, "DAY_INVALID", "Dia do fechamento de 1 a 31", "closingDay");
+  if (!day(c?.dueDay)) ferr(e, "DAY_INVALID", "Dia do vencimento de 1 a 31", "dueDay");
+  if (day(c?.closingDay) && c.closingDay === c.dueDay) ferr(e, "DUE_EQUALS_CLOSING", "O vencimento não pode ser no dia do fechamento", "dueDay");
+  if (c?.limitCents != null && !(Number.isInteger(c.limitCents) && c.limitCents > 0)) ferr(e, "AMOUNT_INVALID", "Limite em centavos", "limitCents");
+  return e;
+}
+const atDay = (ym, day) => addMonths(ym + "-01", 0, day);
+/**
+ * Fatura de uma compra: fecha no `closingDay` (compra no dia do fechamento ou depois vai para a próxima — o "melhor dia de
+ * compra" é o próprio dia do fechamento) e vence no `dueDay` (no mesmo mês do fechamento se dueDay > closingDay; senão no
+ * mês seguinte). → { refMonth (mês do vencimento), closesOn, dueOn }
+ */
+export function cardInvoiceFor(purchaseDate, { closingDay, dueDay }) {
+  let closesOn = atDay(monthKey(purchaseDate), closingDay);
+  if (purchaseDate >= closesOn) closesOn = addMonths(closesOn, 1, closingDay);
+  const dueOn = dueDay > closingDay ? atDay(monthKey(closesOn), dueDay) : addMonths(atDay(monthKey(closesOn), 1), 1, dueDay);
+  return { refMonth: monthKey(dueOn), closesOn, dueOn };
+}
+/** Compra parcelada no cartão: uma parcela por fatura a partir da fatura da compra (centavo certo na 1ª). */
+export function cardPurchasePlan(amountCents, installments, purchaseDate, card) {
+  if (!Number.isInteger(installments) || installments < 1 || installments > 24) throw new Error("de 1 a 24 parcelas");
+  const first = cardInvoiceFor(purchaseDate, card);
+  const base = Math.floor(amountCents / installments), rest = amountCents - base * installments;
+  return Array.from({ length: installments }, (_, i) => {
+    const closesOn = addMonths(first.closesOn, i, card.closingDay);
+    const inv = cardInvoiceFor(addDays(closesOn, -1), card);
+    return { number: i + 1, total: installments, amountCents: base + (i === 0 ? rest : 0), ...inv };
+  });
+}
+export const bestPurchaseDay = (card) => card.closingDay;
+
+// ------------------------------------------------------------------ competência travada
+/** Mês travado: nada com data (competência, vencimento de lançamento novo, baixa, estorno) até `lockedThrough` (AAAA-MM). */
+export const isLocked = (date, lockedThrough) => !!lockedThrough && !!date && String(date).slice(0, 7) <= lockedThrough;
+/** Pode travar até `month`? Só mês já terminado; destravar é voltar o mês (quem pode: FIN_ADMIN, com motivo). */
+export function validateLock(month, today, current) {
+  const e = [];
+  if (!isMonth(month)) ferr(e, "MONTH_INVALID", "Mês AAAA-MM", "month");
+  else if (month >= monthKey(today)) ferr(e, "MONTH_NOT_CLOSED", "Só dá para travar mês que já terminou", "month");
+  else if (current && month < current) ferr(e, "LOCK_BACKWARDS", "Para destravar, use a ação de destravar com o motivo", "month");
+  return e;
+}
+
+// ------------------------------------------------------------------ exportação ao contador (partidas dobradas)
+/**
+ * Lançamentos contábeis do período a partir do que foi pago e transferido (regime de caixa do contador):
+ * pagamentos [{ id, date, type, cashCents, accountId, categoryId, allocations?, description, document? }] e
+ * transferências [{ id, date, fromAccountId, toAccountId, amountCents, description? }]; códigos do plano do contador
+ * em `accountCode(id)` e `categoryCode(id)`. Receita: D banco / C receita; despesa: D despesa / C banco;
+ * transferência: D destino / C origem. → { rows: [{ date, debit, credit, amountCents, history, document }], missing }
+ */
+export function accountingEntries({ payments = [], transfers = [] }, { accountCode, categoryCode }) {
+  const rows = [], missing = new Map();
+  const code = (kind, id, fn) => { const c = id ? fn(id) : null; if (!c) missing.set(kind + ":" + id, { kind, id }); return c ?? null; };
+  for (const p of payments) {
+    const parts = p.allocations?.length ? (() => { const al = allocateAmount(p.entryAmountCents ?? p.cashCents, p.allocations); const cents = splitByShares(p.cashCents, al.map((a) => a.amountCents)); return al.map((a, i) => ({ categoryId: a.categoryId, cents: cents[i] })); })() : [{ categoryId: p.categoryId, cents: p.cashCents }];
+    const acc = code("account", p.accountId, accountCode);
+    for (const part of parts) {
+      if (!part.cents) continue;
+      const cat = code("category", part.categoryId, categoryCode);
+      rows.push({ date: p.date, debit: p.type === "INCOME" ? acc : cat, credit: p.type === "INCOME" ? cat : acc, amountCents: part.cents, history: p.description, document: p.document ?? null });
+    }
+  }
+  for (const t of transfers) rows.push({ date: t.date, debit: code("account", t.toAccountId, accountCode), credit: code("account", t.fromAccountId, accountCode), amountCents: t.amountCents, history: t.description ?? "Transferência entre contas", document: null });
+  rows.sort((a, b) => a.date.localeCompare(b.date));
+  return { rows, missing: [...missing.values()], totalCents: rows.reduce((s, r) => s + r.amountCents, 0) };
+}
+const brDate = (ymd) => ymd.split("-").reverse().join("/");
+/** CSV do contador: data (DD/MM/AAAA); débito; crédito; valor (vírgula decimal); histórico; documento. */
+export const accountingCsv = (rows) => toCsv(rows, [{ label: "data", value: (r) => brDate(r.date) }, { label: "debito", key: "debit" }, { label: "credito", key: "credit" }, { label: "valor", value: (r) => centsToDecimal(r.amountCents) }, { label: "historico", key: "history" }, { label: "documento", key: "document" }]);
+
+// ------------------------------------------------------------------ NFS-e (padrão nacional, pelo motor fiscal)
+export const ISS_MIN_PCT = 2, ISS_MAX_PCT = 5;
+/** Serviço da NFS-e: código de tributação nacional (6 dígitos: item, subitem e desdobro da LC 116), descrição e ISS de 2% a 5%. */
+export function validateService(s) {
+  const e = [];
+  if (!/^\d{6}$/.test(String(s?.code ?? ""))) ferr(e, "SERVICE_CODE_INVALID", "Código de tributação nacional com 6 dígitos (ex.: 010101)", "service.code");
+  if (!String(s?.description ?? "").trim()) ferr(e, "DESCRIPTION_REQUIRED", "Descreva o serviço", "service.description");
+  if (!(typeof s?.issPct === "number" && s.issPct >= ISS_MIN_PCT && s.issPct <= ISS_MAX_PCT)) ferr(e, "ISS_RATE_INVALID", "Alíquota do ISS entre 2% e 5%", "service.issPct");
+  if (s?.cityCode != null && !/^\d{7}$/.test(String(s.cityCode))) ferr(e, "CITY_INVALID", "Código IBGE do município com 7 dígitos", "service.cityCode");
+  return e;
+}
+/** Retenção federal abaixo de R$ 10,00 não é feita (IRRF; PIS/COFINS/CSLL somados). */
+export const RETENTION_MIN_CENTS = 1000;
+/**
+ * Impostos e retenções de uma NFS-e: ISS (retido pelo tomador se `issWithheld`), IRRF (`irrfPct`, 1,5% nos serviços
+ * profissionais), PIS/COFINS/CSLL (`pcc`: 0,65% + 3% + 1% = 4,65%) e INSS (`inssPct`, 11% na cessão de mão de obra).
+ * Optante do Simples (`simples`) não sofre IRRF nem PIS/COFINS/CSLL. → { issCents, issWithheldCents, irrfCents,
+ * pisCents, cofinsCents, csllCents, inssCents, retainedCents, netCents } (`netCents` = o que o tomador paga)
+ */
+export function serviceTaxes(amountCents, { issPct, issWithheld = false, irrfPct = 0, pcc = false, inssPct = 0, simples = false } = {}) {
+  const pctOf = (p) => Math.round((amountCents * p) / 100);
+  const issCents = pctOf(issPct ?? 0), issWithheldCents = issWithheld ? issCents : 0;
+  let irrfCents = simples ? 0 : pctOf(irrfPct);
+  if (irrfCents < RETENTION_MIN_CENTS) irrfCents = 0;
+  let pisCents = 0, cofinsCents = 0, csllCents = 0;
+  if (pcc && !simples) { pisCents = pctOf(0.65); cofinsCents = pctOf(3); csllCents = pctOf(1); if (pisCents + cofinsCents + csllCents < RETENTION_MIN_CENTS) pisCents = cofinsCents = csllCents = 0; }
+  const inssCents = pctOf(inssPct);
+  const retainedCents = issWithheldCents + irrfCents + pisCents + cofinsCents + csllCents + inssCents;
+  return { issCents, issWithheldCents, irrfCents, pisCents, cofinsCents, csllCents, inssCents, retainedCents, netCents: amountCents - retainedCents };
+}
+const mod11 = (digits) => { let s = 0, w = 2; for (let i = digits.length - 1; i >= 0; i--) { s += Number(digits[i]) * w; w = w === 9 ? 2 : w + 1; } const r = s % 11; return r < 2 ? 0 : 11 - r; };
+/**
+ * Chave de acesso da NFS-e nacional (50 posições): município (7) · ambiente (1) · tipo de inscrição (1: CPF, 2: CNPJ) ·
+ * inscrição (14, CPF com zeros à esquerda) · número da NFS-e (13) · ano e mês da emissão (AAMM) · código numérico (9) · DV.
+ * DV pelo módulo 11 (pesos 2 a 9) como o da NF-e — confira no manual do padrão nacional ao portar.
+ */
+export function nfseAccessKey({ cityCode, environment = 2, document, number, issuedOn, code }) {
+  const doc = onlyDigits(document);
+  const body = String(cityCode).padStart(7, "0") + String(environment) + (doc.length === 11 ? "1" : "2") + doc.padStart(14, "0") + String(number).padStart(13, "0") + issuedOn.slice(2, 4) + issuedOn.slice(5, 7) + String(code).padStart(9, "0");
+  if (!/^\d{49}$/.test(body)) throw new Error("dados da chave inválidos");
+  return body + mod11(body);
+}
+export const isNfseKey = (k) => /^\d{50}$/.test(String(k ?? "")) && mod11(k.slice(0, 49)) === Number(k[49]);
+
+// ------------------------------------------------------------------ comércio: maquininha de cartão
+export function validateCardMachine(m) {
+  const e = [];
+  if (!String(m?.name ?? "").trim()) ferr(e, "NAME_REQUIRED", "Nome da maquininha", "name");
+  for (const k of ["debitPct", "creditPct", "installmentPct"]) if (!(typeof m?.[k] === "number" && m[k] >= 0 && m[k] < 20)) ferr(e, "FEE_INVALID", "Taxa entre 0% e 20%", k);
+  for (const k of ["debitDays", "creditDays"]) if (m?.[k] != null && !(Number.isInteger(m[k]) && m[k] >= 0 && m[k] <= 60)) ferr(e, "DAYS_INVALID", "Prazo em dias (0 a 60)", k);
+  if (m?.anticipationMonthlyPct != null && !(typeof m.anticipationMonthlyPct === "number" && m.anticipationMonthlyPct >= 0 && m.anticipationMonthlyPct < 15)) ferr(e, "FEE_INVALID", "Taxa de antecipação ao mês", "anticipationMonthlyPct");
+  return e;
+}
+/**
+ * Recebíveis de uma venda no cartão: débito cai em `debitDays` (padrão D+1); crédito à vista em `creditDays` (D+30);
+ * parcelado: uma parcela a cada `creditDays` (D+30, D+60…), com a taxa de parcelado. Taxa sobre cada parcela.
+ * → [{ number, total, dueDate, grossCents, feeCents, netCents }]
+ */
+export function cardSaleSchedule({ amountCents, kind, installments = 1, saleDate }, m) {
+  const debitDays = m.debitDays ?? 1, creditDays = m.creditDays ?? 30;
+  if (kind === "DEBIT") { const fee = Math.round((amountCents * m.debitPct) / 100); return [{ number: 1, total: 1, dueDate: addDays(saleDate, debitDays), grossCents: amountCents, feeCents: fee, netCents: amountCents - fee }]; }
+  const pct = installments > 1 ? m.installmentPct : m.creditPct;
+  const base = Math.floor(amountCents / installments), rest = amountCents - base * installments;
+  return Array.from({ length: installments }, (_, i) => { const g = base + (i === 0 ? rest : 0), fee = Math.round((g * pct) / 100); return { number: i + 1, total: installments, dueDate: addDays(saleDate, creditDays * (i + 1)), grossCents: g, feeCents: fee, netCents: g - fee }; });
+}
+/** Antecipação: desconto de `monthlyPct` ao mês pro rata pelos dias que faltam, sobre o líquido. */
+export function anticipation(items, onDate, monthlyPct) {
+  const out = items.map((x) => { const days = Math.max(0, diffDays(onDate, x.dueDate)); const d = Math.round((x.netCents * monthlyPct * days) / 3000); return { ...x, days, discountCents: d, receiveCents: x.netCents - d }; });
+  return { items: out, netCents: out.reduce((s, x) => s + x.netCents, 0), discountCents: out.reduce((s, x) => s + x.discountCents, 0), receiveCents: out.reduce((s, x) => s + x.receiveCents, 0) };
+}
+
+// ------------------------------------------------------------------ clínica: faturamento de convênio e glosa
+export const CLAIM_FLOW = { OPEN: ["SENT", "CANCELED"], SENT: ["PAID", "CANCELED"], PAID: [], CANCELED: [] };
+export const canMoveClaim = (from, to) => (CLAIM_FLOW[from] ?? []).includes(to);
+/** Guia: { amountCents, glosas: [{ amountCents }], recoveries: [{ amountCents }] } → saldo esperado do convênio. */
+export function claimBalance(c) {
+  const glosa = (c.glosas ?? []).reduce((s, g) => s + g.amountCents, 0), recovered = (c.recoveries ?? []).reduce((s, r) => s + r.amountCents, 0);
+  return { billedCents: c.amountCents, glosaCents: glosa, recoveredCents: recovered, expectedCents: c.amountCents - glosa + recovered, openGlosaCents: glosa - recovered };
+}
+/** Glosa: valor positivo, motivo, e o total glosado não passa do faturado. Recurso recupera no máximo o glosado. */
+export function validateGlosa(c, g) {
+  const e = [], b = claimBalance(c);
+  if (!(Number.isInteger(g?.amountCents) && g.amountCents > 0)) ferr(e, "AMOUNT_INVALID", "Valor glosado em centavos", "amountCents");
+  else if (b.glosaCents + g.amountCents > c.amountCents) ferr(e, "GLOSA_ABOVE_BILLED", "A glosa passa do valor da guia", "amountCents");
+  if (!String(g?.reason ?? "").trim()) ferr(e, "REASON_REQUIRED", "Motivo da glosa (código e descrição do demonstrativo)", "reason");
+  return e;
+}
+export function validateRecovery(c, cents) {
+  const e = [], b = claimBalance(c);
+  if (!(Number.isInteger(cents) && cents >= 0)) ferr(e, "AMOUNT_INVALID", "Valor recuperado em centavos", "recoveredCents");
+  else if (cents > b.openGlosaCents) ferr(e, "RECOVERY_ABOVE_GLOSA", "Recupera no máximo o que foi glosado", "recoveredCents");
+  return e;
+}
+/** Índice de glosa por convênio: { billedCents, glosaCents, recoveredCents, netGlosaCents, ratePct } */
+export function glosaRate(claims) {
+  const t = claims.reduce((a, c) => { const b = claimBalance(c); a.billedCents += b.billedCents; a.glosaCents += b.glosaCents; a.recoveredCents += b.recoveredCents; return a; }, { billedCents: 0, glosaCents: 0, recoveredCents: 0 });
+  const net = t.glosaCents - t.recoveredCents;
+  return { ...t, netGlosaCents: net, ratePct: t.billedCents ? Math.round((net / t.billedCents) * 1000) / 10 : 0 };
+}
+
+// ------------------------------------------------------------------ perfis de segmento
+export const FIN_SEGMENTS = {
+  GENERAL: { label: "Empresa em geral", words: { customer: "cliente", customers: "clientes", income: "receita" }, on: [] },
+  SERVICES: { label: "Prestador de serviço", words: { customer: "cliente", customers: "clientes", income: "honorário" }, on: ["nfse", "nfse_on_payment", "retentions", "recurring"] },
+  RETAIL: { label: "Comércio (maquininha)", words: { customer: "cliente", customers: "clientes", income: "venda" }, on: ["card_machines", "anticipation", "budget"] },
+  CLINIC: { label: "Clínica (convênios)", words: { customer: "paciente", customers: "pacientes", income: "atendimento", insurer: "convênio" }, on: ["claims", "nfse", "budget"] },
+};
+export const finSegment = (id) => (FIN_SEGMENTS[id] ? { id, ...FIN_SEGMENTS[id] } : { id: "GENERAL", ...FIN_SEGMENTS.GENERAL });

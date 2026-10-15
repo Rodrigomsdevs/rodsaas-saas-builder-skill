@@ -54,3 +54,17 @@ Confira **usando o app** (API e front rodando), com: o owner (`FIN_ADMIN`), uma 
 - [ ] RLS: a segunda empresa não vê nada (API e telas)
 - [ ] `/rodsaas:verify -g "Financeiro"` verde (e a bateria completa sem regressão)
 - [ ] README do projeto: o que o Financeiro faz, papéis, como conectar a Stripe (Connect, webhook de contas conectadas, `stripe listen --forward-connect-to`), como importar OFX, o que ficou fora da v1
+
+## Operação avançada (`09`)
+- [ ] NFS-e pelo motor: serviço validado (código nacional, ISS 2–5%), tomador com documento, chave de 50 posições, retenções (ISS, IRRF, PCC, INSS; mínimo de R$ 10; Simples) baixando o lançamento sem mexer no saldo; uma nota por lançamento; cancelar
+- [ ] rateio em porcentagem e em centavos com soma exata; DRE e relatórios pelas partes; parcelas copiam
+- [ ] orçamento por mês e categoria; relatório com `OK`/`WARN`/`OVER`/`UNDER`/`NO_BUDGET`; aviso de estouro uma vez
+- [ ] cartão: fechamento e vencimento; compra no dia do fechamento vai para a próxima; parcelas nas faturas seguintes; fatura com rateio pelas categorias; fatura paga recusa compra; limite usado
+- [ ] mês travado: só mês terminado; criar, mudar, baixar, estornar, cancelar, transferir e conciliar no período → 409 `PERIOD_LOCKED`; destravar com motivo e histórico
+- [ ] exportação contábil com `ledgerCode`: partidas de receita, despesa, transferência e rateio; faltando listado; CSV do contador; envio com trava
+
+## Perfis (`10`)
+- [ ] perfil aplicado sem desligar nada; vocabulário
+- [ ] maquininha: cadastro com taxas e prazos; venda vira receita bruta + taxa por parcela; repasse baixa as duas; antecipação com desconto pro rata
+- [ ] convênio: guia, lote → receita com o prazo do convênio, glosa baixa o esperado, recurso recupera em nova receita, índice de glosa
+- [ ] prestador: receita quitada com serviço emite a NFS-e sozinha; falha avisa sem desfazer a baixa

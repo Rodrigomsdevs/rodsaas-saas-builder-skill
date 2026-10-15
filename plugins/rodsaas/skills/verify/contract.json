@@ -1,5 +1,5 @@
 {
-  "version": 23,
+  "version": 24,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2663,7 +2663,11 @@
         "/financeiro/conciliacao",
         "/financeiro/cobrancas",
         "/financeiro/configuracoes",
-        "/pagar/[token]"
+        "/pagar/[token]",
+        "/financeiro/orcamento",
+        "/financeiro/convenios",
+        "/financeiro/maquininhas",
+        "/financeiro/contas/[id]"
       ],
       "testids": [
         "fin-home",
@@ -2724,7 +2728,21 @@
         "pay-method",
         "pay-test-mode",
         "pay-simulate",
-        "pay-done"
+        "pay-done",
+        "fin-segment",
+        "fin-entry-nfse",
+        "fin-nfse-issue",
+        "fin-allocation-row",
+        "fin-budget-row",
+        "data-category",
+        "fin-card-invoice",
+        "data-ref",
+        "fin-locked",
+        "fin-lock-month",
+        "fin-card-receivable-row",
+        "fin-card-settle",
+        "fin-claim-row",
+        "fin-claim-glosa"
       ],
       "api": [
         {
@@ -2797,7 +2815,9 @@
             "amountCents",
             "dueDate",
             "competenceDate",
-            "installments"
+            "installments",
+            "allocations",
+            "service"
           ]
         },
         {
@@ -2932,6 +2952,163 @@
             "categoryId",
             "startDate"
           ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/entries/{id}/nfse",
+          "body": [
+            "service"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/fin/entries/{id}"
+        },
+        {
+          "method": "put",
+          "path": "/v1/fin/budgets",
+          "body": [
+            "month",
+            "items",
+            "copyFrom"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/budgets/report"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/cards/{accountId}/purchases",
+          "body": [
+            "description",
+            "categoryId",
+            "amountCents",
+            "date",
+            "installments"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/cards/{accountId}/invoices"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/period-lock",
+          "body": [
+            "month"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/period-lock/unlock",
+          "body": [
+            "month",
+            "reason"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/export/accounting"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/fin/accounts/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/fin/categories/{id}"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/fin/contacts/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/card-machines",
+          "body": [
+            "name",
+            "accountId",
+            "debitPct",
+            "creditPct",
+            "installmentPct"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/card-sales",
+          "body": [
+            "machineId",
+            "kind",
+            "installments",
+            "amountCents",
+            "saleDate"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/card-receivables"
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/card-receivables/settle",
+          "body": [
+            "machineId",
+            "date"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/card-receivables/anticipate",
+          "body": [
+            "machineId",
+            "date"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/claims",
+          "body": [
+            "insurerId",
+            "patientName",
+            "guideNumber",
+            "serviceDate",
+            "amountCents"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/claim-batches",
+          "body": [
+            "insurerId",
+            "claimIds"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/claims/{id}/glosa",
+          "body": [
+            "amountCents",
+            "reason"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/claims/{id}/appeal",
+          "body": [
+            "text"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/fin/claims/{id}/appeal-result",
+          "body": [
+            "recoveredCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/fin/reports/glosas"
         }
       ]
     },

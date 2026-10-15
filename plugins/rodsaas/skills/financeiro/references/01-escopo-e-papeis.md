@@ -69,6 +69,11 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | feature `fin_reports` (DRE, inadimplência, relatórios, exportação para a contabilidade) | — | ✅ | ✅ |
 | feature `fin_recurring` (recorrências) | — | ✅ | ✅ |
 | feature `fin_approvals` (aprovação de pagamentos) | — | ✅ | ✅ |
+| rateio, fatura de cartão, mês travado (`09`) | ✅ | ✅ | ✅ |
+| feature `fin_budget` (previsto × realizado, `09`) | — | ✅ | ✅ |
+| feature `fin_card_machines` (maquininhas, repasse e antecipação, `10`) | — | ✅ | ✅ |
+| feature `fin_claims` (convênios, lote, glosa e recurso, `10`) | — | ✅ | ✅ |
+| NFS-e (`09`) | com o add-on `fiscal` e a feature `fiscal` dele | | |
 
 Rebaixar não apaga nada: contas acima do limite ficam só leitura; cobranças pendentes continuam valendo até vencer (a baixa automática segue funcionando), mas não dá para criar novas; recorrências pausam.
 

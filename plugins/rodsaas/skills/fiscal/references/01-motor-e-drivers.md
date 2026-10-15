@@ -47,7 +47,8 @@ model FiscalRule {
 model FiscalDocument {
   id             String   @id @default(uuid())
   orgId          String
-  model          Int                      // 55 | 65 (NFS-e entra como "NFSE" no Financeiro)
+  kind           String   @default("NFE") // NFE | NFCE | NFSE
+  model          Int?                     // 55 | 65 (nulo na NFS-e)
   series         Int
   number         Int
   key            String                   // 44 dígitos; muda só o tpEmis na contingência
@@ -181,4 +182,4 @@ Responde na hora, sem rede. Regras fixas (o `/rodsaas:verify` depende delas):
 
 - **Provedores (Focus NFe, NFE.io, PlugNotas, Nuvem Fiscal…)**: recebem JSON (ou o XML) e assinam do lado deles com o certificado enviado uma vez; quase todos são assíncronos (webhook ou consulta). O driver traduz `doc.lines/totals` para o formato do provedor, guarda o id do provedor em `protocol` até autorizar, e mapeia os códigos de retorno para `REJECTED`/`DENIED`/`UNAVAILABLE`. Leia a documentação atual de cada um antes; credenciais: token por ambiente.
 - **SEFAZ direta (`sefaz`)**: assinatura XMLDSig do `infNFe` com o certificado A1 (PFX + senha), SOAP 1.2 com TLS mútuo nos web services do autorizador da UF (próprio ou SVRS/SVAN), serviços `NFeAutorizacao4`/`NFeRetAutorizacao4`/`NFeRecepcaoEvento4`/`NFeInutilizacao4`/`NFeStatusServico4`/`NFeConsultaProtocolo4`, contingência SVC-AN/SVC-RS para NF-e e offline para NFC-e; validação com os XSDs oficiais antes de enviar. Endereços e versões mudam por nota técnica: buscar no Portal Nacional da NF-e na hora de escrever.
-- **NFS-e**: o Financeiro usa este motor com `model: "NFSE"`, regras de ISS por serviço (código de tributação nacional, alíquota, retenção) e um driver do padrão nacional (ou de provedor). O contrato do driver é o mesmo (`authorize`, `cancel`, `status`); chave, CFOP e QR são da NF-e e não se aplicam.
+- **NFS-e**: o Financeiro usa este motor com **`kind: "NFSE"`** (o documento ganha `kind`: `"NFE"` · `"NFCE"` · `"NFSE"`; `model` fica nulo na NFS-e), regras de ISS por serviço (código de tributação nacional, alíquota, retenção) e um driver do padrão nacional (DPS → NFS-e no Ambiente de Dados Nacional) ou de provedor. O emitente ganha a **inscrição municipal** (`im`). O contrato do driver é o mesmo (`authorize`, `cancel`, `status`); a chave de acesso é a nacional de 50 posições (`nfseAccessKey` no `financeiro-lib`); CFOP e QR são da NF-e e não se aplicam. Detalhes em `skills/financeiro/references/09-operacao-avancada.md`.

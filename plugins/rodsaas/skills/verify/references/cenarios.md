@@ -177,3 +177,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | NFC-e do PDV | flag ignorada; CPF da nota trocado pelo cliente do cadastro; nota sem `ref` |
 | perfis | balança sem conferir o dígito; quantidade da balança por R$ 1,00; unidade de venda sem converter; múltiplo e mínimo só no front; trocar de perfil desliga o anterior |
 | telas | comissão sem o valor; lotes fora da ordem de validade; perfil escolhido sem salvar |
+
+## Financeiro · operação (`31-financeiro-operacao.spec.ts`, preset `financeiro`)
+
+| Teste | Causas comuns |
+|---|---|
+| NFS-e | serviço sem validar; tomador sem documento aceito; retenção ignorada ou lançada como dinheiro numa conta; Simples sofrendo IRRF/PCC; nota duplicada; documento sem `ref` no motor |
+| rateio | partes somando 90% aceitas; centavo perdido no 33,33% × 3; DRE pela categoria principal em vez das partes; baixa parcial não proporcional |
+| orçamento | cancelado contando; rateio inteiro numa categoria; receita tratada como despesa (meta batida vira estouro); cópia do mês trazendo o mês errado |
+| cartão | compra no dia do fechamento na fatura que fecha; centavo na última parcela; fatura sem rateio; limite contando o que já foi pago; compra entrando em fatura paga |
+| mês travado | dá para travar o mês corrente; baixa, estorno ou cancelamento passam no período; recebimento de hoje bloqueado só porque a competência é antiga; destravar sem motivo |
+| contador | débito e crédito trocados na despesa; período ignorado; transferência fora; data sem DD/MM/AAAA |
+| maquininha | taxa à vista no parcelado; taxa sem lançamento (DRE sem a despesa); repasse baixando o que ainda não caiu; antecipação sem pro rata |
+| convênio | guia repetida; prazo fixo em vez do convênio; guia enviada duas vezes; glosa sem baixar o lote; glosa somada passando da guia; recurso recuperando mais que o glosado; índice sem descontar o recuperado |
+| prestador | nota emitida na baixa parcial; perfil sem ligar a emissão na baixa |
+| telas | orçamento sem o estado; conta do cartão sem as faturas; perfil sem salvar; guia faltando |

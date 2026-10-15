@@ -153,6 +153,9 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 | `fin.import.done` | importação de extrato terminou | quem importou | statement_import | `/financeiro/conciliacao?conta=<id>` |
 | `fin.stripe.account` | `account.updated` mudou o status (pendência, restrição, ativa) | `FIN_ADMIN` | organization | `/financeiro/configuracoes/cobrancas` |
 | `fin.subscription.past_due` | `invoice.payment_failed` | `FIN_ADMIN` e `FIN` | subscription | `/financeiro/assinaturas` |
+| `fin.budget.over` | lançamento faz a categoria passar do orçado no mês (uma vez por categoria e mês) | `FIN_ADMIN` | category · `budget_over` (`groupUrl` `/financeiro/orcamento`) | `/financeiro/orcamento?mes=<AAAA-MM>` |
+| `fin.nfse.failed` | emissão automática da NFS-e na baixa falhou (a baixa fica) | `FIN_ADMIN` | entry | `/financeiro/lancamentos/<id>` |
+| `fin.card.invoice_closed` | job 6 h: fatura do cartão fechou ontem | `FIN_ADMIN` e `FIN` | entry | `/financeiro/contas/<cartão>` |
 
 `canSee`: ter papel no Financeiro. Tirar o papel → `retract` das notificações do app dessa pessoa. Nunca coloque saldo de conta no aviso.
 

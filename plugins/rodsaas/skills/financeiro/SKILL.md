@@ -1,6 +1,6 @@
 ---
 name: financeiro
-description: Preset que soma ao projeto rodsaas o app Financeiro, a gestão financeira da empresa no estilo Conta Azul/Omie/Nibo — contas a pagar e a receber com parcelas, recorrência, baixa parcial com juros, multa e desconto, contas bancárias, caixa e cartão com saldo, transferências, plano de contas com centros de custo, fluxo de caixa realizado e previsto, DRE gerencial, inadimplência, conciliação bancária por OFX/CSV com sugestões e regras automáticas, cobranças pela Stripe na conta da própria empresa (Connect: boleto, Pix e cartão, link de pagamento, baixa automática pelo webhook, tarifa lançada, régua de lembretes, cobrança recorrente), aprovação de pagamentos e exportação para a contabilidade. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir financeiro, contas a pagar, contas a receber, fluxo de caixa, DRE, conciliação bancária, OFX, cobrança, boleto, Pix, link de pagamento, inadimplência, ou chamar /rodsaas:financeiro.
+description: Preset que soma ao projeto rodsaas o app Financeiro, a gestão financeira da empresa no estilo Conta Azul/Omie/Nibo — contas a pagar e a receber com parcelas, recorrência, baixa parcial com juros, multa e desconto, contas bancárias, caixa e cartão com saldo, transferências, plano de contas com centros de custo, fluxo de caixa realizado e previsto, DRE gerencial, inadimplência, conciliação bancária por OFX/CSV com sugestões e regras automáticas, cobranças pela Stripe na conta da própria empresa (Connect: boleto, Pix e cartão, link de pagamento, baixa automática pelo webhook, tarifa lançada, régua de lembretes, cobrança recorrente), aprovação de pagamentos e exportação para a contabilidade; NFS-e pelo motor fiscal com retenções, rateio em categorias e centros de custo, previsto × realizado, fatura de cartão de crédito, mês travado e exportação contábil em partidas dobradas; perfis de prestador de serviço (nota na baixa), comércio (maquininha com taxa, repasse e antecipação) e clínica (convênio com lote, glosa e recurso). Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir financeiro, contas a pagar, contas a receber, fluxo de caixa, DRE, conciliação bancária, OFX, cobrança, boleto, Pix, link de pagamento, inadimplência, nota de serviço, NFS-e, orçamento, rateio, cartão de crédito, maquininha, convênio, glosa, ou chamar /rodsaas:financeiro.
 ---
 
 # rodsaas · financeiro (app Financeiro)
@@ -42,7 +42,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos (ou a wor
 Se `rodsaas.json → presets` já tem `financeiro` (ou existe `api/src/modules/financeiro`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 6 (é onde mais se simplifica: dinheiro em `Float`/`Decimal` no JS, parcelas que somam um centavo a mais, saldo guardado num campo que desencontra, vencido que não vira "vencido" sozinho, OFX importado duas vezes, cobrança marcada como paga pelo retorno do navegador em vez do webhook).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 9 e 10 se o Financeiro foi instalado antes da versão 0.31 (NFS-e, rateio, orçamento, cartão, mês travado, exportação contábil e perfis não existiam) e depois pelas fases 3, 4 e 6 (é onde mais se simplifica: dinheiro em `Float`/`Decimal` no JS, parcelas que somam um centavo a mais, saldo guardado num campo que desencontra, vencido que não vira "vencido" sozinho, OFX importado duas vezes, cobrança marcada como paga pelo retorno do navegador em vez do webhook).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/08-checklist.md` e o `/rodsaas:verify` (`-g "Financeiro"`).
 
@@ -62,8 +62,11 @@ Se `rodsaas.json → presets` já tem `financeiro` (ou existe `api/src/modules/f
 | Taxa da plataforma | nenhuma por padrão (`FIN_APPLICATION_FEE_CENTS=0`); o SaaS pode cobrar um valor fixo por cobrança paga (aparece para a empresa antes de conectar) |
 | Planos (modelo de planos) | Free: 2 contas, lançamentos, parcelas, contatos, fluxo de caixa; Pro: 10 contas, + conciliação, cobranças, DRE e relatórios, recorrências, aprovação, exportação; Business: contas ilimitadas |
 | Workstation | app **por empresa** (catálogo: R$ 49/mês + as tarifas da Stripe nas cobranças, pagas pela empresa direto à Stripe) |
+| NFS-e | pelo add-on `fiscal` (driver falso até escolher o provedor ou o padrão nacional); retenções baixam o lançamento; emissão na baixa só no perfil prestador |
+| Mês travado | nenhum por padrão; o `FIN_ADMIN` trava depois de mandar ao contador (ou o envio com `lock: true`) |
+| Perfil | o segmento do onboarding ou a pergunta na primeira abertura; `GENERAL` se pular |
 
-Fora da v1 (registre no README do projeto): emissão de nota fiscal (NFS-e/NF-e), boleto registrado direto no banco (CNAB) e Open Finance, multimoeda, orçamento previsto × realizado por categoria, rateio de um lançamento em várias categorias, controle de estoque/custo médio, folha de pagamento, conciliação de cartão de crédito com a operadora, Pix Automático (indisponível no Brasil pela Stripe).
+Fora da v1 (registre no README do projeto): NF-e de venda pelo Financeiro (é do ERP), boleto registrado direto no banco (CNAB) e Open Finance, multimoeda, controle de estoque/custo médio, folha de pagamento, leitura automática da agenda de recebíveis da adquirente (a maquininha é cadastrada com as taxas), envio do lote do convênio no padrão TISS (o lote é controlado aqui; o XML sai do sistema da clínica), SPED e escrituração contábil completa (a exportação é para o contador), Pix Automático (indisponível no Brasil pela Stripe).
 
 ## Fases
 
@@ -83,7 +86,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(fin
    - *Pronto quando*: onboarding do Connect com status da conta, `validateCharge` antes de criar, Checkout na conta da empresa (boleto, Pix, cartão), baixa **só pelo webhook** (idempotente pelo id do evento), tarifa lançada, régua pelo `reminderDue`, recorrente cria um lançamento por fatura paga, modo de teste com "simular pagamento".
 7. **Telas** — Início, lançamentos, detalhe, contas, fluxo, DRE, relatórios, conciliação, cobranças, assinaturas, contatos, configurações, página pública. → `references/07-telas.md`
    - *Pronto quando*: todas as rotas e testids da seção "Contrato testável", celular sem rolagem lateral, totais sempre visíveis nas listas.
-8. **Fechamento** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do Financeiro: `-g "Financeiro"`; exige os formatos ★ de `03-api.md` e os testids de `07-telas.md`), README do projeto.
+8. **Fechamento do núcleo** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do Financeiro: `-g "Financeiro"`; exige os formatos ★ de `03-api.md` e os testids de `07-telas.md`), README do projeto.
+9. **Operação avançada** — NFS-e pelo motor fiscal com retenções, rateio, previsto × realizado, fatura de cartão, mês travado, exportação ao contador. → `references/09-operacao-avancada.md`
+   - *Pronto quando*: receita com serviço emite a NFS-e com a chave de 50 posições e as retenções baixam o lançamento; rateio com soma exata entra na DRE; orçamento mostra estouro e alerta; compra no cartão cai na fatura certa e parcela nas seguintes; mês travado recusa criar, baixar e estornar; exportação contábil com as partidas e o que falta mapear.
+10. **Perfis de segmento** — prestador de serviço (nota na baixa), comércio (maquininha), clínica (convênio e glosa). → `references/10-perfis-de-segmento.md`
+   - *Pronto quando*: escolher o perfil liga o que ele pede; venda no cartão vira receita bruta e taxa nas datas de repasse, com baixa e antecipação; lote do convênio vira receita, glosa baixa o esperado e o recurso recupera; receita quitada do prestador emite a nota sozinha. Feche com `/rodsaas:verify -g "Financeiro"` (inclui `31-financeiro-operacao.spec.ts`).
 
 ## Princípios
 
@@ -111,4 +118,6 @@ O que foi adicionado (app, telas, página pública de pagamento), papéis, plano
 | `references/06-cobrancas-stripe.md` | Fase 6 |
 | `references/07-telas.md` | Fase 7: rotas do front, telas, estados, contrato de testids |
 | `references/08-checklist.md` | Fase 8 |
-| `scripts/financeiro-lib.mjs` + `financeiro-lib.test.mjs` | datas com dia âncora, parcelas, recorrência, situação, multa/juros, baixa, saldo, fluxo de caixa, plano de contas e DRE, inadimplência, OFX/CSV, deduplicação, conciliação, regras, CPF/CNPJ, meios da Stripe, régua, CSV: porte para TS com os testes |
+| `references/09-operacao-avancada.md` | Fase 9: NFS-e pelo motor, rateio, previsto × realizado, fatura de cartão, mês travado, exportação ao contador |
+| `references/10-perfis-de-segmento.md` | Fase 10: prestador de serviço, comércio com maquininha, clínica com convênio |
+| `scripts/financeiro-lib.mjs` + `financeiro-lib.test.mjs` | datas com dia âncora, parcelas, recorrência, situação, multa/juros, baixa, saldo, fluxo de caixa, plano de contas e DRE, inadimplência, OFX/CSV, deduplicação, conciliação, regras, CPF/CNPJ, meios da Stripe, régua, CSV, rateio, orçamento, fatura de cartão, mês travado, partidas contábeis, NFS-e (serviço, retenções, chave), maquininha, glosa, perfis: porte para TS com os testes |

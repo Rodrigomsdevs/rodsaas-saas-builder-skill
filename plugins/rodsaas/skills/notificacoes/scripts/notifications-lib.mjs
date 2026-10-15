@@ -183,6 +183,9 @@ export const PRESET_TYPES = [
   { type: "fin.import.done", appId: "financeiro", label: "Extrato importado", template: "Extrato de {title} importado: {data.fresh} novas transações, {data.pending} para conciliar", group: { by: "none" } },
   { type: "fin.stripe.account", appId: "financeiro", label: "Conta Stripe", template: "A conta Stripe da empresa {data.status}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "fin.subscription.past_due", appId: "financeiro", label: "Assinatura de cliente atrasada", template: "A assinatura {title} de {data.customer} não foi paga", group: { by: "none" } },
+  { type: "fin.budget.over", appId: "financeiro", label: "Orçamento estourado", template: { one: "{title} passou do orçado em {data.month} ({data.used}% do orçamento)", many: "{count} categorias passaram do orçado" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "fin.nfse.failed", appId: "financeiro", label: "NFS-e não emitida", template: "A nota de serviço de {title} não foi emitida: {data.reason}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "fin.card.invoice_closed", appId: "financeiro", label: "Fatura do cartão fechou", template: "A fatura de {title} fechou em {data.total}, vence em {data.dueOn}", group: { by: "none" } },
   // comercial
   { type: "com.approval.requested", appId: "comercial", label: "Desconto para aprovar", template: { one: "{actor} pediu aprovação de {data.discount} de desconto em {title} ({data.amount})", many: "{count} propostas aguardando a sua aprovação" }, group: { by: "key", windowMinutes: 10 }, defaultEmail: "IMMEDIATE" },
   { type: "com.approval.decided", appId: "comercial", label: "Desconto aprovado ou recusado", template: "{actor} {data.verb} o desconto de {title}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
