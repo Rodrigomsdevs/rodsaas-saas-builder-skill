@@ -66,6 +66,19 @@ Confira **usando o app** (API e front rodando), com: o owner (`RH_ADMIN`), uma p
 - [ ] quadro, admissões/desligamentos, rotatividade, absenteísmo, tempo de casa, férias vencidas, documentos vencendo (RH e gestor da equipe)
 - [ ] fechamento do mês com eventos do mês, alterações e reembolsos; CSV abre certo no Excel (acentos, `;`); envio ao contador por e-mail
 
+## Operação avançada (`10`)
+- [ ] escala: turnos (inclusive noturno), grade semanal, copiar semana, bloqueios (cruzados, férias/ausência/folga) e avisos (interjornada, semana longa, 7º dia), cobertura, publicar com aviso, minha escala no celular
+- [ ] vagas: página pública com formulário, consentimento LGPD, currículo, sem candidatura repetida, quadro por etapa, funil e tempo até contratar, contratado abre a pré-admissão, reprovado recebe e-mail
+- [ ] comunicados: público por área/local/pessoas, ciência idempotente, pendentes, cobrar ciência, aviso ao gestor depois do prazo
+- [ ] treinamentos: catálogo com validade, regras por cargo/área, registro com certificado, matriz, aviso 30 dias antes
+- [ ] celebrações: aniversários (respeita quem esconde) e tempo de casa no Início
+
+## Perfis (`11`)
+- [ ] perfil aplicado sem desligar nada, vocabulário trocado
+- [ ] indústria: NRs com a norma vigente conferida, catálogo de EPI com CA, entrega com assinatura, ficha de EPI em PDF, trocas
+- [ ] saúde: registro no conselho com validade, painel de vencimentos, Agenda não oferece quem está vencido
+- [ ] varejo: rodízio com domingo (convenção coletiva conferida), folguista, aplicar na escala
+
 ## Telas e qualidade
 - [ ] todas as rotas e testids do contrato (`08-telas.md`)
 - [ ] Início diferente para colaborador, gestor e RH

@@ -152,6 +152,9 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 | `rh.birthday` | job 8 h | a equipe da pessoa (opção da empresa; quem escondeu o aniversário não entra) | employee · `birthday` | `/pessoas` |
 
 `canSee`: a regra de visibilidade do próprio Pessoas (pedido: quem pediu, aprovadores e RH; ficha: `visibleGroups`). Nunca coloque salário, CID, motivo de atestado ou nota de avaliação no texto do aviso nem no e-mail. A pesquisa nunca avisa "fulano respondeu".
+| `rh.schedule.published` | escala publicada (`publish: true`) | cada pessoa da escala com login | schedule · employeeId | `/pessoas/minha-escala` |
+| `rh.announcement` | comunicado novo (e cobrança de ciência) | destinatários do comunicado com login | announcement | `/pessoas/comunicados` |
+| `rh.training.expiring` | treinamento ou registro no conselho vence em 30 dias (job diário) | a pessoa e o gestor | training · employeeId | `/pessoas/treinamentos` |
 
 ### Financeiro (`financeiro`)
 

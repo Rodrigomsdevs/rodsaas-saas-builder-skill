@@ -1,5 +1,5 @@
 {
-  "version": 28,
+  "version": 29,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2901,7 +2901,14 @@
         "/pessoas/holerites",
         "/pessoas/clima",
         "/pessoas/clima/[id]/responder",
-        "/pre-admissao/[token]"
+        "/pre-admissao/[token]",
+        "/pessoas/configuracoes",
+        "/pessoas/escala",
+        "/pessoas/minha-escala",
+        "/pessoas/comunicados",
+        "/pessoas/vagas",
+        "/pessoas/treinamentos",
+        "/vagas/[siteKey]/[slug]"
       ],
       "testids": [
         "rh-home",
@@ -2949,7 +2956,29 @@
         "survey-done",
         "preadmission-step",
         "preadmission-doc",
-        "preadmission-submit"
+        "preadmission-submit",
+        "rh-segment",
+        "rh-schedule",
+        "rh-schedule-cell",
+        "data-employee",
+        "data-conflict",
+        "rh-candidate-card",
+        "data-stage",
+        "job-apply-form",
+        "job-apply-submit",
+        "job-apply-done",
+        "rh-announcement",
+        "data-acked",
+        "rh-announcement-ack",
+        "rh-training-cell",
+        "rh-celebration",
+        "rh-epi-delivery",
+        "rh-epi-due",
+        "data-overdue",
+        "rh-council",
+        "rh-rotation",
+        "rh-rotation-cell",
+        "data-covered-by"
       ],
       "api": [
         {
@@ -3151,6 +3180,208 @@
         {
           "method": "post",
           "path": "/v1/public/rh/admissions/{token}/submit"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/segment"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/rh/segment",
+          "body": [
+            "segment"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/shifts",
+          "body": [
+            "name",
+            "start",
+            "end",
+            "breakMinutes"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/shifts"
+        },
+        {
+          "method": "put",
+          "path": "/v1/rh/shift-needs",
+          "body": [
+            "needs"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/rh/schedule",
+          "body": [
+            "assignments",
+            "publish"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/schedule"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/me/schedule"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/jobs",
+          "body": [
+            "title",
+            "description",
+            "departmentId",
+            "questions"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/rh/jobs/{id}",
+          "body": [
+            "status"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/jobs/{id}/candidates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/candidates/{id}/move",
+          "body": [
+            "stage",
+            "note",
+            "notify"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/jobs/{siteKey}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/jobs/{siteKey}/{slug}/apply",
+          "body": [
+            "name",
+            "email",
+            "phone",
+            "answers",
+            "consent"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/announcements",
+          "body": [
+            "title",
+            "body",
+            "audience",
+            "requireAck",
+            "ackDueDate"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/announcements"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/announcements/{id}/ack"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/announcements/{id}/acks"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/trainings",
+          "body": [
+            "name",
+            "code",
+            "validityMonths"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/rh/training-rules",
+          "body": [
+            "rules"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/trainings/{id}/records",
+          "body": [
+            "employeeId",
+            "completedOn"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/trainings/compliance"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/me/trainings"
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/celebrations"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/epis",
+          "body": [
+            "name",
+            "ca",
+            "caExpiresOn",
+            "lifeDays"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/employees/{id}/epi-deliveries",
+          "body": [
+            "deliveredOn",
+            "items",
+            "signature"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/epi-replacements"
+        },
+        {
+          "method": "put",
+          "path": "/v1/rh/employees/{id}/council",
+          "body": [
+            "council",
+            "number",
+            "uf",
+            "expiresOn",
+            "required"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/rh/councils"
+        },
+        {
+          "method": "post",
+          "path": "/v1/rh/day-off-rotation",
+          "body": [
+            "employeeIds",
+            "start",
+            "weeks",
+            "sundayEvery",
+            "folguistaIds",
+            "apply"
+          ]
         }
       ]
     },

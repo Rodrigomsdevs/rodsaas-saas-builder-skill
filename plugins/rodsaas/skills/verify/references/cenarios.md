@@ -254,3 +254,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | base pública | slug repetido; filha fora do site; não publicada aberta; campos internos expostos; voto duplicado |
 | atas | to-do marcado vira tarefa; responsável que não é membro; rodar de novo duplica; concluir a tarefa não marca o to-do |
 | telas | perfil sem salvar; comentário pela tela sem gravar; restaurar sem efeito; dia do calendário vazio; voto sem gravar |
+
+## Pessoas · operação (`36-pessoas-operacao.spec.ts`, preset `rh`)
+
+| Teste | Causas comuns |
+|---|---|
+| escala | turnos que se cruzam aceitos; escalar em férias, ausência ou folga; interjornada sem aviso; cobertura sem as necessidades; colaborador vendo ou montando a escala dos outros |
+| vagas | candidatura sem consentimento ou sem sobrenome; duplicada por e-mail em outra caixa; etapa pulada; vaga fechada aceitando; contratado sem os dados da admissão; funil contando só a etapa atual |
+| comunicados | público ignorado (todo mundo recebe); quem não recebeu dá ciência; ciência duplicada; pendentes errados |
+| treinamentos | registro antigo valendo; vencendo tratado como vencido (ou nunca vencendo); conclusão no futuro; regra por área ignorada |
+| celebrações | admitido no dia contando 0 anos; aniversário sumindo |
+| indústria | NRs duplicadas ao aplicar de novo; CA vencido aceito; ficha sem assinatura; troca vencida não marcada |
+| saúde | conselho fora da lista aceito; vencido atendendo; filtro ignorado |
+| varejo | rodízio sem domingo; folguista cobrindo na própria folga; começo fora da segunda; folga aplicada sem bloquear a escala |
+| telas | perfil sem salvar; ciência pela tela sem gravar; conflito sem marca na grade; formulário da vaga sem mostrar o erro |

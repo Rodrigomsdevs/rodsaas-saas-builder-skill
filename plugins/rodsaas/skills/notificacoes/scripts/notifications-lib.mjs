@@ -182,6 +182,9 @@ export const PRESET_TYPES = [
   { type: "rh.survey.open", appId: "pessoas", label: "Pesquisa para responder", template: "Responda {title} até {data.when} (anônima)", group: { by: "none" } },
   { type: "rh.expense.paid", appId: "pessoas", label: "Reembolso pago", template: "O reembolso de {title} ({data.amount}) foi pago", group: { by: "none" } },
   { type: "rh.birthday", appId: "pessoas", label: "Aniversários e tempo de casa", template: { one: "Hoje é aniversário de {title}", many: "{count} aniversários hoje" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "OFF" },
+  { type: "rh.schedule.published", appId: "pessoas", label: "Escala publicada", template: "{actor} publicou a sua escala", group: { by: "key", windowMinutes: 60 } },
+  { type: "rh.announcement", appId: "pessoas", label: "Comunicado", template: "Novo comunicado: {title}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "rh.training.expiring", appId: "pessoas", label: "Treinamento ou registro vencendo", template: { one: "{title} vence em {data.days} dias", many: "{count} treinamentos vencendo" }, group: { by: "key", windowMinutes: 1440 } },
   // financeiro
   { type: "fin.due_today", appId: "financeiro", label: "Vencimentos do dia", template: "Hoje vencem {data.payableCount} contas a pagar ({data.payable}); {data.overdueCount} a receber venceram ontem", group: { by: "none" }, defaultEmail: "DAILY" },
   { type: "fin.charge.paid", appId: "financeiro", label: "Cobrança recebida", template: { one: "{data.customer} pagou {title} ({data.amount}) por {data.method}", many: "{count} cobranças recebidas" }, group: { by: "key", windowMinutes: 30 } },

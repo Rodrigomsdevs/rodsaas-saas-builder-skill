@@ -24,6 +24,7 @@ test("suggestApps: landing primeiro, depois o segmento, só disponíveis", () =>
   assert.deepEqual(["saude", "pet", "educacao", "agencia"].map(W.formsProfileFor), ["HEALTH", "HEALTH", "EVENTS", null], "Forms: perfil pelo segmento");
   assert.deepEqual(["escritorio", "agencia", "tecnologia", "saude", "outro"].map(W.taskProfileFor), ["ACCOUNTING", "AGENCY", "AGENCY", null, null], "Tarefas: perfil pelo segmento");
   assert.deepEqual(["industria", "escritorio", "tecnologia", "agencia", "saude"].map(W.pageProfileFor), ["PROCESSES", "PROCESSES", "KNOWLEDGE_BASE", "MEETINGS", null], "Páginas: perfil pelo segmento");
+  assert.deepEqual(["industria", "saude", "odonto", "comercio", "agencia"].map(W.peopleProfileFor), ["INDUSTRY", "HEALTH", "HEALTH", "RETAIL", null], "Pessoas: perfil pelo segmento");
   const many = W.suggestApps({ segment: "saude", available: AVAIL, preselected: ["crm", "forms", "agenda", "helpdesk", "tarefas"] });
   assert.equal(many.selected.length, 5, "tudo o que veio da landing fica marcado");
 });

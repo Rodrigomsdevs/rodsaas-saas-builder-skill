@@ -1,6 +1,6 @@
 ---
 name: rh
-description: Preset que soma ao projeto rodsaas o app Pessoas, um RH completo no estilo Factorial/Sólides/BambooHR/Gupy — colaboradores com ficha, organograma, cargos e áreas; férias pela CLT (períodos aquisitivo e concessivo, faltas, fracionamento, venda de 1/3, coletivas, vencidas) e ausências legais; motor de aprovações (gestor, papel, valor, delegação) para férias, despesas e solicitações; admissão com link de pré-admissão e checklists de entrada e saída; documentos com validade e ciência, holerites em lote casados pelo CPF; desempenho (ciclos, 9-box, 1:1, feedback, PDI, metas/OKR); clima e eNPS anônimos; despesas com reembolso; autoatendimento; indicadores e fechamento do mês para a contabilidade; LGPD por grupo de campos. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir RH, gestão de pessoas, colaboradores, férias, ausências, aprovações, admissão, onboarding, holerites, avaliação de desempenho, OKR, pesquisa de clima, eNPS, despesas, reembolso, ou chamar /rodsaas:rh.
+description: Preset que soma ao projeto rodsaas o app Pessoas, um RH completo no estilo Factorial/Sólides/BambooHR/Gupy — colaboradores com ficha, organograma, cargos e áreas; férias pela CLT (períodos aquisitivo e concessivo, faltas, fracionamento, venda de 1/3, coletivas, vencidas) e ausências legais; motor de aprovações (gestor, papel, valor, delegação) para férias, despesas e solicitações; admissão com link de pré-admissão e checklists de entrada e saída; documentos com validade e ciência, holerites em lote casados pelo CPF; desempenho (ciclos, 9-box, 1:1, feedback, PDI, metas/OKR); clima e eNPS anônimos; despesas com reembolso; autoatendimento; indicadores e fechamento do mês para a contabilidade; LGPD por grupo de campos — e a operação avançada: escala de trabalho (interjornada, descanso semanal, cobertura), recrutamento simples com página de vagas, comunicados com ciência, treinamentos com validade e mural de celebrações, com perfis de indústria (EPI e NR), saúde (registro no conselho) e varejo (rodízio de folgas e folguista). Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir RH, gestão de pessoas, colaboradores, férias, ausências, aprovações, admissão, onboarding, holerites, avaliação de desempenho, OKR, pesquisa de clima, eNPS, despesas, reembolso, ou chamar /rodsaas:rh.
 ---
 
 # rodsaas · rh (app Pessoas)
@@ -44,7 +44,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos (ou a wor
 Se `rodsaas.json → presets` já tem `rh` (ou existe `api/src/modules/rh`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 7 (é onde mais se simplifica: saldo de férias "30 por ano" sem período aquisitivo nem faltas, aprovação fixa no gestor sem fallback nem delegação, salário visível para o gestor, pesquisa com `userId` na resposta).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 10 e 11 se o Pessoas foi instalado antes da versão 0.36 (escala, vagas, comunicados, treinamentos, celebrações e perfis não existiam) e depois pelas fases 3, 4 e 7 (é onde mais se simplifica: saldo de férias "30 por ano" sem período aquisitivo nem faltas, aprovação fixa no gestor sem fallback nem delegação, salário visível para o gestor, pesquisa com `userId` na resposta).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/09-checklist.md` e o `/rodsaas:verify` (`-g "RH"`).
 
@@ -64,11 +64,13 @@ Se `rodsaas.json → presets` já tem `rh` (ou existe `api/src/modules/rh`), rod
 | Pesquisas | anônimas por padrão, resultado só com **5+ respostas** por recorte, comentários sem identificação |
 | Avaliação | escala 1–5 com competências e peso, autoavaliação + gestor (pares e 360 opcionais), resultado liberado pelo RH |
 | Despesas | categorias prontas (refeição, transporte, hospedagem, km a R$ 1,20, outros); recibo obrigatório acima de R$ 50; despesas de até 90 dias |
-| Fora do Pessoas | **ponto eletrônico** (outro app, Portaria 671/2021), **folha de pagamento e eSocial** (ficam com a contabilidade: o Pessoas exporta o fechamento do mês), **recrutamento** (app Recrutamento; a admissão já recebe o candidato aprovado) |
+| Fora do Pessoas | **ponto eletrônico** (outro app, Portaria 671/2021: a escala do Pessoas é o planejado, não a marcação), **folha de pagamento e eSocial** (ficam com a contabilidade: o Pessoas exporta o fechamento do mês) |
+| Perfil | `GENERAL`; a workstation escolhe pelo segmento (indústria, saúde, varejo) — `references/11-perfis-de-segmento.md` |
+| Escala | bloqueia turnos que se cruzam e escalar em férias/ausência/folga; avisa interjornada abaixo de 11 h, semana acima da jornada e sétimo dia sem folga |
 | Planos (modelo de planos) | Free: 10 colaboradores, base + férias + documentos + holerites + aprovações padrão; Pro: 200 colaboradores, + desempenho, metas, clima, despesas, fluxos personalizados, pré-admissão, fechamento; Business: ilimitado |
 | Workstation | **Suíte RH**: R$ 5 por colaborador ativo/mês, mínimo R$ 79, tudo incluído |
 
-Fora da v1 (registre no README do projeto): ponto e banco de horas calculado, folha/eSocial/FGTS Digital, benefícios com operadora (VR/VA, plano de saúde), assinatura eletrônica com validade jurídica (o "li e concordo" é ciência, não assinatura ICP), OCR de recibos, cartão corporativo, recrutamento, pesquisa com IA, app nativo (o autoatendimento é web responsivo e PWA).
+Fora da v1 (registre no README do projeto): ponto e banco de horas calculado, folha/eSocial/FGTS Digital, benefícios com operadora (VR/VA, plano de saúde), assinatura eletrônica com validade jurídica (o "li e concordo" é ciência, não assinatura ICP), OCR de recibos, cartão corporativo, ATS completo (testes, triagem por IA, portais de vagas), pesquisa com IA, app nativo (o autoatendimento é web responsivo e PWA).
 
 ## Fases
 
@@ -90,7 +92,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(rh)
    - *Pronto quando*: ciclo com fases (`currentPhase`), avaliações geradas por pessoa e avaliador, nota ponderada, 9-box na calibração, resultado só depois de liberado, 1:1 com nota privada do gestor, metas com `krProgress`/`goalStatus`, pesquisa que grava participação e resposta em tabelas separadas, resultado pelo `groupResults` (mínimo 5) e eNPS.
 8. **Telas, indicadores e fechamento** — Início por papel, todas as telas do app, relatórios (quadro, rotatividade, absenteísmo, aniversários), fechamento do mês para a contabilidade. → `references/08-telas.md`
    - *Pronto quando*: todas as rotas e testids da seção "Contrato testável", Início diferente para colaborador, gestor e RH, celular sem rolagem lateral, fechamento do mês com CSV e envio por e-mail.
-9. **Fechamento** — `references/09-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do RH: `-g "RH"`; exige os formatos ★ de `03-api.md` e os testids de `08-telas.md`), README do projeto.
+9. **Fechamento do núcleo** — `references/09-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do RH: `-g "RH"`; exige os formatos ★ de `03-api.md` e os testids de `08-telas.md`), README do projeto.
+10. **Operação avançada** — escala de trabalho, recrutamento simples, comunicados com ciência, treinamentos com validade, mural de celebrações. → `references/10-operacao-avancada.md`
+   - *Pronto quando*: escala que bloqueia turnos cruzados e ausências e avisa a interjornada, com cobertura e a escala da pessoa; vaga pública com consentimento, sem candidatura repetida, funil e contratado virando admissão; comunicado só para quem recebe, ciência idempotente e pendentes; matriz de treinamentos com vencido/vencendo/faltando; celebrações do dia.
+11. **Perfis de segmento** — indústria (EPI e NR), saúde (registro no conselho), varejo (rodízio de folgas e folguista). → `references/11-perfis-de-segmento.md`
+   - *Pronto quando*: perfil liga o que pede sem desligar nada; NRs criadas sem duplicar; EPI com CA vencido ou sem assinatura recusado e trocas vencidas; registro vencido não atende; rodízio com domingo e folguista, folga aplicada bloqueando a escala. Feche com `/rodsaas:verify -g "RH"` e `-g "Pessoas · operação"` (`36-pessoas-operacao.spec.ts`).
 
 ## Princípios
 
@@ -119,4 +125,7 @@ O que foi adicionado (app, telas, link público de pré-admissão), papéis, pla
 | `references/07-desempenho-e-clima.md` | Fase 7 |
 | `references/08-telas.md` | Fases 3–8: rotas do front, telas por papel, estados, contrato de testids |
 | `references/09-checklist.md` | Fase 9 |
+| `references/10-operacao-avancada.md` | Fase 10: escala, vagas, comunicados, treinamentos, celebrações |
+| `references/11-perfis-de-segmento.md` | Fase 11: indústria, saúde, varejo |
+| `scripts/pessoas-lib.mjs` + `pessoas-lib.test.mjs` | escala (turnos, conflitos, cobertura), recrutamento (candidatura, etapas, funil), comunicados (público e ciência), treinamentos (validade e matriz), celebrações, EPI e NR, conselho, rodízio de folgas e folguista, perfis: porte para TS com os testes |
 | `scripts/rh-lib.mjs` + `rh-lib.test.mjs` | datas e feriados, férias CLT (períodos, plano, coletivas, regime livre), licenças, organograma, aprovações, despesas, CPF e holerites, validade, checklists, metas, avaliação, 9-box, eNPS e anonimato, indicadores, quem vê o quê, fechamento CSV: porte para TS com os testes |
