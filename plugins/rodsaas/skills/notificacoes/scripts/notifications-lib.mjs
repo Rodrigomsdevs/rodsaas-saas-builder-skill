@@ -130,6 +130,8 @@ export const PRESET_TYPES = [
   { type: "forms.limit", appId: "forms", label: "Limite de respostas", template: "A empresa usou {data.percent}% das respostas do mês", group: { by: "none" } },
   { type: "forms.closed", appId: "forms", label: "Formulário encerrado", template: "{title} foi encerrado ({data.reason})", group: { by: "none" } },
   { type: "forms.webhook_disabled", appId: "forms", label: "Webhook desativado", template: "O webhook de {title} foi desativado depois de várias falhas", group: { by: "none" } },
+  { type: "forms.payment.received", appId: "forms", label: "Pagamento de resposta", template: { one: "{data.respondent} pagou {data.amount} em {title}", many: "{count} respostas pagas em {title}" }, group: { by: "key", windowMinutes: 30 } },
+  { type: "forms.intake.alert", appId: "forms", label: "Alerta na ficha", template: "Ficha de {data.respondent} em {title}: {data.alert}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   // agenda
   { type: "agenda.booked", appId: "agenda", label: "Novo agendamento", template: { one: "{data.client} agendou {title}", many: "{count} novos agendamentos" }, group: { by: "key", windowMinutes: 10 } },
   { type: "agenda.pending", appId: "agenda", label: "Agendamento aguardando aprovação", template: "{data.client} pediu {title}: aprove ou recuse", group: { by: "none" } },

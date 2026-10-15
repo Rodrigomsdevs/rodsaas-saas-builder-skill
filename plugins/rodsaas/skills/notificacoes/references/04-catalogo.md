@@ -80,6 +80,8 @@ Ao instalar (ou revisar) um preset com este add-on presente, o preset chama `not
 | `forms.limit` | 80% e 100% do limite mensal | owners/admins | organization | `/configuracoes/plano` |
 | `forms.closed` | encerrado por data ou limite | dono | form | `/forms/<id>` |
 | `forms.webhook_disabled` | webhook desativado por falhas | dono | form | `/forms/<id>/integracoes` |
+| `forms.payment.received` | resposta com pagamento confirmada pelo webhook | dono e colaboradores | form · `paid` (`groupUrl` `/forms/f/<id>/respostas?status=PAID`) | `/forms/f/<id>/respostas/<resposta>` |
+| `forms.intake.alert` | ficha com alerta (`intakeAlerts`: alergia, pressão…) | quem tem acesso a dados de saúde do formulário | response | `/forms/f/<id>/respostas/<resposta>` |
 
 ### Agenda (`agenda`)
 

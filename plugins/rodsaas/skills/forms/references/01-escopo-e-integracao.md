@@ -70,6 +70,9 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | feature `forms_files` (pergunta de arquivo) | — | ✅ | ✅ |
 | feature `forms_integrations` (webhooks e envio para o CRM) | — | ✅ | ✅ |
 | feature `forms_branding` (sem o rodapé "Feito com {produto}", tema próprio com capa e logo) | — | ✅ | ✅ |
+| resposta parcial (`09`) | ✅ | ✅ | ✅ |
+| feature `forms_advanced` (cálculo, quiz, pagamento, assinatura, agendar no fim, chamado — `09`) | — | ✅ | ✅ |
+| feature `forms_events` (vagas, lista de espera, ingresso e check-in — `10`) | — | ✅ | ✅ |
 | layout uma por vez, modelos, exportação, notificações, resposta automática | ✅ | ✅ | ✅ |
 
 Regras:

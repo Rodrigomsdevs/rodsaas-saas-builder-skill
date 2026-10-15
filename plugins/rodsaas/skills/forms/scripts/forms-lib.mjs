@@ -89,6 +89,8 @@ export const FIELD_TYPES = {
   time: { label: "Horário", group: "Data e hora", answerable: true },
   file: { label: "Arquivo", group: "Avançado", answerable: true },
   consent: { label: "Consentimento (LGPD)", group: "Avançado", answerable: true },
+  signature: { label: "Assinatura desenhada", group: "Avançado", answerable: true },
+  payment: { label: "Pagamento", group: "Avançado", answerable: false },
   statement: { label: "Texto informativo", group: "Estrutura", answerable: false },
   page: { label: "Nova página", group: "Estrutura", answerable: false },
 };
@@ -171,8 +173,16 @@ export function validateSchema(schema, { maxFields = 200 } = {}) {
         if (FIELD_TYPES[target.type].choice && ["eq", "neq", "contains"].includes(r.op) && !(target.options ?? []).some((o) => o.id === r.value)) err(rp, "Opção da condição não existe");
       });
     }
+    if (f.type === "payment") {
+      const st = f.settings ?? {};
+      if ((st.amountCents == null) === (st.amountFrom == null)) err(`${p}.settings`, "Pagamento: valor fixo ou de um cálculo (um dos dois)");
+      else if (st.amountCents != null && !(Number.isInteger(st.amountCents) && st.amountCents >= PAYMENT_MIN_CENTS)) err(`${p}.settings.amountCents`, "Valor do pagamento em centavos (mínimo R$ 0,50)");
+      if (st.methods && !(Array.isArray(st.methods) && st.methods.length && st.methods.every((m) => ["pix", "card", "boleto"].includes(m)))) err(`${p}.settings.methods`, "Meios: pix, card, boleto");
+    }
+    if (f.type === "signature" && f.settings?.requireName !== undefined && typeof f.settings.requireName !== "boolean") err(`${p}.settings.requireName`, "Sim ou não");
     if (f.id && FIELD_ID.test(f.id)) seen.set(f.id, f);
   });
+  errors.push(...validateExtras(schema, fields));
   const hidden = Array.isArray(schema.hidden) ? schema.hidden : [];
   const hk = new Set();
   hidden.forEach((h, i) => {
@@ -371,6 +381,12 @@ export function validateAnswers(schema, answers, opts = {}) {
         break;
       }
       case "consent": v === true ? (out[f.id] = true) : err(f.id, "É preciso concordar para continuar"); break;
+      case "signature": {
+        const se = validateSignatureData(v, { requireName: !!st.requireName });
+        if (se) { err(f.id, se); break; }
+        out[f.id] = typeof v === "string" ? v : { dataUrl: v.dataUrl, strokes: v.strokes, name: v.name ? String(v.name).trim().slice(0, 200) : null };
+        break;
+      }
     }
   }
   return { value: out, errors };
@@ -412,6 +428,7 @@ export function displayAnswer(f, v) {
     case "multiple_choice": return [...(v.selected ?? []).map((id) => optLabel(f, id)), ...(v.other ? [`Outro: ${v.other}`] : [])].join(", ");
     case "yes_no": return v ? "Sim" : "Não";
     case "consent": return v ? "Concordou" : "";
+    case "signature": return typeof v === "object" && v?.name ? `Assinado por ${v.name}` : "Assinado";
     case "money": return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v / 100);
     case "date": return `${v.slice(8, 10)}/${v.slice(5, 7)}/${v.slice(0, 4)}`;
     case "phone": {
@@ -546,3 +563,246 @@ export function leadFromResponse(schema, value, mapping, { formTitle, hidden = {
   const utm = Object.fromEntries(Object.entries(hidden).filter(([k]) => /^utm_|^gclid$|^fbclid$/.test(k)));
   return { lead, extra, utm, title: formTitle ? `${lead.personName || lead.email || "Resposta"} · ${formTitle}` : null };
 }
+
+// ================================================================== operação avançada (references/09) e perfis (10)
+export const PAYMENT_MIN_CENTS = 50;
+
+// ------------------------------------------------------------------ cálculo e quiz
+/**
+ * Fórmula segura (sem eval): números, {idDaPergunta} ou {idDoCalculo}, + − × ÷, parênteses, min(), max(), round(x[, casas]).
+ * → { ok, ast?, refs, error? }
+ */
+export function parseFormula(text) {
+  const src = String(text ?? ""), toks = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (/\s/.test(c)) { i++; continue; }
+    if (/[0-9.]/.test(c)) { let j = i; while (j < src.length && /[0-9.]/.test(src[j])) j++; const n = Number(src.slice(i, j)); if (!Number.isFinite(n)) return { ok: false, refs: [], error: "Número inválido" }; toks.push({ t: "num", v: n }); i = j; continue; }
+    if (c === "{") { const j = src.indexOf("}", i); if (j < 0) return { ok: false, refs: [], error: "Chave sem fechar" }; const id = src.slice(i + 1, j).trim(); if (!/^[a-z][a-z0-9_]{1,40}$/.test(id)) return { ok: false, refs: [], error: "Referência inválida: " + id }; toks.push({ t: "ref", v: id }); i = j + 1; continue; }
+    if ("+-*/(),".includes(c)) { toks.push({ t: c }); i++; continue; }
+    if (/[a-z]/i.test(c)) { let j = i; while (j < src.length && /[a-z]/i.test(src[j])) j++; const w = src.slice(i, j).toLowerCase(); if (!["min", "max", "round"].includes(w)) return { ok: false, refs: [], error: "Função desconhecida: " + w }; toks.push({ t: "fn", v: w }); i = j; continue; }
+    return { ok: false, refs: [], error: "Caractere inválido: " + c };
+  }
+  let k = 0;
+  const refs = new Set();
+  const peek = () => toks[k], eat = (t) => { if (toks[k]?.t !== t) throw new Error("Esperava " + t); return toks[k++]; };
+  const expr = () => { let n = term(); while (peek()?.t === "+" || peek()?.t === "-") { const op = toks[k++].t; n = { op, a: n, b: term() }; } return n; };
+  const term = () => { let n = unary(); while (peek()?.t === "*" || peek()?.t === "/") { const op = toks[k++].t; n = { op, a: n, b: unary() }; } return n; };
+  const unary = () => (peek()?.t === "-" ? (k++, { op: "neg", a: unary() }) : atom());
+  const atom = () => {
+    const tk = peek();
+    if (!tk) throw new Error("Fórmula incompleta");
+    if (tk.t === "num") { k++; return { num: tk.v }; }
+    if (tk.t === "ref") { k++; refs.add(tk.v); return { ref: tk.v }; }
+    if (tk.t === "(") { k++; const n = expr(); eat(")"); return n; }
+    if (tk.t === "fn") { k++; eat("("); const args = [expr()]; while (peek()?.t === ",") { k++; args.push(expr()); } eat(")"); if (tk.v === "round" && args.length > 2) throw new Error("round(valor, casas)"); return { fn: tk.v, args }; }
+    throw new Error("Fórmula inválida");
+  };
+  try { const ast = expr(); if (k !== toks.length) throw new Error("Sobrou algo na fórmula"); return { ok: true, ast, refs: [...refs] }; }
+  catch (e) { return { ok: false, refs: [...refs], error: e.message }; }
+}
+/** Avalia a árvore com as variáveis; divisão por zero → null (o cálculo fica "sem valor"). */
+export function evalFormula(ast, vars) {
+  const ev = (n) => {
+    if ("num" in n) return n.num;
+    if ("ref" in n) return Number(vars[n.ref] ?? 0) || 0;
+    if (n.op === "neg") { const a = ev(n.a); return a == null ? null : -a; }
+    if (n.op) { const a = ev(n.a), b = ev(n.b); if (a == null || b == null) return null; if (n.op === "+") return a + b; if (n.op === "-") return a - b; if (n.op === "*") return a * b; return b === 0 ? null : a / b; }
+    const args = n.args.map(ev); if (args.some((x) => x == null)) return null;
+    if (n.fn === "min") return Math.min(...args);
+    if (n.fn === "max") return Math.max(...args);
+    const d = args[1] ?? 0, f = 10 ** d; return Math.round(args[0] * f) / f;
+  };
+  const r = ev(ast);
+  return r == null || !Number.isFinite(r) ? null : Math.round(r * 1e6) / 1e6;
+}
+/** Valor de uma pergunta na fórmula: número, valor (centavos), escolha (pontos da opção), sim/não (1/0); sem resposta = 0. */
+export function fieldNumber(f, v) {
+  if (!isAnswered(v)) return 0;
+  if (["number", "money", "rating", "nps", "scale"].includes(f.type)) return Number(v) || 0;
+  if (f.type === "yes_no") return v ? 1 : 0;
+  if (FIELD_TYPES[f.type]?.choice) { const ids = f.type === "multiple_choice" ? v.selected ?? [] : typeof v === "string" ? [v] : []; return ids.reduce((s, id) => s + (Number((f.options ?? []).find((o) => o.id === id)?.points) || 0), 0); }
+  return 0;
+}
+/** Cálculos do formulário na ordem (um cálculo pode usar os anteriores). → { [calcId]: number | null } */
+export function computeCalculations(schema, answers) {
+  const byId = new Map(schema.fields.map((f) => [f.id, f])), vis = visibleFieldIds(schema, answers);
+  const vars = {};
+  for (const f of schema.fields) if (FIELD_TYPES[f.type]?.answerable) vars[f.id] = vis.has(f.id) ? fieldNumber(f, answers[f.id]) : 0;
+  const out = {};
+  for (const c of schema.calculations ?? []) { const p = parseFormula(c.formula); out[c.id] = p.ok ? evalFormula(p.ast, { ...vars, ...out }) : null; vars[c.id] = out[c.id] ?? 0; }
+  void byId;
+  return out;
+}
+/**
+ * Quiz: cada pergunta de escolha com `correct` (id ou ids) vale `points` (padrão 1); múltipla só conta inteira certa.
+ * schema.quiz: { passPct?, outcomes?: [{ min, max, title, message }] } → { score, max, pct, passed, outcome, perField }
+ */
+export function quizScore(schema, answers) {
+  const vis = visibleFieldIds(schema, answers);
+  let score = 0, max = 0;
+  const perField = [];
+  for (const f of schema.fields) {
+    if (f.correct == null || !FIELD_TYPES[f.type]?.choice || !vis.has(f.id)) continue;
+    const pts = f.points ?? 1, want = [].concat(f.correct).sort(), v = answers[f.id];
+    const got = (f.type === "multiple_choice" ? v?.selected ?? [] : typeof v === "string" ? [v] : []).slice().sort();
+    const right = got.length === want.length && got.every((x, i) => x === want[i]);
+    max += pts; if (right) score += pts;
+    perField.push({ fieldId: f.id, correct: right, points: right ? pts : 0 });
+  }
+  const pct = max ? Math.round((score / max) * 1000) / 10 : null;
+  const q = schema.quiz ?? {};
+  const outcome = (q.outcomes ?? []).find((o) => pct != null && pct >= o.min && pct <= o.max) ?? null;
+  return { score, max, pct, passed: q.passPct != null && pct != null ? pct >= q.passPct : null, outcome: outcome ? { title: outcome.title, message: outcome.message ?? null } : null, perField };
+}
+function validateExtras(schema, fields) {
+  const errors = [], err = (path, message) => errors.push({ path, message });
+  const ids = new Set(fields.map((f) => f?.id));
+  const known = new Set(fields.filter((f) => f && FIELD_TYPES[f.type]?.answerable).map((f) => f.id));
+  (schema.calculations ?? []).forEach((c, i) => {
+    const p = `calculations.${i}`;
+    if (!/^[a-z][a-z0-9_]{1,40}$/.test(c?.id ?? "") || ids.has(c.id)) err(`${p}.id`, "Id do cálculo inválido ou repetido");
+    if (!String(c?.label ?? "").trim()) err(`${p}.label`, "Nome do cálculo");
+    const r = parseFormula(c?.formula);
+    if (!r.ok) err(`${p}.formula`, r.error);
+    else for (const ref of r.refs) if (!known.has(ref)) err(`${p}.formula`, "Referência desconhecida: " + ref);
+    if (c?.format && !["number", "money", "percent"].includes(c.format)) err(`${p}.format`, "Formato: number, money ou percent");
+    if (c?.id) { ids.add(c.id); known.add(c.id); }
+  });
+  for (const f of fields) {
+    if (!f) continue;
+    if (f.type === "payment" && f.settings?.amountFrom != null && !(schema.calculations ?? []).some((c) => c.id === f.settings.amountFrom)) err(`fields.${fields.indexOf(f)}.settings.amountFrom`, "Cálculo do valor não existe");
+    if (f.correct != null) { const want = [].concat(f.correct); if (!FIELD_TYPES[f.type]?.choice || !want.length || !want.every((x) => (f.options ?? []).some((o) => o.id === x))) err(`fields.${fields.indexOf(f)}.correct`, "Resposta certa precisa ser uma opção"); if (f.type !== "multiple_choice" && want.length > 1) err(`fields.${fields.indexOf(f)}.correct`, "Só uma resposta certa"); }
+  }
+  if (fields.filter((f) => f?.type === "payment").length > 1) err("fields", "Só um pagamento por formulário");
+  const q = schema.quiz;
+  if (q) {
+    if (q.passPct != null && !(typeof q.passPct === "number" && q.passPct >= 0 && q.passPct <= 100)) err("quiz.passPct", "Nota de aprovação de 0 a 100");
+    (q.outcomes ?? []).forEach((o, i) => { if (!(o.min >= 0 && o.max <= 100 && o.min <= o.max)) err(`quiz.outcomes.${i}`, "Faixa de 0 a 100"); if (!String(o.title ?? "").trim()) err(`quiz.outcomes.${i}.title`, "Título do resultado"); });
+  }
+  return errors;
+}
+/** Valor a cobrar: fixo ou do cálculo (arredondado ao centavo). → centavos | null */
+export function paymentAmount(schema, answers) {
+  const f = schema.fields.find((x) => x.type === "payment");
+  if (!f || !visibleFieldIds(schema, answers).has(f.id)) return null;
+  if (f.settings?.amountCents != null) return f.settings.amountCents;
+  const v = computeCalculations(schema, answers)[f.settings?.amountFrom];
+  return v == null ? null : Math.round(v);
+}
+
+// ------------------------------------------------------------------ assinatura desenhada
+export const SIGNATURE_MAX_BYTES = 150_000;
+/** Assinatura: { dataUrl: "data:image/png;base64,…", strokes ≥ 1, name? } (ou o id do arquivo já enviado). → mensagem de erro | null */
+export function validateSignatureData(v, { requireName = false } = {}) {
+  if (typeof v === "string") return /^[0-9a-f-]{36}$/i.test(v) ? null : "Assinatura inválida";
+  if (!v || typeof v !== "object") return "Assinatura inválida";
+  const m = /^data:image\/png;base64,([A-Za-z0-9+/]+={0,2})$/.exec(String(v.dataUrl ?? ""));
+  if (!m) return "Assinatura precisa ser uma imagem PNG";
+  if (Math.floor((m[1].length * 3) / 4) > SIGNATURE_MAX_BYTES) return "Assinatura grande demais";
+  if (!(Number.isInteger(v.strokes) && v.strokes >= 1)) return "Assine no quadro";
+  if (requireName && String(v.name ?? "").trim().split(/\s+/).length < 2) return "Escreva o nome completo";
+  return null;
+}
+
+// ------------------------------------------------------------------ resposta parcial
+/** Progresso: perguntas visíveis respondidas. → { answered, total, pct, lastFieldId } */
+export function partialProgress(schema, answers) {
+  const vis = visibleFieldIds(schema, answers);
+  const fs = schema.fields.filter((f) => FIELD_TYPES[f.type]?.answerable && vis.has(f.id));
+  const done = fs.filter((f) => isAnswered(answers?.[f.id]));
+  const last = [...fs].reverse().find((f) => isAnswered(answers?.[f.id]));
+  return { answered: done.length, total: fs.length, pct: fs.length ? Math.round((done.length / fs.length) * 100) : 0, lastFieldId: last?.id ?? null };
+}
+/** Junta o parcial salvo com o novo (o novo vence; resposta apagada some). */
+export const mergePartial = (saved, incoming) => { const out = { ...(saved ?? {}) }; for (const [k, v] of Object.entries(incoming ?? {})) { if (isAnswered(v)) out[k] = v; else delete out[k]; } return out; };
+/** Onde as pessoas param: parciais não concluídos → contagem pela última pergunta respondida (null = nem começou). */
+export function dropOff(schema, partials) {
+  const order = schema.fields.filter((f) => FIELD_TYPES[f.type]?.answerable).map((f) => f.id);
+  const counts = Object.fromEntries([["__start", 0], ...order.map((id) => [id, 0])]);
+  for (const p of partials) if (!p.completed) counts[p.lastFieldId && p.lastFieldId in counts ? p.lastFieldId : "__start"]++;
+  return Object.entries(counts).map(([fieldId, stopped]) => ({ fieldId: fieldId === "__start" ? null : fieldId, stopped }));
+}
+
+// ------------------------------------------------------------------ resposta → agenda, chamado
+/** Dados do respondente para agendar ou abrir chamado: nome (pergunta com `role: "name"` ou a 1ª "nome"), e-mail, telefone. */
+export function contactFromResponse(schema, value) {
+  const by = (pred) => schema.fields.find((f) => pred(f) && isAnswered(value?.[f.id]));
+  const nameF = by((f) => f.settings?.role === "name") ?? by((f) => f.type === "short_text" && /\bnome\b/i.test(stripAccents(f.label)));
+  const emailF = by((f) => f.type === "email"), phoneF = by((f) => f.type === "phone");
+  return { name: nameF ? String(value[nameF.id]) : null, email: emailF ? String(value[emailF.id]) : null, phone: phoneF ? String(value[phoneF.id]) : null };
+}
+/** Chamado a partir da resposta: assunto (pergunta mapeada ou o título), texto com todas as respostas, solicitante. */
+export function ticketFromResponse(schema, value, mapping = {}, { formTitle } = {}) {
+  const c = contactFromResponse(schema, value);
+  const subjectField = mapping.subject ? schema.fields.find((f) => f.id === mapping.subject) : null;
+  const subject = (subjectField && isAnswered(value[subjectField.id]) ? displayAnswer(subjectField, value[subjectField.id]) : formTitle ?? "Resposta de formulário").slice(0, 200);
+  const text = schema.fields.filter((f) => FIELD_TYPES[f.type]?.answerable && f.type !== "signature" && isAnswered(value?.[f.id])).map((f) => `${f.label}: ${displayAnswer(f, value[f.id])}`).join("\n");
+  return { subject, text, requester: { name: c.name, email: mapping.email ? value[mapping.email] ?? c.email : c.email } };
+}
+
+// ------------------------------------------------------------------ perfil pesquisas (NPS/CSAT)
+/** NPS por mês: [{ submittedAt, value }] → [{ month, count, score, promoters, passives, detractors }] */
+export function npsTrend(rows, timeZone = "America/Sao_Paulo") {
+  const by = new Map();
+  for (const r of rows) { const m = dateInTZ(new Date(r.submittedAt), timeZone).slice(0, 7); if (!by.has(m)) by.set(m, []); by.get(m).push(r.value); }
+  return [...by].sort((a, b) => a[0].localeCompare(b[0])).map(([month, vs]) => ({ month, ...npsScore(vs) }));
+}
+/** CSAT: % de notas "satisfeito" (as duas maiores da escala; 4 e 5 de 5). */
+export function csatScore(values, max = 5) {
+  const v = values.filter((x) => Number.isInteger(x) && x >= 1 && x <= max);
+  if (!v.length) return { count: 0, satisfied: 0, pct: null };
+  const sat = v.filter((x) => x >= max - 1).length;
+  return { count: v.length, satisfied: sat, pct: Math.round((sat / v.length) * 1000) / 10 };
+}
+export const isDetractor = (v) => Number.isInteger(v) && v >= 0 && v <= 6;
+
+// ------------------------------------------------------------------ perfil eventos (vagas e check-in)
+/** Vagas por opção (lote, sessão, turma): opções com `capacity`; respostas confirmadas contam. */
+export function seatsByOption(field, confirmedAnswers) {
+  const out = {};
+  for (const o of field.options ?? []) {
+    if (o.capacity == null) continue;
+    const taken = confirmedAnswers.filter((v) => (field.type === "multiple_choice" ? (v?.selected ?? []).includes(o.id) : v === o.id)).length;
+    out[o.id] = { capacity: o.capacity, taken, left: Math.max(0, o.capacity - taken) };
+  }
+  return out;
+}
+/** Inscrição: CONFIRMED (tem vaga), WAITLIST (lotou, com lista de espera) ou FULL (lotou, sem lista). */
+export function registrationStatus({ formCapacity = null, confirmedCount = 0, optionLeft = null, waitlist = true }) {
+  const full = (formCapacity != null && confirmedCount >= formCapacity) || (optionLeft != null && optionLeft <= 0);
+  return !full ? "CONFIRMED" : waitlist ? "WAITLIST" : "FULL";
+}
+const TK = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+/** Código do ingresso (QR): 9 caracteres sem 0/O/1/I + dígito de controle. */
+export const ticketCode = (rand = Math.random) => { const b = Array.from({ length: 9 }, () => TK[Math.floor(rand() * 32)]).join(""); return b + TK[[...b].reduce((s, c, i) => s + TK.indexOf(c) * (i + 3), 0) % 32]; };
+export const isTicketCode = (c) => { const s = String(c ?? "").toUpperCase().replace(/[\s-]/g, ""); return /^[A-HJ-NP-Z2-9]{10}$/.test(s) && TK[[...s.slice(0, 9)].reduce((a, ch, i) => a + TK.indexOf(ch) * (i + 3), 0) % 32] === s[9]; };
+/** Quem sobe da lista de espera quando abrem `n` vagas: os mais antigos primeiro. */
+export const promoteWaitlist = (waitlist, n) => [...waitlist].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || String(a.id).localeCompare(String(b.id))).slice(0, Math.max(0, n));
+
+// ------------------------------------------------------------------ perfil saúde (ficha e anamnese)
+/** Alertas da ficha: perguntas com `settings.alertIf: { op, value?, message }` que bateram (alergia = sim, pressão > 14…). */
+export function intakeAlerts(schema, value) {
+  const byId = new Map(schema.fields.map((f) => [f.id, f])), out = [];
+  for (const f of schema.fields) {
+    const a = f.settings?.alertIf; if (!a || value?.[f.id] === undefined) continue;
+    const hit = a.op === "answered" ? isAnswered(value[f.id]) : (() => { try { return visibleFieldIds({ ...schema, fields: [f, { id: "__probe", type: "short_text", label: "x", visibleIf: { match: "all", rules: [{ field: f.id, op: a.op, value: a.value }] } }] }, { [f.id]: value[f.id] }).has("__probe"); } catch { return false; } })();
+    if (hit) out.push({ fieldId: f.id, label: f.label, answer: displayAnswer(f, value[f.id]), message: a.message ?? f.label });
+  }
+  void byId;
+  return out;
+}
+/** Validade da ficha: vence `months` depois do envio (atualizar a anamnese). */
+export const intakeExpiresOn = (submittedOn, months = 12) => { const [y, m, d] = submittedOn.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1 + months, 1)); const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate(); return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`; };
+/** Esconde as respostas sensíveis (`sensitive: true`) para quem não pode ver. */
+export const maskSensitive = (schema, value, canSee) => (canSee ? value : Object.fromEntries(Object.entries(value ?? {}).map(([k, v]) => [k, schema.fields.find((f) => f.id === k)?.sensitive ? "•••" : v])));
+
+// ------------------------------------------------------------------ perfis
+export const FORMS_SEGMENTS = {
+  GENERAL: { label: "Formulários em geral", words: { form: "formulário", forms: "formulários", response: "resposta", responses: "respostas" }, on: [] },
+  SURVEY: { label: "Pesquisas (NPS e satisfação)", words: { form: "pesquisa", forms: "pesquisas", response: "resposta", responses: "respostas" }, on: ["nps_trend", "detractor_follow_up", "partials"] },
+  EVENTS: { label: "Eventos e inscrições", words: { form: "inscrição", forms: "inscrições", response: "inscrito", responses: "inscritos" }, on: ["capacity", "waitlist", "tickets", "payment"] },
+  HEALTH: { label: "Fichas e anamnese", words: { form: "ficha", forms: "fichas", response: "ficha preenchida", responses: "fichas preenchidas" }, on: ["sensitive", "signature", "intake_alerts", "schedule_after"] },
+};
+export const formsSegment = (id) => (FORMS_SEGMENTS[id] ? { id, ...FORMS_SEGMENTS[id] } : { id: "GENERAL", ...FORMS_SEGMENTS.GENERAL });

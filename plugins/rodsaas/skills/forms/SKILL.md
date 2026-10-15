@@ -1,6 +1,6 @@
 ---
 name: forms
-description: Preset que soma ao projeto rodsaas o app Forms, de formulários e pesquisas no estilo Typeform/Google Forms — construtor com 20 tipos de pergunta (inclusive CPF, CNPJ, telefone, endereço por CEP, valor em R$, NPS, estrelas, arquivo e consentimento LGPD), páginas, lógica condicional, modo clássico ou uma pergunta por vez, tema da marca, boas-vindas e agradecimento, rascunho com publicação, link público, incorporar no site e QR code, campos ocultos (UTM), limites e encerramento, anti-spam, respostas em tabela com filtros, resumo com gráficos e NPS, funil de conclusão, exportação para Excel, notificações, resposta automática, webhooks assinados, envio de respostas como leads para o CRM e modelos prontos. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir formulários, pesquisas, NPS, questionários, inscrições, clone do Typeform/Google Forms/Jotform, ou chamar /rodsaas:forms.
+description: Preset que soma ao projeto rodsaas o app Forms, de formulários e pesquisas no estilo Typeform/Google Forms — construtor com 20 tipos de pergunta (inclusive CPF, CNPJ, telefone, endereço por CEP, valor em R$, NPS, estrelas, arquivo e consentimento LGPD), páginas, lógica condicional, modo clássico ou uma pergunta por vez, tema da marca, boas-vindas e agradecimento, rascunho com publicação, link público, incorporar no site e QR code, campos ocultos (UTM), limites e encerramento, anti-spam, respostas em tabela com filtros, resumo com gráficos e NPS, funil de conclusão, exportação para Excel, notificações, resposta automática, webhooks assinados, envio de respostas como leads para o CRM e modelos prontos. Também respostas parciais salvas no servidor com desistências por pergunta, cálculo (orçamento) e quiz com nota e resultado, pagamento na resposta pelo Financeiro, assinatura desenhada, agendar no fim pela Agenda e resposta que abre chamado no Suporte; perfis de pesquisas (NPS por mês, CSAT, retorno ao detrator), eventos (vagas, lista de espera, ingresso com QR e check-in) e saúde (ficha e anamnese com respostas sensíveis e alertas). Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir formulários, pesquisas, NPS, questionários, inscrições, clone do Typeform/Google Forms/Jotform, ou chamar /rodsaas:forms.
 ---
 
 # rodsaas · forms
@@ -29,7 +29,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos, padrão 
 Se `rodsaas.json → presets` já tem `forms` (ou existe `api/src/modules/forms`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 5, 6 e 7 (é onde mais se simplifica: construtor sem os 20 tipos de pergunta, sem lógica ou páginas; público sem o modo uma por vez ou sem máscaras BR; respostas sem resumo, gráficos e exportação).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 10 e 11 se o Forms foi instalado antes da versão 0.33 (parcial, cálculo, quiz, pagamento, assinatura, agendar, chamado e perfis não existiam) e depois pelas fases 5, 6 e 7 (é onde mais se simplifica: construtor sem os 20 tipos de pergunta, sem lógica ou páginas; público sem o modo uma por vez ou sem máscaras BR; respostas sem resumo, gráficos e exportação).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/08-checklist.md` e o `/rodsaas:verify` (`-g "Forms"`).
 
@@ -45,7 +45,7 @@ Se `rodsaas.json → presets` já tem `forms` (ou existe `api/src/modules/forms`
 | Planos | Free: 3 formulários publicados, 100 respostas/mês, rodapé "Feito com {produto}"; Pro: ilimitados, 5.000/mês, lógica, arquivos, integrações (webhook e CRM), sem rodapé; Business: 50.000/mês |
 | Modelos | 8 prontos (`scripts/templates.json`): Fale conosco, Orçamento, NPS, Satisfação, Inscrição em evento, Cadastro de cliente, Feedback interno, Candidatura |
 
-Fora da v1 (registre no README do projeto como próximos passos): respostas parciais salvas no servidor, pagamento dentro do formulário (vai com as cobranças do `/rodsaas:financeiro`), assinatura desenhada, cálculos/pontuação (quiz), tradução, domínio próprio, Google Sheets/Slack nativos, testes A/B, edição colaborativa em tempo real.
+Fora da v1 (registre no README do projeto como próximos passos): tradução, domínio próprio, Google Sheets/Slack nativos, testes A/B, edição colaborativa em tempo real, assinatura com certificado ICP-Brasil, catraca/QR offline no check-in, prontuário eletrônico completo (a ficha é a anamnese de entrada).
 
 ## Fases
 
@@ -64,7 +64,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(for
 7. **Respostas e integrações** — tabela, detalhe, resumo com gráficos, funil, exportação, notificações, resposta automática, webhooks, CRM, LGPD. → `references/06-respostas-e-integracoes.md`
    - *Pronto quando*: tabela e detalhe das respostas, resumo com gráficos por tipo, NPS, funil, exportação CSV/Excel, notificações, resposta automática, webhooks e envio para o CRM.
 8. **Interações e estados** — salvamento automático, desfazer, arrastar, atalhos, todos os estados de carregamento/vazio/erro. → `references/07-interacoes-e-estados.md`
-9. **Fechamento** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Forms), README do projeto.
+9. **Fechamento do núcleo** — `references/08-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Forms), README do projeto.
+10. **Operação avançada** — resposta parcial, cálculo e quiz, pagamento, assinatura desenhada, agendar no fim, resposta → chamado. → `references/09-operacao-avancada.md`
+   - *Pronto quando*: parcial salvo e retomado com desistências por pergunta; cálculo e quiz no servidor; resposta com pagamento espera a cobrança e vira paga pelo webhook; assinatura validada e guardada com hash; agendamento com o contato da resposta; chamado aberto pela resposta.
+11. **Perfis de segmento** — pesquisas (NPS/CSAT), eventos (vagas e check-in), saúde (ficha e anamnese). → `references/10-perfis-de-segmento.md`
+   - *Pronto quando*: perfil liga o que pede; NPS por mês e retorno ao detrator; vaga, lista de espera, ingresso e check-in único; sensível mascarada e alertas da ficha. Feche com `/rodsaas:verify -g "Forms"` (inclui `33-forms-operacao.spec.ts`).
 
 ## Princípios
 
@@ -90,5 +94,7 @@ O que foi adicionado (app, telas, rotas públicas), planos e limites novos, como
 | `references/06-respostas-e-integracoes.md` | Fase 7: respostas, resumo, exportação, e-mails, webhooks, CRM, LGPD |
 | `references/07-interacoes-e-estados.md` | Fase 8 |
 | `references/08-checklist.md` | Fase 9 |
-| `scripts/forms-lib.mjs` + `forms-lib.test.mjs` | regras puras (esquema, lógica, validação BR, resumo, NPS, CSV, webhook, lead para o CRM): porte para TS com os testes |
+| `references/09-operacao-avancada.md` | Fase 10: parcial, cálculo e quiz, pagamento, assinatura, agendar no fim, chamado |
+| `references/10-perfis-de-segmento.md` | Fase 11: pesquisas, eventos, saúde |
+| `scripts/forms-lib.mjs` + `forms-lib.test.mjs` | regras puras (esquema, lógica, validação BR, resumo, NPS, CSV, webhook, lead para o CRM, fórmula segura, quiz, pagamento, assinatura, parcial e desistências, contato e chamado, NPS por mês e CSAT, vagas e ingresso, alertas e sensíveis, perfis): porte para TS com os testes |
 | `scripts/templates.json` | os 8 modelos prontos (todos validados pelos testes) |

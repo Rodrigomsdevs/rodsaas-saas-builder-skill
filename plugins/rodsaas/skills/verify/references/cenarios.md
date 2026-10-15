@@ -206,3 +206,18 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | obra | etapas sem somar 100%; progresso voltando; medição cobrando o acumulado de novo; sem retenção; retenção liberada antes do fim ou duas vezes; medido somando o líquido |
 | escola | irmão de outro ano ou sem aceite; pontualidade sobre o material; mais de 12 parcelas |
 | telas | vendedor faltando no funil; perfil sem salvar; locação sem a situação |
+
+## Forms · operação (`33-forms-operacao.spec.ts`, preset `forms`)
+
+| Teste | Causas comuns |
+|---|---|
+| parcial | dado pessoal guardado antes do consentimento; parcial que substitui em vez de juntar; enviado continua retomável; desistência contando quem terminou; total com perguntas escondidas |
+| cálculo e quiz | cálculo aceito do navegador; fórmula com referência que não existe; pontos das opções ignorados; múltipla com metade certa valendo; resultado sempre o primeiro |
+| pagamento | resposta concluída sem esperar o pagamento; valor fixo em vez do cálculo; pagamento que não volta para a resposta; filtro por situação ignorado |
+| assinatura | sem traço ou sem nome aceitos; JPEG aceito; imagem inteira guardada na resposta; exportação sem o nome |
+| agendar no fim | qualquer um agenda com o id da resposta; agendado sem o contato; dois horários para a mesma resposta; horário ocupado aceito |
+| chamado | chamado sem o assunto mapeado; texto sem as perguntas |
+| pesquisas | nota 6 tratada como neutra; CSAT contando só a nota máxima; retorno aberto para todos; NPS por mês no dia UTC |
+| eventos | lote lotado aceito; ingresso para quem está na lista; check-in repetido; código sem conferir o dígito; cancelamento sem promover; lotado sem lista aceito |
+| saúde | sensível aberto para todos os admins; qualquer um dá o acesso; ficha sem alertas |
+| telas | perfil sem salvar; check-in mostrando "liberado" no erro; mês faltando no NPS |

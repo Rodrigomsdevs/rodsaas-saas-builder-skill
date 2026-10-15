@@ -47,3 +47,18 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER, uma seg
 - [ ] `/rodsaas:verify` verde, incluindo a parte do Forms (`-g "Forms"` roda só ela)
 - [ ] README do projeto atualizado (o que o Forms faz, tabela pública sem RLS, fora da v1)
 - [ ] **conferência final**: tabela item a item de `04-construtor.md`, `05-formulario-publico.md` e `06-respostas-e-integracoes.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório
+
+## Operação avançada (`09`)
+- [ ] parcial: salvar com token, retomar, sem dado pessoal antes do consentimento, vence em 30 dias, envio fecha; desistências por pergunta
+- [ ] cálculo: fórmula segura validada, valores das perguntas (pontos das opções), escondida = 0, ao vivo no público e gravado pelo servidor
+- [ ] quiz: gabarito, pontos, múltipla inteira certa, aprovação e resultado por faixa
+- [ ] pagamento: valor fixo ou do cálculo, resposta aguardando, cobrança no Financeiro, pago pelo webhook libera avisos e integrações; sem Financeiro não publica
+- [ ] assinatura: quadro, limpar, nome, PNG até 150 KB, arquivo com hash
+- [ ] agendar no fim: horários da Agenda, contato da resposta, ocupado 409, já agendado 409
+- [ ] chamado: resposta abre chamado no Suporte com assunto e texto
+
+## Perfis (`10`)
+- [ ] perfil aplicado sem desligar nada; modelos sugeridos
+- [ ] NPS por mês no fuso, CSAT, retorno ao detrator (chamado ou tarefa)
+- [ ] vagas por formulário e por opção, lista de espera, cancelar promove, ingresso com QR por e-mail, check-in único, lista de presença
+- [ ] respostas sensíveis cifradas e mascaradas, papel "vê dados de saúde", alertas da ficha, validade com aviso na Agenda

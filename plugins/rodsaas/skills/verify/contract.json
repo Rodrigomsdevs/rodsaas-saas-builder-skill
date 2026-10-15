@@ -1,5 +1,5 @@
 {
-  "version": 25,
+  "version": 26,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -782,7 +782,10 @@
         "/forms/f/[id]/compartilhar",
         "/forms/f/[id]/configuracoes",
         "/forms/f/[id]/integracoes",
-        "/f/[slug]"
+        "/f/[slug]",
+        "/forms/configuracoes",
+        "/forms/f/[id]/checkin",
+        "/forms/f/[id]/nps"
       ],
       "testids": [
         "forms-new",
@@ -807,7 +810,24 @@
         "public-form-next",
         "public-form-submit",
         "public-form-thanks",
-        "public-form-closed"
+        "public-form-closed",
+        "forms-segment",
+        "form-calc",
+        "data-calc",
+        "form-quiz-result",
+        "form-signature-pad",
+        "form-signature-clear",
+        "form-pay-redirect",
+        "form-book-slot",
+        "form-nps-trend",
+        "data-month",
+        "form-seats",
+        "data-option",
+        "form-ticket",
+        "form-checkin-code",
+        "form-checkin-result",
+        "form-alert",
+        "form-sensitive-mask"
       ],
       "api": [
         {
@@ -876,6 +896,65 @@
         {
           "method": "get",
           "path": "/v1/forms/{id}/responses/export"
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/forms/settings",
+          "body": [
+            "segment",
+            "healthViewers"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/public/forms/{slug}/partials",
+          "body": [
+            "token",
+            "answers"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/forms/{slug}/partials/{token}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/drop-off"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/forms/{slug}/responses/{id}/book",
+          "body": [
+            "start",
+            "token"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/nps"
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/csat"
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms/{id}/checkin",
+          "body": [
+            "code"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/forms/{id}/attendees"
+        },
+        {
+          "method": "post",
+          "path": "/v1/forms/{id}/responses/{responseId}/cancel"
         }
       ]
     },
