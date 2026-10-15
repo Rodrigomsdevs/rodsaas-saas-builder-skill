@@ -60,6 +60,9 @@ Páginas públicas `/proposta/[token]`, `/assinar/[token]` e `/verificar/[codigo
 | feature `com_approvals` (aprovação de desconto) | — | ✅ | ✅ |
 | feature `com_templates` (modelos próprios) | — | ✅ | ✅ |
 | feature `com_tracking` (rastreio de visualização) | — | ✅ | ✅ |
+| sinal no aceite, envio por WhatsApp, catálogo do ERP, reajuste por índice (`10`) | ✅ | ✅ | ✅ (WhatsApp com o add-on; sinal cobrado com o Financeiro) |
+| feature `com_reports` (relatório de conversão, `10`) | — | ✅ | ✅ |
+| features `com_rentals`, `com_measurements`, `com_enrollments` (perfis, `11`) | — | ✅ | ✅ |
 
 Limite atingido → 403 `PLAN_LIMIT_REACHED` no enviar (rascunhos continuam livres). Rebaixar não apaga nada: envelopes em andamento seguem até concluir.
 

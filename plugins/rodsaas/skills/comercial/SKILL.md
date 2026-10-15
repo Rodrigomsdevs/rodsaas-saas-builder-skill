@@ -1,6 +1,6 @@
 ---
 name: comercial
-description: Preset que soma ao projeto rodsaas o app Comercial, do orçamento ao contrato assinado no estilo PandaDoc/Proposify/ZapSign/Clicksign — propostas com itens, quantidade fracionada, desconto por item e geral, opcionais que o cliente marca, recorrentes, plano de pagamento, validade, versões, aprovação de desconto, link público com rastreio de visualização e aceite online (nome, CPF/CNPJ, IP, hash); modelos com variáveis e valor por extenso; contratos com partes, vigência, aviso prévio, renovação automática, reajuste e aditivos; assinatura eletrônica com ordem (sequencial/paralela), testemunhas, código por e-mail, recusa, PDF final com manifesto e verificação pública por código; integra com CRM e Financeiro. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir propostas, orçamentos, contratos, assinatura eletrônica, aceite online, gestão de contratos, renovação, ou chamar /rodsaas:comercial.
+description: Preset que soma ao projeto rodsaas o app Comercial, do orçamento ao contrato assinado no estilo PandaDoc/Proposify/ZapSign/Clicksign — propostas com itens, quantidade fracionada, desconto por item e geral, opcionais que o cliente marca, recorrentes, plano de pagamento, validade, versões, aprovação de desconto, link público com rastreio de visualização e aceite online (nome, CPF/CNPJ, IP, hash); modelos com variáveis e valor por extenso; contratos com partes, vigência, aviso prévio, renovação automática, reajuste e aditivos; assinatura eletrônica com ordem (sequencial/paralela), testemunhas, código por e-mail, recusa, PDF final com manifesto e verificação pública por código; integra com CRM e Financeiro; sinal cobrado no aceite, envio por WhatsApp pelo motor, reajuste pelo IPCA/IGP-M do Banco Central, catálogo do ERP e relatório de conversão; perfis de locação (diárias, disponibilidade, devolução), reforma/obra (etapas, medição com retenção) e escola (matrícula com anuidade, irmão e pontualidade). Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir propostas, orçamentos, contratos, assinatura eletrônica, aceite online, gestão de contratos, renovação, sinal, reajuste, IGP-M, IPCA, conversão, locação, medição de obra, matrícula, ou chamar /rodsaas:comercial.
 ---
 
 # rodsaas · comercial (app Comercial)
@@ -40,7 +40,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, planos (ou a wor
 Se `rodsaas.json → presets` já tem `comercial` (ou existe `api/src/modules/comercial`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 5 e 6 (é onde mais se simplifica: total calculado no front, proposta editável depois de enviada, aceite que não guarda o que foi aceito, assinatura que qualquer um com o link faz sem código, ordem de assinatura ignorada, PDF final sem manifesto nem hash).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 9 e 10 se o Comercial foi instalado antes da versão 0.32 (sinal, WhatsApp, índice do Banco Central, catálogo do ERP, conversão e perfis não existiam) e depois pelas fases 3, 5 e 6 (é onde mais se simplifica: total calculado no front, proposta editável depois de enviada, aceite que não guarda o que foi aceito, assinatura que qualquer um com o link faz sem código, ordem de assinatura ignorada, PDF final sem manifesto nem hash).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/09-checklist.md` e o `/rodsaas:verify` (`-g "Comercial"`).
 
@@ -55,14 +55,16 @@ Se `rodsaas.json → presets` já tem `comercial` (ou existe `api/src/modules/co
 | Validade | 15 dias a partir do envio (configurável por proposta); vence no fim do dia |
 | Depois de enviada | a proposta **não muda**: mudar = nova versão (a anterior vira "substituída" e o link antigo deixa de aceitar) |
 | Aceite | nome completo, CPF/CNPJ válido e "li e concordo"; guarda IP, navegador, data, os itens marcados e o SHA-256 do documento aceito |
-| Contratos | vigência em meses, aviso prévio de 30 dias, renovação automática desligada por padrão, reajuste anual manual pelo índice informado (IPCA/IGP-M são digitados, sem consulta automática) |
+| Contratos | vigência em meses, aviso prévio de 30 dias, renovação automática desligada por padrão, reajuste anual pelo índice do contrato (IPCA, IGP-M, INPC, IGP-DI do SGS do Banco Central, acumulado dos 12 meses antes do aniversário; deflação não reduz), aplicado pelo vendedor ou sozinho (`autoReadjust`) |
 | Assinatura | assinatura eletrônica (MP 2.200-2/2001 art. 10 §2º — válida entre as partes que aceitam o meio; Lei 14.063/2020 para entes públicos); código de 6 dígitos por e-mail (10 min, 5 tentativas); envelope vence em 30 dias; lembrete a cada 3 dias |
 | PDF | Gotenberg; PDF final = documento + folha de assinaturas, SHA-256 gravado, código de verificação `XXXX-XXXX-XXXX` |
 | Integrações | CRM (proposta do negócio; aceite ganha o negócio), Financeiro (aceite gera as contas a receber do plano de pagamento e, se ligado, a cobrança) |
 | Planos (modelo de planos) | Free: 10 propostas/mês, modelos padrão, aceite online; Pro: propostas ilimitadas, + contratos, assinatura (50 envelopes/mês), aprovação de desconto, modelos próprios, rastreio de visualização; Business: 500 envelopes/mês |
 | Workstation | app **por vendedor** (quem tem papel `SELLER` ou `COM_ADMIN`), com envelopes inclusos e pacotes extras |
+| Sinal | nenhum por padrão; por proposta (% ou R$) ou o padrão das configurações; cobrado pelo Financeiro no aceite |
+| Perfil | o segmento do onboarding ou a pergunta na primeira abertura; `GENERAL` se pular |
 
-Fora da v1 (registre no README do projeto): assinatura digital com certificado ICP-Brasil (qualificada), validação de identidade por selfie/documento, assinatura por WhatsApp/SMS, pagamento dentro da proposta (o Financeiro cobra depois do aceite), edição colaborativa em tempo real, consulta automática de índices de reajuste, CPQ com regras de preço complexas, nota fiscal.
+Fora da v1 (registre no README do projeto): assinatura digital com certificado ICP-Brasil (qualificada), validação de identidade por selfie/documento, assinatura por WhatsApp/SMS (o link vai pelo WhatsApp; o código continua no e-mail), pagamento do valor total dentro da proposta (só o sinal; o restante o Financeiro cobra), edição colaborativa em tempo real, CPQ com regras de preço complexas, nota fiscal, vistoria com fotos na locação, cronograma físico-financeiro com caminho crítico na obra, boletim e diário escolar.
 
 ## Fases
 
@@ -82,7 +84,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(com
    - *Pronto quando*: `currentTurn`/`canSign` (409 `NOT_YOUR_TURN`), `checkOtp` (tentativas contadas), evidências gravadas (IP, navegador, horário, documento), envelope concluído gera PDF final + manifesto + SHA-256 + `verificationCode`, verificação pública por código e por hash, recusa encerra.
 7. **Telas** — Início, propostas (lista, editor, detalhe com linha do tempo), modelos, contratos, envelopes, configurações, páginas públicas. → `references/08-telas.md`
    - *Pronto quando*: todas as rotas e testids da seção "Contrato testável", total ao vivo no editor, páginas públicas no celular com a marca da empresa.
-8. **Fechamento** — `references/09-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do Comercial: `-g "Comercial"`; exige os formatos ★ de `03-api.md` e os testids de `08-telas.md`), README do projeto.
+8. **Fechamento do núcleo** — `references/09-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do Comercial: `-g "Comercial"`; exige os formatos ★ de `03-api.md` e os testids de `08-telas.md`), README do projeto.
+9. **Operação avançada** — sinal no aceite, envio por WhatsApp, reajuste pelo Banco Central, catálogo do ERP, relatório de conversão. → `references/10-operacao-avancada.md`
+   - *Pronto quando*: aceite cobra o sinal pelo Financeiro e o pagamento marca a proposta; envio pelo motor de WhatsApp com o link; reajuste com o acumulado de 12 meses encadeado (mês faltando 409, deflação não reduz); item com o preço do ERP e pedido no aceite; funil de conversão com os números certos.
+10. **Perfis de segmento** — locação, reforma/obra, escola. → `references/11-perfis-de-segmento.md`
+   - *Pronto quando*: escolher o perfil liga o que ele pede; locação com a tarifa mais barata, disponibilidade e devolução atrasada; obra com etapas, medição e retenção; matrícula com o plano da anuidade e irmão automático. Feche com `/rodsaas:verify -g "Comercial"` (inclui `32-comercial-operacao.spec.ts`).
 
 ## Princípios
 
@@ -111,4 +117,6 @@ O que foi adicionado (app, telas, páginas públicas), papéis, planos ou workst
 | `references/07-modelos-e-pdf.md` | Fase 4 |
 | `references/08-telas.md` | Fase 7: rotas do front, telas, estados, contrato de testids |
 | `references/09-checklist.md` | Fase 8 |
-| `scripts/comercial-lib.mjs` + `comercial-lib.test.mjs` | itens e totais, aprovação, plano de pagamento, modelos (variáveis e blocos por tipo) e filtros, valor por extenso, situação e aceite da proposta, visualizações, vigência/renovação/reajuste, ordem de assinatura, código por e-mail, código de verificação, manifesto: porte para TS com os testes |
+| `references/10-operacao-avancada.md` | Fase 9: sinal, WhatsApp, reajuste pelo Banco Central, catálogo do ERP, conversão |
+| `references/11-perfis-de-segmento.md` | Fase 10: locação, reforma/obra, escola |
+| `scripts/comercial-lib.mjs` + `comercial-lib.test.mjs` | itens e totais, aprovação, plano de pagamento, modelos (variáveis e blocos por tipo) e filtros, valor por extenso, situação e aceite da proposta, visualizações, vigência/renovação/reajuste, ordem de assinatura, código por e-mail, código de verificação, manifesto, sinal, telefone e texto do WhatsApp, séries do SGS e índice acumulado, conversão, locação, medição de obra, anuidade escolar, perfis: porte para TS com os testes |

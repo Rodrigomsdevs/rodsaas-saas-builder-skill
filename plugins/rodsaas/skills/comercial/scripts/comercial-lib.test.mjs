@@ -202,3 +202,167 @@ test("variáveis e blocos por tipo de modelo", () => {
   assert.deepEqual(C.validateBlocks('<div data-block="aceite"></div>', "CONTRACT").map((e) => [e.code, e.path]), [["UNKNOWN_BLOCK", "aceite"]]);
   assert.deepEqual(C.validateBlocks("<div data-block='x'></div>", "AMENDMENT").map((e) => e.path), ["x"]);
 });
+
+// ================================================================== operação avançada e perfis
+const T1 = (items) => C.proposalTotals(items);
+test("sinal no aceite: validação, base no avulso ou na mensalidade, teto e plano do restante", () => {
+  const once = T1([{ id: "a", description: "Projeto", qty: 1, unitCents: 100000 }]);
+  const monthly = T1([{ id: "m", description: "Suporte", qty: 1, unitCents: 30000, recurring: "month" }]);
+  assert.deepEqual(C.validateDeposit({ pct: 30, amountCents: 100 }, once).map((e) => e.code), ["DEPOSIT_INVALID"]);
+  assert.deepEqual(C.validateDeposit({}, once).map((e) => e.code), ["DEPOSIT_INVALID"]);
+  assert.deepEqual(C.validateDeposit({ pct: 0 }, once).map((e) => e.path), ["deposit.pct"]);
+  assert.deepEqual(C.validateDeposit({ pct: 100.5 }, once).map((e) => e.path), ["deposit.pct"]);
+  assert.deepEqual(C.validateDeposit({ amountCents: 10.5 }, once).map((e) => e.path), ["deposit.amountCents"]);
+  assert.deepEqual(C.validateDeposit({ pct: 30, dueDays: 31 }, once).map((e) => e.path), ["deposit.dueDays"]);
+  assert.deepEqual(C.validateDeposit({ amountCents: 100001 }, once).map((e) => e.code), ["DEPOSIT_ABOVE_TOTAL"]);
+  assert.deepEqual(C.validateDeposit({ amountCents: 100000 }, once), []);
+  assert.deepEqual(C.validateDeposit({ pct: 100, dueDays: 0 }, once), []);
+  assert.deepEqual(C.validateDeposit(null, once), []);
+  assert.equal(C.depositAmount({ pct: 30 }, once), 30000);
+  assert.equal(C.depositAmount({ pct: 33.333 }, once), 33333);
+  assert.equal(C.depositAmount({ amountCents: 5000 }, once), 5000);
+  assert.equal(C.depositAmount({ pct: 50 }, monthly), 15000, "sem avulso: sobre a 1ª mensalidade");
+  assert.equal(C.depositAmount({ amountCents: 999999 }, monthly), 30000, "nunca mais que a base");
+  assert.equal(C.depositAmount(null, once), 0);
+  assert.equal(C.depositAmount({ pct: 0.5 }, T1([{ id: "c", description: "x", qty: 1, unitCents: 101 }])), 1, "0,505 centavo arredonda para 1");
+  assert.equal(C.depositAmount({ pct: 50 }, T1([{ id: "c", description: "x", qty: 1, unitCents: 101 }])), 51, "50,5 arredonda para cima");
+  assert.equal(C.depositBase(T1([{ id: "y", description: "Licença", qty: 1, unitCents: 120000, recurring: "year" }])), 120000);
+  const p = C.planAfterDeposit(100000, 30000, { kind: "parcelado", installments: 2, firstDue: "2027-01-31" });
+  assert.deepEqual(p.schedule.map((x) => [x.amountCents, x.dueDate]), [[35000, "2027-01-31"], [35000, "2027-02-28"]]);
+  assert.deepEqual(C.planAfterDeposit(100000, 100000, { kind: "avista", firstDue: "2027-01-31" }), { ok: true, errors: [], schedule: [] }, "sinal de 100%: nada mais a pagar");
+});
+
+test("WhatsApp: telefone em E.164 e texto do envio", () => {
+  assert.equal(C.toE164Br("(44) 99988-7766"), "+5544999887766");
+  assert.equal(C.toE164Br("+55 44 99988-7766"), "+5544999887766");
+  assert.equal(C.toE164Br("0055 44 99988-7766"), "+5544999887766");
+  assert.equal(C.toE164Br("44 3322-1100"), "+554433221100", "fixo com WhatsApp Business");
+  assert.equal(C.toE164Br("44 8888-77766"), null, "celular sem o 9");
+  assert.equal(C.toE164Br("1 9998-776"), null, "9 dígitos");
+  assert.equal(C.toE164Br("09 99988-7766"), null, "DDD não começa com 0");
+  assert.equal(C.toE164Br("10 99988-7766"), null, "DDD 10 não existe");
+  assert.equal(C.toE164Br("11999887766"), "+5511999887766");
+  assert.equal(C.toE164Br("4499988776"), "+554499988776");
+  assert.equal(C.toE164Br("1199988776655"), null, "13 dígitos sem 55");
+  assert.equal(C.toE164Br("123"), null);
+  assert.equal(C.whatsappProposalText({ company: "Acme", customerName: "Ana Souza", code: "P-0007", url: "https://x/p/abc", totalCents: 150000, monthlyCents: 9900, validUntil: "2026-11-30" }), "Ana, aqui é da Acme. Segue a proposta P-0007 (R$ 1.500,00 + R$ 99,00/mês), válida até 30/11/2026: https://x/p/abc");
+  assert.equal(C.whatsappProposalText({ company: "Acme", customerName: "", code: "P-1", url: "u", totalCents: 0, monthlyCents: 0, validUntil: "2026-11-30" }), "Olá, aqui é da Acme. Segue a proposta P-1, válida até 30/11/2026: u");
+});
+
+test("reajuste: SGS, acumulado encadeado de 12 meses antes do aniversário, mês faltando e deflação", () => {
+  assert.deepEqual(C.INDEX_SERIES, { IPCA: 433, "IGP-M": 189, INPC: 188, "IGP-DI": 190 });
+  assert.equal(C.sgsUrl(433, "2025-01-01", "2025-12-31"), "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=json&dataInicial=01/01/2025&dataFinal=31/12/2025");
+  assert.deepEqual(C.parseSgs([{ data: "01/01/2025", valor: "0.16" }, { data: "01/02/2025", valor: "1,31" }, { data: "x", valor: "1" }, { data: "01/03/2025", valor: "abc" }]), [{ month: "2025-01", pct: 0.16 }, { month: "2025-02", pct: 1.31 }]);
+  const s = []; for (let i = 1; i <= 12; i++) s.push({ month: "2025-" + String(i).padStart(2, "0"), pct: 0.5 }); s.push({ month: "2026-01", pct: 1 });
+  assert.deepEqual(C.accumulatedIndex(s, "2026-01"), { ok: true, pct: 6.1678, rawPct: 6.1678, from: "2025-01", to: "2025-12", floored: false }, "12 × 0,5% encadeado ≠ 6%");
+  assert.equal(C.accumulatedIndex(s, "2026-02").pct, 6.696, "janela anda um mês");
+  assert.deepEqual(C.accumulatedIndex(s, "2026-03"), { ok: false, missing: ["2026-02"], from: "2025-03", to: "2026-02" });
+  const def = s.map((x) => ({ ...x, pct: -0.2 }));
+  assert.deepEqual(C.accumulatedIndex(def, "2026-01", { floorZero: true }), { ok: true, pct: 0, rawPct: -2.3738, from: "2025-01", to: "2025-12", floored: true });
+  assert.equal(C.accumulatedIndex(def, "2026-01").pct, -2.3738, "sem a cláusula, reduz");
+  assert.equal(C.accumulatedIndex(s, "2026-01", { months: 3 }).from, "2025-10");
+  assert.equal(C.readjust(100000, 6.1678), 106168);
+  assert.equal(C.anniversaryMonth("2025-03-10", "2026-10-15"), "2027-03");
+  assert.equal(C.anniversaryMonth("2025-11-10", "2026-10-15"), "2026-11");
+  assert.equal(C.anniversaryMonth("2025-10-20", "2026-10-15"), "2026-10", "aniversário ainda neste mês");
+  assert.equal(C.anniversaryMonth("2025-10-10", "2026-10-15"), "2027-10", "aniversário deste mês já passou");
+  assert.equal(C.anniversaryMonth("2026-09-01", "2026-10-15"), "2027-09", "primeiro aniversário é 12 meses depois do início");
+  assert.equal(C.anniversaryMonth("2026-12-01", "2026-10-15"), "2027-12");
+});
+
+test("conversão: funil, taxa sobre as decididas, tempo até o aceite, ticket e por vendedor", () => {
+  const T = "2026-10-31";
+  const ps = [
+    { sentAt: "2026-10-01T10:00:00Z", viewedAt: "2026-10-01T11:00:00Z", acceptedAt: "2026-10-05T10:00:00Z", validUntil: "2026-10-30", sellerId: "a", totalCents: 100000, monthlyCents: 0, effectiveDiscountPct: 10 },
+    { sentAt: "2026-10-02T10:00:00Z", acceptedAt: "2026-10-04T10:00:00Z", validUntil: "2026-10-30", sellerId: "b", totalCents: 0, monthlyCents: 10000, effectiveDiscountPct: 0 },
+    { sentAt: "2026-10-03T10:00:00Z", viewedAt: "2026-10-03T12:00:00Z", rejectedAt: "2026-10-06T10:00:00Z", validUntil: "2026-10-30", sellerId: "a", totalCents: 50000 },
+    { sentAt: "2026-10-04T10:00:00Z", validUntil: "2026-10-20", sellerId: "a", totalCents: 70000 },
+    { sentAt: "2026-10-10T10:00:00Z", viewedAt: "2026-10-11T10:00:00Z", validUntil: "2026-11-20", sellerId: "b", totalCents: 20000 },
+    { sentAt: "2026-09-30T10:00:00Z", acceptedAt: "2026-10-01T10:00:00Z", validUntil: "2026-10-30", sellerId: "a", totalCents: 999999 },
+    { validUntil: "2026-11-30", sellerId: "a", totalCents: 5 },
+    { sentAt: "2026-10-20T10:00:00Z", validUntil: "2026-10-31", sellerId: "b", totalCents: 1 },
+  ];
+  const r = C.conversionReport(ps, { from: "2026-10-01", to: "2026-10-31", today: T });
+  assert.deepEqual([r.sent, r.viewed, r.accepted, r.rejected, r.expired, r.open], [6, 4, 2, 1, 1, 2], "validade hoje ainda está aberta");
+  assert.equal(r.conversionPct, 50, "2 aceitas de 4 decididas");
+  assert.equal(r.viewRatePct, 66.7);
+  assert.equal(r.avgDaysToAccept, 3, "(4 + 2) / 2");
+  assert.equal(r.acceptedCents, 220000, "mensalidade conta 12 meses");
+  assert.equal(r.avgTicketCents, 110000);
+  assert.equal(r.avgDiscountAcceptedPct, 5);
+  assert.deepEqual(r.bySeller.map((x) => [x.sellerId, x.sent, x.accepted, x.conversionPct]), [["b", 3, 1, 100], ["a", 3, 1, 33.3]]);
+  const empty = C.conversionReport([], { from: "2026-10-01", to: "2026-10-31", today: T });
+  assert.deepEqual([empty.sent, empty.conversionPct, empty.viewRatePct, empty.avgDaysToAccept, empty.avgTicketCents, empty.avgDiscountAcceptedPct], [0, null, null, null, null, null]);
+});
+
+test("locação: diárias, tarifa mais barata, disponibilidade no período e atraso", () => {
+  assert.equal(C.rentalDays("2026-10-01", "2026-10-01"), 1);
+  assert.equal(C.rentalDays("2026-10-01", "2026-10-02"), 1);
+  assert.equal(C.rentalDays("2026-10-01", "2026-10-11"), 10);
+  const r = { dayCents: 5000, weekCents: 25000, monthCents: 80000 };
+  assert.equal(C.rentalPrice(3, r), 15000);
+  assert.equal(C.rentalPrice(5, r), 25000, "5 diárias = 1 semana");
+  assert.equal(C.rentalPrice(6, r), 25000, "6 dias sai mais barato pagar a semana");
+  assert.equal(C.rentalPrice(10, r), 40000, "semana + 3 diárias");
+  assert.equal(C.rentalPrice(26, r), 80000, "3 semanas + 5 diárias = 100.000 > mês");
+  assert.equal(C.rentalPrice(40, r), 120000);
+  assert.equal(C.rentalPrice(10, { dayCents: 5000 }), 50000);
+  assert.equal(C.rentalPrice(1, { dayCents: 5000, weekCents: 4000 }), 4000, "semana mais barata que a diária");
+  const b = [{ qty: 2, start: "2026-10-01", end: "2026-10-05" }, { qty: 1, start: "2026-10-05", end: "2026-10-08" }, { qty: 5, start: "2026-10-01", end: "2026-10-30", status: "CANCELED" }, { qty: 5, start: "2026-10-01", end: "2026-10-30", status: "RETURNED" }];
+  assert.equal(C.rentalAvailable(4, b, { start: "2026-10-03", end: "2026-10-06" }), 1);
+  assert.equal(C.rentalAvailable(4, b, { start: "2026-10-05", end: "2026-10-06" }), 3, "devolve no dia 5, aluga de novo no dia 5");
+  assert.equal(C.rentalAvailable(4, b, { start: "2026-10-08", end: "2026-10-10" }), 4);
+  assert.equal(C.rentalAvailable(1, b, { start: "2026-10-01", end: "2026-10-10" }), 0);
+  assert.deepEqual(C.lateReturn({ end: "2026-10-05", returnedAt: "2026-10-06T01:00:00-03:00", dayCents: 5000 }), { lateDays: 0, chargeCents: 0 }, "dentro da tolerância");
+  assert.deepEqual(C.lateReturn({ end: "2026-10-05", returnedAt: "2026-10-06T10:00:00-03:00", dayCents: 5000 }), { lateDays: 1, chargeCents: 5000 });
+  assert.deepEqual(C.lateReturn({ end: "2026-10-05", returnedAt: "2026-10-08T10:00:00-03:00", dayCents: 5000, graceHours: 0 }), { lateDays: 3, chargeCents: 15000 });
+});
+
+test("obra: etapas somando 100%, valor por etapa e medição com retenção", () => {
+  assert.deepEqual(C.validateStages([]).map((e) => e.code), ["STAGES_REQUIRED"]);
+  assert.deepEqual(C.validateStages([{ name: "", pct: 0 }]).map((e) => e.path), ["stages.0.name", "stages.0.pct"]);
+  assert.deepEqual(C.validateStages([{ name: "A", pct: 50 }, { name: "B", pct: 40 }]).map((e) => e.code), ["STAGES_SUM"]);
+  assert.deepEqual(C.validateStages([{ name: "A", pct: 33.33 }, { name: "B", pct: 33.33 }, { name: "C", pct: 33.34 }]), []);
+  assert.deepEqual(C.stageValues(100, [{ pct: 33.33 }, { pct: 33.33 }, { pct: 33.34 }]), [33, 33, 34]);
+  assert.deepEqual(C.stageValues(101, [{ pct: 50 }, { pct: 50 }]), [51, 50]);
+  const st = [{ name: "Demolição", pct: 30 }, { name: "Alvenaria", pct: 70 }];
+  const m1 = C.measurement(100000, st, [0, 0], [100, 50], { retentionPct: 5 });
+  assert.deepEqual([m1.grossCents, m1.retentionCents, m1.netCents], [65000, 3250, 61750]);
+  const m2 = C.measurement(100000, st, [100, 50], [100, 100], { retentionPct: 5 });
+  assert.deepEqual(m2.lines.map((l) => l.amountCents), [0, 35000], "só a diferença do progresso");
+  assert.deepEqual(C.measurement(100000, st, [100, 50], [100, 40]).errors.map((e) => [e.code, e.path]), [["PROGRESS_BACKWARDS", "progress.1"]]);
+  assert.deepEqual(C.measurement(100000, st, [0, 0], [101, 0]).errors.map((e) => e.code), ["PROGRESS_INVALID"]);
+  assert.equal(C.measurement(100000, st, null, [10]).lines[1].amountCents, 0, "etapa sem progresso fica onde estava");
+  assert.deepEqual(C.measurement(100000, st, [50, 20], [60]).lines.map((l) => [l.now, l.amountCents]), [[60, 3000], [20, 0]], "etapa sem medição nova fica no progresso anterior");
+  assert.equal(C.measurement(99999, [{ name: "A", pct: 100 }], [33.3], [66.6]).grossCents, 33299, "arredonda o acumulado (66.599 − 33.300), não a diferença");
+  assert.equal(C.measurement(1000, st, [0, 0], [50, 50]).retentionCents, 0);
+  assert.equal(C.measurement(1010, [{ name: "A", pct: 100 }], [0], [100], { retentionPct: 5 }).retentionCents, 51, "retenção arredonda (50,5 → 51)");
+});
+
+test("escola: anuidade com irmão e bolsa, material na 1ª, pontualidade até o vencimento", () => {
+  assert.throws(() => C.tuitionPlan({ annualCents: 1, installments: 13, firstDue: "2027-01-10" }));
+  assert.throws(() => C.tuitionPlan({ annualCents: 1, installments: 0, firstDue: "2027-01-10" }));
+  const p = C.tuitionPlan({ annualCents: 1200000, installments: 12, firstDue: "2027-01-31", siblingPct: 10, punctualityPct: 5, materialCents: 30000, enrollmentFeeCents: 50000 });
+  assert.equal(p.schedule.length, 12);
+  assert.deepEqual(p.schedule[0], { number: 1, dueDate: "2027-01-31", grossCents: 130000, discountCents: 10000, amountCents: 120000, onTimeCents: 115500 }, "pontualidade não vale sobre o material");
+  assert.deepEqual(p.schedule[1], { number: 2, dueDate: "2027-02-28", grossCents: 100000, discountCents: 10000, amountCents: 90000, onTimeCents: 85500 });
+  assert.equal(p.schedule[11].dueDate, "2027-12-31");
+  assert.equal(p.totalCents, 50000 + 1080000 + 30000);
+  assert.equal(p.enrollmentCents, 50000);
+  const q = C.tuitionPlan({ annualCents: 1000001, installments: 3, firstDue: "2027-02-10", siblingPct: 60, scholarshipPct: 50 });
+  assert.deepEqual(q.schedule.map((x) => x.amountCents), [0, 0, 0], "descontos somados com teto de 100%");
+  const r = C.tuitionPlan({ annualCents: 1000, installments: 3, firstDue: "2027-02-10" });
+  assert.deepEqual(r.schedule.map((x) => [x.grossCents, x.amountCents]), [[334, 334], [333, 333], [333, 333]]);
+  const s = C.tuitionPlan({ annualCents: 1000, installments: 3, firstDue: "2027-02-10", scholarshipPct: 50 });
+  assert.deepEqual(s.schedule.map((x) => x.amountCents), [168, 166, 166]);
+  assert.equal(C.tuitionDue(p.schedule[1], "2027-02-28"), 85500, "no dia ainda vale");
+  assert.equal(C.tuitionDue(p.schedule[1], "2027-03-01"), 90000);
+});
+
+test("perfis do Comercial", () => {
+  assert.deepEqual(Object.keys(C.COM_SEGMENTS), ["GENERAL", "RENTAL", "CONSTRUCTION", "SCHOOL"]);
+  assert.equal(C.comSegment("SCHOOL").words.customer, "responsável");
+  assert.ok(C.comSegment("CONSTRUCTION").on.includes("measurements"));
+  assert.ok(C.comSegment("RENTAL").on.includes("rentals"));
+  assert.equal(C.comSegment("X").id, "GENERAL");
+});

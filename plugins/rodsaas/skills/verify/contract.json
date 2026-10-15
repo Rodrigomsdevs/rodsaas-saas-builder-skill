@@ -1,5 +1,5 @@
 {
-  "version": 24,
+  "version": 25,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -3128,7 +3128,10 @@
         "/comercial/configuracoes",
         "/proposta/[token]",
         "/assinar/[token]",
-        "/verificar"
+        "/verificar",
+        "/comercial/relatorios",
+        "/comercial/locacoes",
+        "/comercial/matriculas"
       ],
       "testids": [
         "com-home",
@@ -3226,7 +3229,18 @@
         "verify-file",
         "verify-result",
         "data-valid",
-        "verify-signer"
+        "verify-signer",
+        "com-segment",
+        "proposal-deposit",
+        "proposal-deposit-pay",
+        "com-send-whatsapp",
+        "com-conversion",
+        "com-conversion-seller",
+        "data-seller",
+        "com-rental-row",
+        "com-stage-row",
+        "data-progress",
+        "com-enrollment-row"
       ],
       "api": [
         {
@@ -3281,7 +3295,8 @@
             "client",
             "items",
             "globalDiscountPct",
-            "paymentPlan"
+            "paymentPlan",
+            "deposit"
           ]
         },
         {
@@ -3302,7 +3317,11 @@
         },
         {
           "method": "post",
-          "path": "/v1/com/proposals/{id}/send"
+          "path": "/v1/com/proposals/{id}/send",
+          "body": [
+            "channel",
+            "phone"
+          ]
         },
         {
           "method": "post",
@@ -3359,7 +3378,9 @@
             "startDate",
             "months",
             "existing",
-            "proposalId"
+            "proposalId",
+            "stages",
+            "retentionPct"
           ]
         },
         {
@@ -3378,7 +3399,9 @@
           "method": "post",
           "path": "/v1/com/contracts/{id}/readjust",
           "body": [
-            "pct"
+            "pct",
+            "index",
+            "month"
           ]
         },
         {
@@ -3431,6 +3454,92 @@
           "body": [
             "sha256"
           ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/indexes/{code}"
+        },
+        {
+          "method": "put",
+          "path": "/v1/com/indexes/{code}",
+          "body": [
+            "series"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/catalog"
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/reports/conversion"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/envelopes/{id}/signers/{signerId}/whatsapp",
+          "body": [
+            "phone"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/rental-items",
+          "body": [
+            "name",
+            "stockQty",
+            "dayCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/rental-items/{id}/availability"
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/rentals"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/rentals/{id}/checkout"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/rentals/{id}/return",
+          "body": [
+            "returnedAt",
+            "damagesCents"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts/{id}/measurements",
+          "body": [
+            "progress"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/contracts/{id}/measurements"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/contracts/{id}/release-retention"
+        },
+        {
+          "method": "post",
+          "path": "/v1/com/enrollments",
+          "body": [
+            "student",
+            "guardian",
+            "schoolYear",
+            "annualCents",
+            "installments",
+            "firstDue"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/com/enrollments"
         }
       ]
     },

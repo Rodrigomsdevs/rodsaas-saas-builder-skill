@@ -16,7 +16,7 @@ Estados: sem conexão → vazio que ensina ("Conecte o WhatsApp da empresa" com 
 | **Agenda** | `notifyClient` manda, além do e-mail: confirmação (`agenda_confirmacao`), lembrete com **Confirmo / Remarcar** (`agenda_lembrete`), sinal pendente (`agenda_sinal`), vaga da lista de espera (`espera_vaga`) — variáveis: primeiro nome, serviço, quando, link | "1"/"Confirmo" (resposta à confirmação/lembrete) → `clientConfirmedAt`; "2"/"Remarcar" → manda o link de remarcar; outro texto → avisa quem atende |
 | **CRM** | botão WhatsApp no contato/negócio usa `whatsapp.send()` quando conectado (modelos do CRM ou texto livre na janela); senão o link `wa.me` | conversa aparece na linha do tempo do contato (casado pelo telefone); número desconhecido como app padrão → lead na caixa de leads |
 | **Suporte** | resposta pública do chamado de origem WhatsApp sai pelo WhatsApp (modelo `suporte_atualizacao` fora da janela) | mensagem nova → chamado novo (canal `WHATSAPP`) ou entra no chamado aberto do mesmo número; fotos/áudios como anexos (add-on `uploads`) |
-| **Comercial** | link da proposta e do envelope de assinatura | resposta vai para a linha do tempo da proposta |
+| **Comercial** | link da proposta (texto na janela; fora dela o modelo `proposta_enviada`: primeiro nome, empresa, código, link) e do envelope de assinatura (`assinatura_link`) | resposta vai para a linha do tempo da proposta |
 | **Financeiro** | link de cobrança (`cobranca_link`) e lembrete de vencimento | resposta avisa o financeiro |
 
 App não instalado: a linha some (nada quebra). Todo envio de app passa pelo descadastro e pelo limite do plano; falha não desfaz a ação do app (o agendamento continua; o e-mail continua indo).

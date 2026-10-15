@@ -176,6 +176,8 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 | `com.contract.expiring` | job 8 h: contrato entrou no aviso prévio (ou faz aniversário de reajuste) | dono do contrato e `COM_ADMIN` | contract · `expiring` (`groupUrl` `/comercial/contratos?status=EXPIRING`) | `/comercial/contratos/<id>` |
 | `com.contract.renewed` | renovação automática | dono do contrato | contract | idem |
 | `com.integration.failed` | falha ao ganhar o negócio no CRM ou criar as contas a receber | `COM_ADMIN` | proposal | `/comercial?integracoes=1` |
+| `com.deposit.paid` | sinal da proposta aceita pago (webhook da cobrança do Financeiro) | dono da proposta | proposal | `/comercial/propostas/<id>` |
+| `com.contract.readjusted` | reajuste pelo índice aplicado (à mão ou pelo job do aniversário) | dono do contrato e `COM_ADMIN` | contract | `/comercial/contratos/<id>` |
 
 `canSee`: ter papel no Comercial e, para `SELLER`, ser o dono da proposta/contrato. Tirar o papel → `retract`. Os e-mails para **clientes e signatários** (proposta, código, convite para assinar, lembretes, PDF final) não passam por aqui: saem pelo app com a marca da empresa.
 

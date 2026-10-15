@@ -27,7 +27,7 @@ export const SEGMENTS = [
   { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas", "financeiro", "comercial", "erp"], crmProfile: "B2B", erpProfile: "WHOLESALE" },
   { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro", "comercial"], crmProfile: "B2B", finProfile: "SERVICES" },
   { id: "imobiliaria", label: "Imobiliária ou corretor", icon: "Building", apps: ["crm", "agenda", "comercial", "financeiro", "paginas"], agendaProfile: "CONSULTING", crmProfile: "REAL_ESTATE" },
-  { id: "educacao", label: "Escola ou curso", icon: "GraduationCap", apps: ["crm", "agenda", "forms", "financeiro", "comercial", "helpdesk"], crmProfile: "EDUCATION" },
+  { id: "educacao", label: "Escola ou curso", icon: "GraduationCap", apps: ["crm", "agenda", "forms", "financeiro", "comercial", "helpdesk"], crmProfile: "EDUCATION", comProfile: "SCHOOL" },
   { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro", "comercial"], crmProfile: "B2B", helpdeskProfile: "SOFTWARE", finProfile: "SERVICES" },
   { id: "outro", label: "Outro", icon: "Sparkles", apps: ["tarefas", "crm", "paginas"] },
 ];
@@ -42,6 +42,8 @@ export const helpdeskProfileFor = (segment) => SEGMENTS.find((s) => s.id === seg
 export const erpProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.erpProfile ?? null;
 /** Perfil do Financeiro (`skills/financeiro/references/10-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
 export const finProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.finProfile ?? null;
+/** Perfil do Comercial (`skills/comercial/references/11-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
+export const comProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.comProfile ?? null;
 
 /**
  * Apps sugeridos: os que vieram da landing (?apps=) primeiro, depois os do segmento; só disponíveis.

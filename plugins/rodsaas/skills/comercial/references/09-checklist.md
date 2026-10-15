@@ -55,3 +55,16 @@ Confira **usando o app** (API e front rodando), com: o owner (`COM_ADMIN`), uma 
 - [ ] RLS: a segunda empresa não vê nada (API, telas e links públicos de outra empresa não vazam ids)
 - [ ] `/rodsaas:verify -g "Comercial"` verde (e a bateria completa sem regressão)
 - [ ] README do projeto: o que o Comercial faz, papéis, como subir o Gotenberg, validade jurídica da assinatura (e o que fica fora: ICP-Brasil), o que ficou fora da v1
+
+## Operação avançada (`10`)
+- [ ] sinal: validação; base no avulso (ou na 1ª mensalidade); cobrança no Financeiro no aceite; pago pelo webhook marca a proposta; sem Financeiro, recebido à mão; contrato espera o sinal quando configurado
+- [ ] WhatsApp: telefone em E.164; texto com o link; sem conexão 409 sem enviar; modelo aprovado fora da janela; link do signatário pelo WhatsApp
+- [ ] índices: busca no SGS (job), cache global, lançamento manual; reajuste com 12 meses encadeados, mês faltando 409, deflação não reduz, mesmo mês duas vezes 409, recorrências do Financeiro no valor novo
+- [ ] catálogo: produtos do ERP com preço da tabela e saldo; item com o preço do ERP; pedido no ERP no aceite
+- [ ] conversão: funil do período, taxa sobre as decididas, ticket com mensalidade × 12, por vendedor
+
+## Perfis (`11`)
+- [ ] perfil aplicado sem desligar nada; vocabulário
+- [ ] locação: itens, tarifa mais barata, disponibilidade, reservas no aceite, saída e devolução com atraso e avaria
+- [ ] obra: etapas somando 100%, medição com retenção, progresso não volta, liberar retenção no fim
+- [ ] escola: matrícula com anuidade, material, taxa como sinal, pontualidade, irmão automático no mesmo ano

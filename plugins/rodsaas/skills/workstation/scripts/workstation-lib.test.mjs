@@ -20,6 +20,7 @@ test("suggestApps: landing primeiro, depois o segmento, só disponíveis", () =>
   assert.deepEqual(["tecnologia", "comercio", "nada"].map(W.helpdeskProfileFor), ["SOFTWARE", null, null], "Suporte: só software nasce com perfil; os outros perguntam");
   assert.deepEqual(["industria", "comercio"].map(W.erpProfileFor), ["WHOLESALE", null], "ERP: distribuidora nasce; comércio pergunta");
   assert.deepEqual(["agencia", "escritorio", "tecnologia", "comercio", "saude", "odonto", "barbearia"].map(W.finProfileFor), ["SERVICES", "SERVICES", "SERVICES", "RETAIL", "CLINIC", "CLINIC", null], "Financeiro: perfil pelo segmento");
+  assert.deepEqual(["educacao", "comercio", "outro"].map(W.comProfileFor), ["SCHOOL", null, null], "Comercial: escola nasce; os outros perguntam");
   const many = W.suggestApps({ segment: "saude", available: AVAIL, preselected: ["crm", "forms", "agenda", "helpdesk", "tarefas"] });
   assert.equal(many.selected.length, 5, "tudo o que veio da landing fica marcado");
 });

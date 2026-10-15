@@ -192,3 +192,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | convênio | guia repetida; prazo fixo em vez do convênio; guia enviada duas vezes; glosa sem baixar o lote; glosa somada passando da guia; recurso recuperando mais que o glosado; índice sem descontar o recuperado |
 | prestador | nota emitida na baixa parcial; perfil sem ligar a emissão na baixa |
 | telas | orçamento sem o estado; conta do cartão sem as faturas; perfil sem salvar; guia faltando |
+
+## Comercial · operação (`32-comercial-operacao.spec.ts`, preset `comercial`)
+
+| Teste | Causas comuns |
+|---|---|
+| sinal | sinal sem validar; plano cobrando o total em vez do restante; sinal calculado sem os opcionais marcados; cobrança marcada como paga na criação; pagamento sem voltar para a proposta; contrato saindo antes do sinal |
+| WhatsApp | telefone sem validar; envio "ok" sem conexão; proposta enviada mas mensagem não sai; modelo fora da janela sem o link |
+| reajuste | índices somados em vez de encadeados; janela de 12 meses deslocada; mesmo mês aplicado duas vezes; mês faltando tratado como zero; deflação reduzindo o contrato; índice do contrato ignorando o informado |
+| catálogo do ERP | preço pelo custo; produto inexistente aceito; nome não vem do ERP; pedido confirmado sem reservar o estoque; catálogo mostrando o físico em vez do disponível |
+| conversão | taxa sobre todas as enviadas; mensalidade contada uma vez; vendedor vendo as dos outros; rascunho no funil |
+| locação | diárias × preço em vez da tarifa mais barata; sem checar a disponibilidade; devolução no mesmo dia contada como sobreposição; reserva não criada no aceite; atraso sem cobrança |
+| obra | etapas sem somar 100%; progresso voltando; medição cobrando o acumulado de novo; sem retenção; retenção liberada antes do fim ou duas vezes; medido somando o líquido |
+| escola | irmão de outro ano ou sem aceite; pontualidade sobre o material; mais de 12 parcelas |
+| telas | vendedor faltando no funil; perfil sem salvar; locação sem a situação |
