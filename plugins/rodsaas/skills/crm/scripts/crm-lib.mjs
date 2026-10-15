@@ -672,3 +672,337 @@ export const csvDate = (ymdOrIso) => {
   const s = String(ymdOrIso);
   return `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}`;
 };
+
+// ================================================================== vendas avançadas (references/08) e perfis (09)
+
+// ------------------------------------------------------------------ dias e períodos
+const ymdOf = (n) => new Date(n * 86_400_000).toISOString().slice(0, 10);
+export const addDays = (ymd, n) => ymdOf(dayNumber(ymd) + n);
+const weekday = (ymd) => new Date(dayNumber(ymd) * 86_400_000).getUTCDay(); // 0 domingo … 6 sábado
+export const isBusinessDay = (ymd, holidays = []) => weekday(ymd) !== 0 && weekday(ymd) !== 6 && !holidays.includes(ymd);
+/** Soma n dias úteis (pula sábado, domingo e feriados); n = 0 empurra para o próximo dia útil se cair num dia parado. */
+export function addBusinessDays(ymd, n, holidays = []) {
+  let d = ymd;
+  while (!isBusinessDay(d, holidays)) d = addDays(d, 1);
+  for (let i = 0; i < n; i++) { d = addDays(d, 1); while (!isBusinessDay(d, holidays)) d = addDays(d, 1); }
+  return d;
+}
+/** Período de meta: "2026-10" (mês) ou "2026-Q4" (trimestre) → { start, end } (inclusive) ou null. */
+export function periodBounds(period) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(period));
+  const q = /^(\d{4})-Q([1-4])$/.exec(String(period));
+  if (!m && !q) return null;
+  const y = Number((m ?? q)[1]);
+  const first = m ? Number(m[2]) : (Number(q[2]) - 1) * 3 + 1;
+  const months = m ? 1 : 3;
+  if (first < 1 || first > 12) return null;
+  const start = `${y}-${String(first).padStart(2, "0")}-01`;
+  const endMonth = first + months; // mês seguinte ao fim
+  const next = endMonth > 12 ? `${y + 1}-01-01` : `${y}-${String(endMonth).padStart(2, "0")}-01`;
+  return { start, end: addDays(next, -1) };
+}
+
+// ------------------------------------------------------------------ metas por vendedor
+export const GOAL_METRICS = ["WON_VALUE", "WON_COUNT", "DEALS_CREATED", "ACTIVITIES_DONE"];
+/**
+ * Quanto a meta já atingiu. data: { deals: [{ ownerId, pipelineId, status, value, wonOn, createdOn }], activities: [{ ownerId, done, doneOn }] }
+ * (datas "YYYY-MM-DD" no fuso da empresa). ownerId null = equipe toda.
+ */
+export function goalAchieved(metric, data, { ownerId = null, pipelineId = null, start, end }) {
+  const inRange = (d) => !!d && d >= start && d <= end;
+  const mine = (x) => ownerId == null || x.ownerId === ownerId;
+  const pipe = (x) => pipelineId == null || x.pipelineId === pipelineId;
+  const deals = (data.deals ?? []).filter((d) => mine(d) && pipe(d));
+  if (metric === "WON_VALUE") return deals.filter((d) => d.status === "WON" && inRange(d.wonOn)).reduce((a, d) => a + (d.value ?? 0), 0);
+  if (metric === "WON_COUNT") return deals.filter((d) => d.status === "WON" && inRange(d.wonOn)).length;
+  if (metric === "DEALS_CREATED") return deals.filter((d) => inRange(d.createdOn)).length;
+  if (metric === "ACTIVITIES_DONE") return (data.activities ?? []).filter((a) => mine(a) && a.done && inRange(a.doneOn)).length;
+  return 0;
+}
+/**
+ * Progresso: pct (atingido/meta), expectedPct (proporcional aos dias corridos), status DONE | AHEAD | ON_TRACK | BEHIND
+ * (10 pontos de folga para cada lado), remaining, daysLeft (contando hoje) e perDayNeeded.
+ */
+export function goalProgress({ target, achieved, start, end, today }) {
+  const total = daysBetween(start, end) + 1;
+  const elapsed = Math.min(total, Math.max(0, daysBetween(start, today) + 1));
+  const expectedPct = Math.round((elapsed / total) * 100);
+  const pct = target > 0 ? Math.floor((achieved * 100) / target) : 0;
+  const remaining = Math.max(0, target - achieved);
+  const left = today > end ? 0 : today < start ? total : daysBetween(today, end) + 1;
+  const status = achieved >= target && target > 0 ? "DONE" : pct >= expectedPct + 10 ? "AHEAD" : pct >= expectedPct - 10 ? "ON_TRACK" : "BEHIND";
+  return { pct, expectedPct, status, remaining, daysLeft: left, perDayNeeded: remaining === 0 ? 0 : left > 0 ? Math.ceil(remaining / left) : remaining };
+}
+
+// ------------------------------------------------------------------ condições (automações e pontuação)
+export const CONDITION_OPS = ["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains", "empty", "notEmpty"];
+const fieldValue = (obj, field) => (String(field).startsWith("cf.") ? obj?.customFields?.[field.slice(3)] : obj?.[field]);
+const isEmpty = (v) => v == null || v === "" || (Array.isArray(v) && v.length === 0);
+/** cond: { field, op, value } contra um objeto (negócio ou lead). `cf.<chave>` lê o campo personalizado. */
+export function conditionMatches(cond, obj) {
+  const v = fieldValue(obj, cond.field), c = cond.value;
+  switch (cond.op) {
+    case "eq": return Array.isArray(v) ? false : v === c;
+    case "neq": return v !== c;
+    case "gt": return typeof v === "number" && typeof c === "number" && v > c;
+    case "gte": return typeof v === "number" && typeof c === "number" && v >= c;
+    case "lt": return typeof v === "number" && typeof c === "number" && v < c;
+    case "lte": return typeof v === "number" && typeof c === "number" && v <= c;
+    case "in": return Array.isArray(c) && c.includes(v);
+    case "contains": return Array.isArray(v) ? v.includes(c) : typeof v === "string" && typeof c === "string" && normKey(v).includes(normKey(c));
+    case "empty": return isEmpty(v);
+    case "notEmpty": return !isEmpty(v);
+    default: return false;
+  }
+}
+
+// ------------------------------------------------------------------ automações por etapa
+export const AUTOMATION_TRIGGERS = ["DEAL_CREATED", "STAGE_ENTERED", "DEAL_WON", "DEAL_LOST", "DEAL_ROTTING"];
+export const AUTOMATION_ACTIONS = ["CREATE_ACTIVITY", "ASSIGN_OWNER", "ADD_TAG", "SEND_EMAIL", "SEND_WHATSAPP", "START_SEQUENCE", "NOTIFY"];
+export const ACTIVITY_TYPES = ["CALL", "MEETING", "TASK", "EMAIL", "WHATSAPP", "VISIT", "LUNCH"];
+export const MAX_AUTOMATION_DEPTH = 3;
+/** Confere a automação antes de salvar. ctx: { stageIds, tagIds, userIds, sequenceIds, templateIds } → [{ path, message }] */
+export function validateAutomation(a, ctx = {}) {
+  const e = [];
+  const has = (list, id) => !list || list.includes(id);
+  if (!String(a?.name ?? "").trim()) e.push({ path: "name", message: "Dê um nome" });
+  const t = a?.trigger ?? {};
+  if (!AUTOMATION_TRIGGERS.includes(t.type)) e.push({ path: "trigger.type", message: "Gatilho inválido" });
+  if (["STAGE_ENTERED", "DEAL_ROTTING"].includes(t.type) && !(t.stageId && has(ctx.stageIds, t.stageId))) e.push({ path: "trigger.stageId", message: "Escolha a etapa" });
+  (a?.conditions ?? []).forEach((c, i) => {
+    if (!String(c?.field ?? "").trim()) e.push({ path: `conditions.${i}.field`, message: "Campo" });
+    if (!CONDITION_OPS.includes(c?.op)) e.push({ path: `conditions.${i}.op`, message: "Operador" });
+  });
+  const acts = a?.actions ?? [];
+  if (!acts.length) e.push({ path: "actions", message: "Inclua pelo menos uma ação" });
+  if (acts.length > 10) e.push({ path: "actions", message: "Até 10 ações" });
+  acts.forEach((x, i) => {
+    const p = `actions.${i}`;
+    if (!AUTOMATION_ACTIONS.includes(x?.type)) return e.push({ path: `${p}.type`, message: "Ação inválida" });
+    if (x.type === "CREATE_ACTIVITY") {
+      if (!ACTIVITY_TYPES.includes(x.activityType)) e.push({ path: `${p}.activityType`, message: "Tipo de atividade" });
+      if (!String(x.subject ?? "").trim()) e.push({ path: `${p}.subject`, message: "Assunto" });
+      if (!(Number.isInteger(x.dueInDays) && x.dueInDays >= 0 && x.dueInDays <= 365)) e.push({ path: `${p}.dueInDays`, message: "Prazo de 0 a 365 dias" });
+      if (x.assignTo === "USER" && !(x.userId && has(ctx.userIds, x.userId))) e.push({ path: `${p}.userId`, message: "Escolha a pessoa" });
+    }
+    if (x.type === "ASSIGN_OWNER" && !(Array.isArray(x.userIds) && x.userIds.length && x.userIds.every((u) => has(ctx.userIds, u)))) e.push({ path: `${p}.userIds`, message: "Escolha quem recebe" });
+    if (x.type === "ADD_TAG" && !(x.tagId && has(ctx.tagIds, x.tagId))) e.push({ path: `${p}.tagId`, message: "Etiqueta" });
+    if (x.type === "START_SEQUENCE" && !(x.sequenceId && has(ctx.sequenceIds, x.sequenceId))) e.push({ path: `${p}.sequenceId`, message: "Sequência" });
+    if (x.type === "SEND_EMAIL" && !(x.templateId && has(ctx.templateIds, x.templateId))) e.push({ path: `${p}.templateId`, message: "Modelo de e-mail" });
+    if (x.type === "SEND_WHATSAPP" && !String(x.templateName ?? x.snippetId ?? "").trim()) e.push({ path: `${p}.templateName`, message: "Modelo do WhatsApp" });
+    if (x.type === "NOTIFY" && !(Array.isArray(x.userIds) && x.userIds.length)) e.push({ path: `${p}.userIds`, message: "Quem avisar" });
+  });
+  return e;
+}
+/** event: { type, stageId?, pipelineId? } · deal: o negócio depois da mudança. */
+export function automationMatches(a, event, deal) {
+  if (!a?.active || a.trigger?.type !== event.type) return false;
+  if (a.pipelineId && a.pipelineId !== (event.pipelineId ?? deal.pipelineId)) return false;
+  if (["STAGE_ENTERED", "DEAL_ROTTING"].includes(event.type) && a.trigger.stageId !== event.stageId) return false;
+  return (a.conditions ?? []).every((c) => conditionMatches(c, deal));
+}
+/**
+ * Ações resolvidas para executar (sem efeito colateral). opts: { today, businessDays, holidays, rrCursor, activeUserIds }
+ * → { actions: [...], rrCursor } — CREATE_ACTIVITY ganha dueDate e ownerId; ASSIGN_OWNER ganha ownerId (rodízio).
+ */
+export function planActions(a, deal, { today, businessDays = false, holidays = [], rrCursor = 0, activeUserIds = null } = {}) {
+  let cursor = rrCursor;
+  const out = (a.actions ?? []).map((x) => {
+    if (x.type === "CREATE_ACTIVITY") {
+      const dueDate = businessDays ? addBusinessDays(today, x.dueInDays, holidays) : addDays(today, x.dueInDays);
+      return { ...x, dueDate, ownerId: x.assignTo === "USER" ? x.userId : deal.ownerId };
+    }
+    if (x.type === "ASSIGN_OWNER") {
+      cursor += 1;
+      return { ...x, ownerId: roundRobinPick(x.userIds, cursor, activeUserIds ?? x.userIds) };
+    }
+    return { ...x };
+  });
+  return { actions: out, rrCursor: cursor };
+}
+
+// ------------------------------------------------------------------ sequências de follow-up
+export const SEQUENCE_STEP_TYPES = ["CALL", "EMAIL", "WHATSAPP", "TASK", "MEETING"];
+export const SEQUENCE_STOP_EVENTS = ["DEAL_WON", "DEAL_LOST", "REPLIED", "OPTED_OUT"];
+export function validateSequence(s) {
+  const e = [];
+  if (!String(s?.name ?? "").trim()) e.push({ path: "name", message: "Dê um nome" });
+  const steps = s?.steps ?? [];
+  if (!steps.length || steps.length > 20) e.push({ path: "steps", message: "De 1 a 20 passos" });
+  steps.forEach((st, i) => {
+    if (!SEQUENCE_STEP_TYPES.includes(st?.type)) e.push({ path: `steps.${i}.type`, message: "Tipo do passo" });
+    if (!String(st?.subject ?? "").trim()) e.push({ path: `steps.${i}.subject`, message: "Assunto" });
+    if (!(Number.isInteger(st?.dayOffset) && st.dayOffset >= 0 && st.dayOffset <= 180)) e.push({ path: `steps.${i}.dayOffset`, message: "Dia de 0 a 180" });
+    else if (i > 0 && st.dayOffset < steps[i - 1].dayOffset) e.push({ path: `steps.${i}.dayOffset`, message: "Os dias não podem voltar" });
+  });
+  for (const x of s?.stopOn ?? []) if (!SEQUENCE_STOP_EVENTS.includes(x)) e.push({ path: "stopOn", message: `Evento desconhecido: ${x}` });
+  return e;
+}
+/** Data do passo `index` contada a partir de `baseYmd` (início, para o 1º; conclusão do anterior, para os outros). */
+export function stepDueDate(steps, index, baseYmd, { businessDays = true, holidays = [] } = {}) {
+  const gap = steps[index].dayOffset - (index > 0 ? steps[index - 1].dayOffset : 0);
+  return businessDays ? addBusinessDays(baseYmd, gap, holidays) : addDays(baseYmd, gap);
+}
+/** Depois de concluir o passo `index`: o próximo índice ou null (acabou). */
+export const nextStepIndex = (steps, index) => (index + 1 < steps.length ? index + 1 : null);
+/** O evento encerra a sequência? → motivo ou null. */
+export const sequenceStopReason = (sequence, eventType) => ((sequence.stopOn ?? SEQUENCE_STOP_EVENTS).includes(eventType) ? eventType : null);
+
+// ------------------------------------------------------------------ duplicados e mesclagem
+/** Grupos de contatos parecidos (2+): por CPF, e-mail, telefone e nome dentro da mesma empresa, nessa ordem de força. */
+export function duplicateGroups(records) {
+  const keyers = [
+    ["cpf", (r) => (isValidCPF(r.cpf) ? onlyDigits(r.cpf) : null)],
+    ["email", (r) => normalizeEmail(r.email)],
+    ["phone", (r) => normalizePhoneBR(r.phone)],
+    ["name", (r) => (normKey(r.name) ? `${normKey(r.name)}|${r.companyId ?? ""}` : null)],
+  ];
+  const groups = [];
+  for (const [by, key] of keyers) {
+    const map = new Map();
+    for (const r of records) { const k = key(r); if (!k) continue; if (!map.has(k)) map.set(k, []); map.get(k).push(r.id); }
+    for (const [k, ids] of map) if (ids.length > 1) groups.push({ by, key: k, ids });
+  }
+  // o mesmo conjunto de ids aparece só no critério mais forte
+  const seen = new Set();
+  return groups.filter((g) => { const sig = [...g.ids].sort().join(","); if (seen.has(sig)) return false; seen.add(sig); return true; });
+}
+/**
+ * Junta dois registros: o destino fica, a origem some. Vazio no destino é preenchido pela origem; quando os dois têm valor,
+ * vale o destino, a não ser que choices[campo] === "source". Listas (tagIds) somam sem repetir; campos personalizados por chave.
+ * → { merged, conflicts: [campos com valores diferentes nos dois] }
+ */
+export function mergeRecords(target, source, choices = {}, fields = Object.keys({ ...source, ...target })) {
+  const merged = { ...target }, conflicts = [];
+  for (const f of fields) {
+    if (["id", "createdAt", "updatedAt", "deletedAt"].includes(f)) continue;
+    const t = target[f], s = source[f];
+    if (f === "customFields") {
+      const out = { ...(s ?? {}), ...(t ?? {}) };
+      for (const k of Object.keys(s ?? {})) {
+        if (!isEmpty(t?.[k]) && !isEmpty(s[k]) && JSON.stringify(t[k]) !== JSON.stringify(s[k])) { conflicts.push(`cf.${k}`); if (choices[`cf.${k}`] === "source") out[k] = s[k]; }
+        else if (isEmpty(t?.[k])) out[k] = s[k];
+      }
+      merged.customFields = out; continue;
+    }
+    if (Array.isArray(t) || Array.isArray(s)) { merged[f] = [...new Set([...(t ?? []), ...(s ?? [])])]; continue; }
+    if (isEmpty(t)) merged[f] = s ?? t;
+    else if (!isEmpty(s) && t !== s) { conflicts.push(f); if (choices[f] === "source") merged[f] = s; }
+  }
+  return { merged, conflicts };
+}
+
+// ------------------------------------------------------------------ modelos de e-mail e mensagens prontas
+export const TEMPLATE_VARS = ["contato.nome", "contato.primeiro_nome", "contato.email", "contato.telefone", "empresa.nome", "negocio.titulo", "negocio.valor", "negocio.etapa", "vendedor.nome", "vendedor.primeiro_nome", "vendedor.email", "hoje"];
+export const templateVariables = (text) => [...new Set([...String(text ?? "").matchAll(/\{\{\s*([a-z_.]+)\s*\}\}/g)].map((m) => m[1]))];
+/** Variáveis desconhecidas → [{ path, message }] (path = o campo do modelo). */
+export function validateTemplateVars(fields) {
+  const e = [];
+  for (const [path, text] of Object.entries(fields)) for (const v of templateVariables(text)) if (!TEMPLATE_VARS.includes(v)) e.push({ path, message: `Variável desconhecida: {{${v}}}` });
+  return e;
+}
+/**
+ * Preenche {{contato.primeiro_nome}} etc. ctx: { contact: { name, email, phone }, company: { name }, deal: { title, value, stageName }, owner: { name, email }, today }
+ * → { text, missing: [variáveis usadas sem valor] }
+ */
+export function renderCrmTemplate(text, ctx = {}) {
+  const val = {
+    "contato.nome": ctx.contact?.name, "contato.primeiro_nome": firstName(ctx.contact?.name), "contato.email": ctx.contact?.email,
+    "contato.telefone": ctx.contact?.phone ? formatPhoneBR(ctx.contact.phone) : "", "empresa.nome": ctx.company?.name,
+    "negocio.titulo": ctx.deal?.title, "negocio.valor": ctx.deal?.value != null ? formatMoneyBR(ctx.deal.value) : "", "negocio.etapa": ctx.deal?.stageName,
+    "vendedor.nome": ctx.owner?.name, "vendedor.primeiro_nome": firstName(ctx.owner?.name), "vendedor.email": ctx.owner?.email,
+    hoje: ctx.today ? `${ctx.today.slice(8, 10)}/${ctx.today.slice(5, 7)}/${ctx.today.slice(0, 4)}` : "",
+  };
+  const missing = [];
+  const out = String(text ?? "").replace(/\{\{\s*([a-z_.]+)\s*\}\}/g, (_, k) => { const v = val[k]; if (isEmpty(v)) { if (!missing.includes(k)) missing.push(k); return ""; } return String(v); });
+  return { text: out, missing };
+}
+
+// ------------------------------------------------------------------ pontuação de lead
+export const SCORE_FIELDS = ["sourceId", "via", "hasEmail", "hasPhone", "hasCompany", "hasCnpj", "value", "utmSource", "utmCampaign"];
+export function validateScoring({ rules, warmAt = 30, hotAt = 70 }) {
+  const e = [];
+  if (!(Number.isInteger(warmAt) && Number.isInteger(hotAt) && warmAt > 0 && hotAt > warmAt && hotAt <= 100)) e.push({ path: "hotAt", message: "Morno abaixo de quente, até 100" });
+  if ((rules ?? []).length > 50) e.push({ path: "rules", message: "Até 50 regras" });
+  (rules ?? []).forEach((r, i) => {
+    if (!SCORE_FIELDS.includes(r?.field) && !String(r?.field ?? "").startsWith("cf.")) e.push({ path: `rules.${i}.field`, message: "Campo" });
+    if (!CONDITION_OPS.includes(r?.op)) e.push({ path: `rules.${i}.op`, message: "Operador" });
+    if (!(Number.isInteger(r?.points) && r.points >= -50 && r.points <= 50 && r.points !== 0)) e.push({ path: `rules.${i}.points`, message: "De -50 a 50 pontos" });
+  });
+  return e;
+}
+/** Objeto que as regras enxergam a partir do lead. */
+export const leadFacts = (l) => ({ sourceId: l.sourceId ?? null, via: l.via ?? null, hasEmail: !!normalizeEmail(l.email), hasPhone: !!normalizePhoneBR(l.phone), hasCompany: !!(String(l.companyName ?? "").trim() || l.cnpj), hasCnpj: !!(l.cnpj && isValidCNPJ(l.cnpj)), value: l.value ?? null, utmSource: l.utm?.source ?? null, utmCampaign: l.utm?.campaign ?? null, customFields: l.customFields ?? {} });
+/** → { score (0 a 100), breakdown: [{ ruleId, points }] } */
+export function leadScore(lead, rules) {
+  const facts = leadFacts(lead);
+  const breakdown = [];
+  for (const r of rules ?? []) if (conditionMatches(r, facts)) breakdown.push({ ruleId: r.id, points: r.points });
+  const raw = breakdown.reduce((a, b) => a + b.points, 0);
+  return { score: Math.max(0, Math.min(100, raw)), breakdown };
+}
+export const temperatureOf = (score, { warmAt = 30, hotAt = 70 } = {}) => (score >= hotAt ? "HOT" : score >= warmAt ? "WARM" : "COLD");
+
+// ------------------------------------------------------------------ imobiliária: imóveis × interesse
+export const PROPERTY_TYPES = ["APARTMENT", "HOUSE", "LAND", "COMMERCIAL", "RURAL"];
+/**
+ * Imóveis compatíveis com o interesse do cliente. interest: { purpose: SALE|RENT, types?, neighborhoods?, minBedrooms?, maxPriceCents?, minPriceCents? }
+ * Filtros duros: disponível, finalidade, tipo (se escolheu), quartos mínimos, faixa de preço. Ordem: bairro desejado primeiro,
+ * depois quem passa dos quartos pedidos, depois o mais barato. → [{ property, score, reasons }]
+ */
+export function matchProperties(interest, properties) {
+  const hoods = (interest.neighborhoods ?? []).map(normKey);
+  return properties
+    .filter((p) => p.status === "AVAILABLE" && p.purpose === interest.purpose)
+    .filter((p) => !(interest.types ?? []).length || interest.types.includes(p.type))
+    .filter((p) => interest.minBedrooms == null || (p.bedrooms ?? 0) >= interest.minBedrooms)
+    .filter((p) => interest.maxPriceCents == null || p.priceCents <= interest.maxPriceCents)
+    .filter((p) => interest.minPriceCents == null || p.priceCents >= interest.minPriceCents)
+    .map((p) => {
+      const reasons = [];
+      let score = 0;
+      if (hoods.includes(normKey(p.neighborhood))) { score += 2; reasons.push("bairro desejado"); }
+      if (interest.minBedrooms != null && (p.bedrooms ?? 0) > interest.minBedrooms) { score += 1; reasons.push("mais quartos que o pedido"); }
+      return { property: p, score, reasons };
+    })
+    .sort((a, b) => b.score - a.score || a.property.priceCents - b.property.priceCents);
+}
+
+// ------------------------------------------------------------------ perfis de segmento
+const W = (s, p) => [s, p];
+/**
+ * Perfis do CRM (`references/09-perfis-de-segmento.md`): vocabulário, funil, campos, mensagens prontas, sequência e
+ * automações sugeridas (criadas desligadas) e o que o menu destaca. Trocar de perfil nunca apaga nada.
+ */
+export const CRM_SEGMENTS = [
+  { id: "GENERAL", label: "Geral", vocabulary: { deal: W("negócio", "negócios"), contact: W("contato", "contatos"), company: W("empresa", "empresas") },
+    pipeline: null, customFields: [], snippets: [{ name: "Primeiro contato", body: "Olá {{contato.primeiro_nome}}, aqui é {{vendedor.primeiro_nome}}. Posso te ajudar?" }], sequence: null, automations: [], menu: [] },
+  { id: "B2B", label: "Vendas para empresas (B2B)", vocabulary: { deal: W("oportunidade", "oportunidades"), contact: W("contato", "contatos"), company: W("conta", "contas") },
+    pipeline: { name: "Vendas B2B", stages: [["Prospecção", 10, 14], ["Qualificação", 20, 10], ["Diagnóstico", 40, 10], ["Proposta", 60, 7], ["Negociação", 80, 7]] },
+    customFields: [{ entity: "COMPANY", label: "Funcionários", type: "SELECT", options: ["1-10", "11-50", "51-200", "201-1000", "1000+"] }, { entity: "DEAL", label: "Decisor", type: "TEXT" }, { entity: "DEAL", label: "Concorrente", type: "TEXT" }],
+    snippets: [{ name: "Retomar contato", body: "Oi {{contato.primeiro_nome}}, tudo bem? Conseguiu avaliar a proposta para a {{empresa.nome}}?" }],
+    sequence: { name: "Prospecção em 5 toques", steps: [{ dayOffset: 0, type: "EMAIL", subject: "E-mail de apresentação" }, { dayOffset: 2, type: "CALL", subject: "Ligação de conexão" }, { dayOffset: 5, type: "WHATSAPP", subject: "Mensagem curta no WhatsApp" }, { dayOffset: 9, type: "EMAIL", subject: "Caso de sucesso" }, { dayOffset: 14, type: "CALL", subject: "Última tentativa" }] },
+    automations: [{ name: "Proposta → follow-up em 3 dias", trigger: { type: "STAGE_ENTERED", stage: "Proposta" }, actions: [{ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "Follow-up da proposta", dueInDays: 3, assignTo: "OWNER" }] }],
+    menu: ["Metas", "Sequências", "Propostas"] },
+  { id: "REAL_ESTATE", label: "Imobiliária", vocabulary: { deal: W("negociação", "negociações"), contact: W("cliente", "clientes"), company: W("empresa", "empresas") },
+    pipeline: { name: "Imóveis", stages: [["Novo lead", 10, 2], ["Atendimento", 25, 5], ["Visita agendada", 45, 7], ["Proposta", 70, 7], ["Documentação", 90, 15]] },
+    customFields: [{ entity: "DEAL", label: "Finalidade", type: "SELECT", options: ["Comprar", "Alugar"] }, { entity: "DEAL", label: "Forma de pagamento", type: "SELECT", options: ["À vista", "Financiamento", "FGTS", "Permuta"] }, { entity: "CONTACT", label: "Renda familiar", type: "MONEY" }],
+    snippets: [{ name: "Imóveis selecionados", body: "Olá {{contato.primeiro_nome}}! Separei alguns imóveis com o seu perfil. Quer agendar uma visita?" }, { name: "Confirmar visita", body: "Oi {{contato.primeiro_nome}}, confirmando nossa visita. Te espero lá!" }],
+    sequence: { name: "Lead de portal", steps: [{ dayOffset: 0, type: "WHATSAPP", subject: "Responder o lead do portal" }, { dayOffset: 0, type: "CALL", subject: "Ligar e entender o perfil" }, { dayOffset: 1, type: "WHATSAPP", subject: "Mandar imóveis compatíveis" }, { dayOffset: 3, type: "CALL", subject: "Agendar visita" }] },
+    automations: [{ name: "Visita agendada → lembrete", trigger: { type: "STAGE_ENTERED", stage: "Visita agendada" }, actions: [{ type: "CREATE_ACTIVITY", activityType: "VISIT", subject: "Visita ao imóvel", dueInDays: 1, assignTo: "OWNER" }] }],
+    menu: ["Imóveis", "Visitas"] },
+  { id: "EDUCATION", label: "Escola ou curso", vocabulary: { deal: W("matrícula", "matrículas"), contact: W("responsável", "responsáveis"), company: W("empresa", "empresas") },
+    pipeline: { name: "Matrículas", stages: [["Interessado", 10, 3], ["Visita ou aula experimental", 35, 7], ["Matrícula em andamento", 70, 5], ["Documentação", 90, 7]] },
+    customFields: [{ entity: "DEAL", label: "Curso ou série", type: "TEXT" }, { entity: "DEAL", label: "Turno", type: "SELECT", options: ["Manhã", "Tarde", "Noite", "Integral"] }, { entity: "DEAL", label: "Nome do aluno", type: "TEXT" }],
+    snippets: [{ name: "Convite para visita", body: "Olá {{contato.primeiro_nome}}! Que tal conhecer a escola? Temos horários para visita e aula experimental." }],
+    sequence: { name: "Campanha de matrícula", steps: [{ dayOffset: 0, type: "WHATSAPP", subject: "Boas-vindas e convite para visita" }, { dayOffset: 2, type: "CALL", subject: "Ligar para agendar a visita" }, { dayOffset: 7, type: "EMAIL", subject: "Condições da matrícula" }] },
+    automations: [], menu: ["Campanhas", "Visitas"] },
+  { id: "RETAIL", label: "Varejo", vocabulary: { deal: W("venda", "vendas"), contact: W("cliente", "clientes"), company: W("empresa", "empresas") },
+    pipeline: { name: "Vendas da loja", stages: [["Novo", 10, 1], ["Em atendimento", 30, 2], ["Orçamento enviado", 60, 3]] },
+    customFields: [{ entity: "CONTACT", label: "Aniversário", type: "DATE" }, { entity: "CONTACT", label: "Preferências", type: "TEXTAREA" }],
+    snippets: [{ name: "Orçamento", body: "Oi {{contato.primeiro_nome}}! Segue o orçamento de {{negocio.valor}}. Posso separar para você?" }, { name: "Chegou novidade", body: "Oi {{contato.primeiro_nome}}, chegou novidade que é a sua cara. Quer ver fotos?" }],
+    sequence: null,
+    automations: [{ name: "Venda ganha → oferecer recompra em 30 dias", trigger: { type: "DEAL_WON" }, actions: [{ type: "CREATE_ACTIVITY", activityType: "WHATSAPP", subject: "Oferecer recompra", dueInDays: 30, assignTo: "OWNER" }] }],
+    menu: ["Clientes", "WhatsApp"] },
+];
+export const crmSegment = (id) => CRM_SEGMENTS.find((s) => s.id === id) ?? CRM_SEGMENTS[0];

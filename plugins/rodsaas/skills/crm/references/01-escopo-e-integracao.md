@@ -31,10 +31,10 @@ export const crmApp: AppDef = {
   id: 'crm', name: 'CRM', description: 'Funil, leads, contatos e atividades',
   icon: Briefcase, category: 'vendas', order: 30, defaultPinned: true,
   match: ['/crm'], home: '/crm/negocios',
-  Sidebar: CrmSidebar,      // Negócios · Leads (novos atribuídos a mim) · Atividades (atrasadas em vermelho) · Contatos · Empresas · Produtos (selo Pro sem a feature) · Relatórios · seção Funis · Configurações do CRM (owner/admin)
+  Sidebar: CrmSidebar,      // Negócios · Leads (novos atribuídos a mim; quentes primeiro) · Atividades (atrasadas em vermelho) · Contatos · Empresas · Produtos (selo Pro sem a feature) · Metas · Sequências · Automações (owner/admin) · Duplicados · Relatórios · seção Funis · destaques do perfil (Imóveis, Campanhas… `09`) · Configurações do CRM (owner/admin, com Perfil, Modelos de e-mail, Mensagens de WhatsApp e Pontuação) — os nomes usam o vocabulário do perfil
   action: { label: 'Negócio', onSelect: openDealForm },
   useBadge: useCrmBadge,    // atividades atrasadas + leads novos atribuídos a mim
-  widgets: [myActivitiesTodayWidget, staleDealsWidget, myPipelineWidget, newLeadsWidget],
+  widgets: [myActivitiesTodayWidget, staleDealsWidget, myPipelineWidget, newLeadsWidget, myGoalWidget, hotLeadsWidget],
   search: crmSearchProvider,
   settings: { label: 'CRM', href: '/crm/configuracoes' },
 }
@@ -57,7 +57,10 @@ export const crmApp: AppDef = {
 | criar e editar negócios, leads, contatos, empresas, atividades, anotações | ✅ | ✅ (no modo restrito, só nos negócios/leads que vê) |
 | reatribuir responsável | ✅ | só os próprios registros, e só para si |
 | excluir | ✅ | o que criou ou de que é responsável |
-| configurações (funis, campos, motivos, origens, captura, visibilidade) | ✅ | — |
+| configurações (funis, campos, motivos, origens, captura, visibilidade, perfil, pontuação) | ✅ | — |
+| metas e automações | criar e editar | ver as metas da equipe e as suas; não vê automações |
+| sequências, modelos de e-mail e mensagens prontas | criar e editar (compartilhados) | usar; criar modelos pessoais de e-mail |
+| mesclar duplicados | ✅ | só quando é dono dos dois registros |
 | importar, exportar, desfazer importação | ✅ | — |
 | produtos (catálogo) | ✅ | ver e usar nos negócios |
 | relatórios | todos os vendedores | só os próprios números no modo restrito; todos no modo aberto |
@@ -74,6 +77,11 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | feature `crm_products` (catálogo e itens no negócio) | — | ✅ | ✅ |
 | feature `crm_capture` (chaves de API e formulários) | — | ✅ | ✅ |
 | feature `crm_reports` (relatórios e exportação dos relatórios) | — | ✅ | ✅ |
+| feature `crm_goals` (metas por vendedor) | — | ✅ | ✅ |
+| feature `crm_automations` + limite `crmAutomations` (automações ativas) | — | ✅ 10 | ✅ ilimitado |
+| feature `crm_sequences` + limite `crmSequences` (sequências ativas) | — | ✅ 5 | ✅ ilimitado |
+| feature `crm_scoring` (pontuação de lead) | — | ✅ | ✅ |
+| modelos de e-mail, mensagens prontas de WhatsApp, mesclar duplicados, perfis | ✅ | ✅ | ✅ |
 | leads, atividades, anotações, anexos (limites do `uploads`), importação, exportação das listas | ✅ | ✅ | ✅ |
 
 Rebaixar de plano não apaga nada: funis acima do limite ficam somente leitura (dá para mover negócios para fora e arquivar), itens de produto continuam visíveis e o valor congela, chaves de captura param de aceitar leads (403 com mensagem clara para a integração) e os relatórios mostram o `PlanGate`.

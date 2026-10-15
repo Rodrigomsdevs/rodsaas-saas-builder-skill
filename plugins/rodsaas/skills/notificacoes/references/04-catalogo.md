@@ -64,6 +64,10 @@ Ao instalar (ou revisar) um preset com este add-on presente, o preset chama `not
 | `crm.activity.digest` | job 8 h | quem tem atividade hoje ou atrasada | user (`entityId` = userId) | `/crm/atividades` |
 | `crm.deal.won` | negócio ganho | owners/admins e responsável (se outro ganhou) | deal | `/crm/negocios/<id>` |
 | `crm.import.done` | importação terminou | quem importou (ator nulo: é o job) | import | `/crm/importacoes/<id>` |
+| `crm.goal.reached` | meta do período batida | o vendedor da meta e owners/admins (meta da equipe: todos os vendedores) | goal | `/crm/metas` |
+| `crm.lead.hot` | lead passou para quente pela pontuação | responsável; sem responsável, owners/admins | lead | `/crm/leads/<id>` |
+| `crm.automation.notice` | ação `NOTIFY` de uma automação | quem a automação escolheu | deal | `/crm/negocios/<id>` |
+| `crm.automation.failed` | ação de automação falhou (agrupado por dia) | owners/admins | automation | `/crm/automacoes/<id>` |
 
 `canSee`: visibilidade do negócio (modo "só os meus": responsável, owners/admins). Negócio passou para outro no modo "só os meus" → `retract` para o antigo.
 

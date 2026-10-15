@@ -1,5 +1,5 @@
 {
-  "version": 20,
+  "version": 21,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -362,7 +362,11 @@
         "/crm/produtos",
         "/crm/relatorios",
         "/crm/importar",
-        "/crm/configuracoes"
+        "/crm/configuracoes",
+        "/crm/metas",
+        "/crm/automacoes",
+        "/crm/sequencias",
+        "/crm/duplicados"
       ],
       "testids": [
         "crm-pipeline-select",
@@ -427,7 +431,22 @@
         "crm-company-deal-new",
         "field-quantity",
         "field-unit-price",
-        "field-discount"
+        "field-discount",
+        "crm-goal-row",
+        "crm-goal-new",
+        "crm-goal-metric",
+        "crm-goal-target",
+        "crm-goal-save",
+        "crm-deal-sequence",
+        "crm-deal-sequence-status",
+        "crm-deal-sequence-enroll",
+        "crm-sequence-option",
+        "crm-deal-sequence-stop",
+        "crm-contact-merge",
+        "crm-merge-dialog",
+        "crm-merge-search",
+        "crm-merge-option",
+        "crm-merge-confirm"
       ],
       "api": [
         {
@@ -610,6 +629,143 @@
             "unitPrice",
             "quantity",
             "discountPercent"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/goals"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/goals",
+          "body": [
+            "metric",
+            "period",
+            "target"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/automations"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/automations",
+          "body": [
+            "name",
+            "trigger",
+            "actions"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/automations/{id}/runs"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/sequences"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/sequences",
+          "body": [
+            "name",
+            "steps"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/sequences/{id}/enroll",
+          "body": [
+            "dealId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/enrollments"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/enrollments/{id}/stop"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/duplicates/groups"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/contacts/{id}/merge",
+          "body": [
+            "sourceId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/email-templates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/email-templates",
+          "body": [
+            "name",
+            "subject",
+            "body"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/emails"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/scoring"
+        },
+        {
+          "method": "put",
+          "path": "/v1/crm/scoring",
+          "body": [
+            "rules"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/whatsapp-snippets"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/whatsapp-snippets",
+          "body": [
+            "name",
+            "body"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/deals/{id}/whatsapp"
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/properties"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/properties",
+          "body": [
+            "code",
+            "purpose",
+            "type",
+            "priceCents"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/crm/deals/{id}/property-matches"
+        },
+        {
+          "method": "post",
+          "path": "/v1/crm/tags",
+          "body": [
+            "name"
           ]
         }
       ]

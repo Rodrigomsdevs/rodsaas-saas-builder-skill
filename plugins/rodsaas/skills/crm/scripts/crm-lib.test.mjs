@@ -306,3 +306,266 @@ test("csvSafe, csvMoney e csvDate", () => {
   assert.equal(L.csvDate("2026-10-13"), "13/10/2026");
   assert.equal(L.csvDate("2026-10-13T15:00:00Z"), "13/10/2026");
 });
+
+// ================================================================== vendas avançadas e perfis
+test("dias úteis e períodos de meta", () => {
+  assert.equal(L.addDays("2026-12-31", 1), "2027-01-01");
+  assert.equal(L.addDays("2026-03-01", -1), "2026-02-28");
+  assert.equal(L.addBusinessDays("2026-10-16", 1), "2026-10-19", "sexta + 1 útil = segunda");
+  assert.equal(L.addBusinessDays("2026-10-17", 0), "2026-10-19", "sábado + 0 empurra para segunda");
+  assert.equal(L.addBusinessDays("2026-10-14", 0), "2026-10-14");
+  assert.equal(L.addBusinessDays("2026-10-14", 2, ["2026-10-15"]), "2026-10-19", "pula o feriado");
+  assert.equal(L.addBusinessDays("2026-10-14", 5), "2026-10-21");
+  assert.equal(L.isBusinessDay("2026-10-18"), false);
+  assert.equal(L.isBusinessDay("2026-11-02", ["2026-11-02"]), false);
+  assert.deepEqual(L.periodBounds("2026-10"), { start: "2026-10-01", end: "2026-10-31" });
+  assert.deepEqual(L.periodBounds("2028-02"), { start: "2028-02-01", end: "2028-02-29" }, "bissexto");
+  assert.deepEqual(L.periodBounds("2026-12"), { start: "2026-12-01", end: "2026-12-31" });
+  assert.deepEqual(L.periodBounds("2026-Q1"), { start: "2026-01-01", end: "2026-03-31" });
+  assert.deepEqual(L.periodBounds("2026-Q4"), { start: "2026-10-01", end: "2026-12-31" });
+  assert.equal(L.periodBounds("2026-13"), null);
+  assert.equal(L.periodBounds("2026-Q5"), null);
+  assert.equal(L.periodBounds("outubro"), null);
+});
+
+test("metas: o que conta, por vendedor e equipe, e o ritmo do mês", () => {
+  const data = {
+    deals: [
+      { ownerId: "a", pipelineId: "p1", status: "WON", value: 10000, wonOn: "2026-10-05", createdOn: "2026-09-20" },
+      { ownerId: "a", pipelineId: "p2", status: "WON", value: 5000, wonOn: "2026-10-31", createdOn: "2026-10-01" },
+      { ownerId: "a", pipelineId: "p1", status: "WON", value: 7000, wonOn: "2026-09-30", createdOn: "2026-10-02" },
+      { ownerId: "a", pipelineId: "p1", status: "LOST", value: 9000, wonOn: null, createdOn: "2026-10-03" },
+      { ownerId: "b", pipelineId: "p1", status: "WON", value: 3000, wonOn: "2026-10-10", createdOn: "2026-10-10" },
+    ],
+    activities: [{ ownerId: "a", done: true, doneOn: "2026-10-02" }, { ownerId: "a", done: false, doneOn: null }, { ownerId: "a", done: false, doneOn: "2026-10-05" }, { ownerId: "b", done: true, doneOn: "2026-11-01" }],
+  };
+  const r = { start: "2026-10-01", end: "2026-10-31" };
+  assert.equal(L.goalAchieved("WON_VALUE", data, { ownerId: "a", ...r }), 15000, "ganhos no mês, de qualquer funil");
+  assert.equal(L.goalAchieved("WON_VALUE", data, { ownerId: "a", pipelineId: "p1", ...r }), 10000);
+  assert.equal(L.goalAchieved("WON_VALUE", data, { ...r }), 18000, "equipe");
+  assert.equal(L.goalAchieved("WON_COUNT", data, { ownerId: "a", ...r }), 2);
+  assert.equal(L.goalAchieved("DEALS_CREATED", data, { ownerId: "a", ...r }), 3);
+  assert.equal(L.goalAchieved("ACTIVITIES_DONE", data, { ...r }), 1);
+  assert.equal(L.goalAchieved("NOPE", data, r), 0);
+  const p = (o) => L.goalProgress({ target: 100000, start: "2026-10-01", end: "2026-10-31", ...o });
+  assert.deepEqual(p({ achieved: 50000, today: "2026-10-16" }), { pct: 50, expectedPct: 52, status: "ON_TRACK", remaining: 50000, daysLeft: 16, perDayNeeded: 3125 });
+  assert.equal(p({ achieved: 20000, today: "2026-10-16" }).status, "BEHIND");
+  assert.equal(p({ achieved: 41000, today: "2026-10-16" }).status, "BEHIND", "41 < 52 − 10");
+  assert.equal(p({ achieved: 42000, today: "2026-10-16" }).status, "ON_TRACK", "42 ≥ 52 − 10");
+  assert.equal(p({ achieved: 62000, today: "2026-10-16" }).status, "AHEAD", "62 ≥ 52 + 10");
+  assert.equal(p({ achieved: 61000, today: "2026-10-16" }).status, "ON_TRACK");
+  assert.equal(p({ achieved: 100000, today: "2026-10-02" }).status, "DONE");
+  assert.deepEqual(p({ achieved: 0, today: "2026-09-20" }), { pct: 0, expectedPct: 0, status: "ON_TRACK", remaining: 100000, daysLeft: 31, perDayNeeded: 3226 }, "antes de começar");
+  assert.deepEqual(p({ achieved: 30000, today: "2026-11-05" }), { pct: 30, expectedPct: 100, status: "BEHIND", remaining: 70000, daysLeft: 0, perDayNeeded: 70000 }, "depois do fim");
+  assert.equal(p({ achieved: 30000, today: "2026-10-31" }).daysLeft, 1, "último dia conta");
+  assert.equal(L.goalProgress({ target: 0, achieved: 5, start: "2026-10-01", end: "2026-10-31", today: "2026-10-10" }).pct, 0);
+  assert.equal(L.goalProgress({ target: 3, achieved: 1, start: "2026-10-01", end: "2026-10-31", today: "2026-10-10" }).pct, 33, "arredonda para baixo");
+  assert.equal(L.goalProgress({ target: 3, achieved: 2, start: "2026-10-01", end: "2026-10-31", today: "2026-10-10" }).pct, 66, "66,7 → 66");
+});
+
+test("condições", () => {
+  const d = { value: 50000, sourceId: "s1", tagIds: ["t1", "t2"], ownerId: "u1", companyId: null, title: "Plano Anual Escola", customFields: { porte: "grande", qtd: 10 } };
+  const m = (field, op, value) => L.conditionMatches({ field, op, value }, d);
+  assert.equal(m("value", "gte", 50000), true); assert.equal(m("value", "gt", 50000), false);
+  assert.equal(m("value", "lt", 50001), true); assert.equal(m("value", "lte", 49999), false);
+  assert.equal(m("sourceId", "eq", "s1"), true); assert.equal(m("sourceId", "neq", "s1"), false);
+  assert.equal(m("sourceId", "in", ["s0", "s1"]), true); assert.equal(m("sourceId", "in", "s1"), false);
+  assert.equal(m("tagIds", "contains", "t2"), true); assert.equal(m("tagIds", "contains", "t3"), false);
+  assert.equal(m("tagIds", "eq", "t1"), false, "lista não é igual a um valor");
+  assert.equal(L.conditionMatches({ field: "tagIds", op: "eq", value: "t1" }, { tagIds: ["t1"] }), false, "nem com um item só");
+  assert.equal(m("value", "lte", 50000), true);
+  assert.equal(m("title", "contains", "escola"), true, "texto sem caixa e acento"); assert.equal(m("title", "contains", "anuál"), true);
+  assert.equal(m("companyId", "empty"), true); assert.equal(m("tagIds", "notEmpty"), true); assert.equal(m("companyId", "notEmpty"), false);
+  assert.equal(L.conditionMatches({ field: "tagIds", op: "empty" }, { tagIds: [] }), true);
+  assert.equal(m("cf.porte", "eq", "grande"), true); assert.equal(m("cf.qtd", "gt", 5), true);
+  assert.equal(m("value", "gt", "1"), false, "comparação numérica só com número");
+  assert.equal(L.conditionMatches({ field: "value", op: "gt", value: 1 }, { value: "999" }), false, "valor guardado como texto não compara");
+  assert.equal(m("value", "nope", 1), false);
+});
+
+test("automações: validação, gatilho e ações resolvidas", () => {
+  const ctx = { stageIds: ["st1", "st2"], tagIds: ["tg"], userIds: ["u1", "u2", "u3"], sequenceIds: ["sq"], templateIds: ["tp"] };
+  const ok = { name: "Proposta → follow-up", trigger: { type: "STAGE_ENTERED", stageId: "st2" }, conditions: [{ field: "value", op: "gte", value: 1000 }], actions: [{ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "Follow-up", dueInDays: 3, assignTo: "OWNER" }] };
+  assert.deepEqual(L.validateAutomation(ok, ctx), []);
+  const paths = (a) => L.validateAutomation(a, ctx).map((e) => e.path);
+  assert.deepEqual(paths({ ...ok, name: " " }), ["name"]);
+  assert.deepEqual(paths({ ...ok, trigger: { type: "STAGE_ENTERED", stageId: "zz" } }), ["trigger.stageId"]);
+  assert.deepEqual(paths({ ...ok, trigger: { type: "DEAL_ROTTING" } }), ["trigger.stageId"]);
+  assert.deepEqual(paths({ ...ok, trigger: { type: "DEAL_WON" } }), [], "ganho não precisa de etapa");
+  assert.deepEqual(paths({ ...ok, trigger: { type: "X" } }), ["trigger.type"]);
+  assert.deepEqual(paths({ ...ok, conditions: [{ field: "", op: "eq" }, { field: "value", op: "~" }] }), ["conditions.0.field", "conditions.1.op"]);
+  assert.deepEqual(paths({ ...ok, actions: [] }), ["actions"]);
+  assert.deepEqual(paths({ ...ok, actions: Array(11).fill(ok.actions[0]) }), ["actions"]);
+  const act = (a) => paths({ ...ok, actions: [a] });
+  assert.deepEqual(act({ type: "CREATE_ACTIVITY", activityType: "FAX", subject: "", dueInDays: 400, assignTo: "USER" }), ["actions.0.activityType", "actions.0.subject", "actions.0.dueInDays", "actions.0.userId"]);
+  assert.deepEqual(act({ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "x", dueInDays: 1.5 }), ["actions.0.dueInDays"]);
+  assert.deepEqual(act({ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "x", dueInDays: 0, assignTo: "USER", userId: "u2" }), []);
+  assert.deepEqual(act({ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "x", dueInDays: 0, assignTo: "USER", userId: "fora" }), ["actions.0.userId"], "pessoa fora da empresa");
+  assert.deepEqual(act({ type: "ASSIGN_OWNER", userIds: ["u1", "zz"] }), ["actions.0.userIds"]);
+  assert.deepEqual(act({ type: "ASSIGN_OWNER", userIds: [] }), ["actions.0.userIds"]);
+  assert.deepEqual(act({ type: "ADD_TAG", tagId: "zz" }), ["actions.0.tagId"]);
+  assert.deepEqual(act({ type: "START_SEQUENCE", sequenceId: "sq" }), []);
+  assert.deepEqual(act({ type: "START_SEQUENCE" }), ["actions.0.sequenceId"]);
+  assert.deepEqual(act({ type: "SEND_EMAIL", templateId: "zz" }), ["actions.0.templateId"]);
+  assert.deepEqual(act({ type: "SEND_WHATSAPP" }), ["actions.0.templateName"]);
+  assert.deepEqual(act({ type: "SEND_WHATSAPP", templateName: "agenda_lembrete" }), []);
+  assert.deepEqual(act({ type: "NOTIFY", userIds: [] }), ["actions.0.userIds"]);
+  assert.deepEqual(act({ type: "DELETE_ALL" }), ["actions.0.type"]);
+  assert.deepEqual(L.validateAutomation(ok), [], "sem contexto não confere ids");
+
+  const a = { ...ok, active: true, pipelineId: "p1" };
+  const deal = { pipelineId: "p1", value: 2000, ownerId: "u1" };
+  assert.equal(L.automationMatches(a, { type: "STAGE_ENTERED", stageId: "st2" }, deal), true);
+  assert.equal(L.automationMatches(a, { type: "STAGE_ENTERED", stageId: "st1" }, deal), false, "outra etapa");
+  assert.equal(L.automationMatches(a, { type: "DEAL_WON" }, deal), false, "outro gatilho");
+  assert.equal(L.automationMatches({ ...a, active: false }, { type: "STAGE_ENTERED", stageId: "st2" }, deal), false, "desligada");
+  assert.equal(L.automationMatches(a, { type: "STAGE_ENTERED", stageId: "st2" }, { ...deal, value: 999 }), false, "condição");
+  assert.equal(L.automationMatches(a, { type: "STAGE_ENTERED", stageId: "st2" }, { ...deal, pipelineId: "p2" }), false, "outro funil");
+  assert.equal(L.automationMatches({ ...a, pipelineId: null }, { type: "STAGE_ENTERED", stageId: "st2" }, { ...deal, pipelineId: "p2" }), true, "qualquer funil");
+  assert.equal(L.automationMatches({ ...a, trigger: { type: "DEAL_WON" }, conditions: [] }, { type: "DEAL_WON" }, deal), true);
+  assert.equal(L.automationMatches({ ...a, trigger: { type: "DEAL_WON" }, conditions: [{ field: "value", op: "gte", value: 1000 }, { field: "ownerId", op: "eq", value: "u9" }] }, { type: "DEAL_WON" }, deal), false, "todas as condições");
+
+  const plan = L.planActions({ actions: [{ type: "CREATE_ACTIVITY", activityType: "CALL", subject: "x", dueInDays: 3, assignTo: "OWNER" }, { type: "CREATE_ACTIVITY", activityType: "TASK", subject: "y", dueInDays: 1, assignTo: "USER", userId: "u3" }, { type: "ASSIGN_OWNER", userIds: ["u1", "u2"] }, { type: "ASSIGN_OWNER", userIds: ["u1", "u2"] }, { type: "ADD_TAG", tagId: "tg" }] }, deal, { today: "2026-10-16", rrCursor: 4 });
+  assert.equal(plan.actions[0].dueDate, "2026-10-19"); assert.equal(plan.actions[0].ownerId, "u1", "dono do negócio");
+  assert.equal(plan.actions[1].ownerId, "u3"); assert.equal(plan.actions[1].dueDate, "2026-10-17");
+  assert.equal(plan.actions[2].ownerId, "u1", "rodízio: cursor 5 → u1"); assert.equal(plan.actions[3].ownerId, "u2"); assert.equal(plan.rrCursor, 6);
+  assert.deepEqual(plan.actions[4], { type: "ADD_TAG", tagId: "tg" });
+  assert.equal(L.planActions({ actions: [{ type: "CREATE_ACTIVITY", dueInDays: 1, assignTo: "OWNER" }] }, deal, { today: "2026-10-16", businessDays: true }).actions[0].dueDate, "2026-10-19", "dias úteis");
+  assert.equal(L.planActions({ actions: [{ type: "ASSIGN_OWNER", userIds: ["u1", "u2"] }] }, deal, { today: "2026-10-16", rrCursor: 0, activeUserIds: ["u2"] }).actions[0].ownerId, "u2", "pula quem saiu");
+  assert.equal(L.planActions({ actions: [] }, deal, { today: "2026-10-16" }).rrCursor, 0);
+  assert.equal(L.MAX_AUTOMATION_DEPTH, 3);
+});
+
+test("sequências: validação, datas dos passos e parada", () => {
+  const steps = [{ dayOffset: 0, type: "EMAIL", subject: "a" }, { dayOffset: 2, type: "CALL", subject: "b" }, { dayOffset: 2, type: "WHATSAPP", subject: "c" }, { dayOffset: 7, type: "CALL", subject: "d" }];
+  assert.deepEqual(L.validateSequence({ name: "Prospecção", steps, stopOn: ["DEAL_WON", "REPLIED"] }), []);
+  const paths = (s) => L.validateSequence(s).map((e) => e.path);
+  assert.deepEqual(paths({ name: "", steps }), ["name"]);
+  assert.deepEqual(paths({ name: "x", steps: [] }), ["steps"]);
+  assert.deepEqual(paths({ name: "x", steps: Array(21).fill(steps[0]) }), ["steps"]);
+  assert.deepEqual(paths({ name: "x", steps: [steps[1], steps[0]] }), ["steps.1.dayOffset"], "dias não voltam");
+  assert.deepEqual(paths({ name: "x", steps: [{ dayOffset: -1, type: "FAX", subject: "" }] }), ["steps.0.type", "steps.0.subject", "steps.0.dayOffset"]);
+  assert.deepEqual(paths({ name: "x", steps: [{ dayOffset: 181, type: "CALL", subject: "s" }] }), ["steps.0.dayOffset"]);
+  assert.deepEqual(paths({ name: "x", steps, stopOn: ["NEVER"] }), ["stopOn"]);
+  assert.equal(L.stepDueDate(steps, 0, "2026-10-16"), "2026-10-16", "1º passo no dia");
+  assert.equal(L.stepDueDate(steps, 0, "2026-10-17"), "2026-10-19", "começou no sábado → segunda");
+  assert.equal(L.stepDueDate(steps, 1, "2026-10-16"), "2026-10-20", "2 dias úteis depois da sexta");
+  assert.equal(L.stepDueDate(steps, 1, "2026-10-16", { businessDays: false }), "2026-10-18");
+  assert.equal(L.stepDueDate(steps, 2, "2026-10-20"), "2026-10-20", "mesmo dia do anterior");
+  assert.equal(L.stepDueDate(steps, 3, "2026-10-20"), "2026-10-27", "intervalo de 5 dias úteis");
+  assert.equal(L.stepDueDate(steps, 1, "2026-10-14", { holidays: ["2026-10-15"] }), "2026-10-19");
+  assert.equal(L.nextStepIndex(steps, 0), 1); assert.equal(L.nextStepIndex(steps, 3), null);
+  assert.equal(L.sequenceStopReason({ stopOn: ["DEAL_WON"] }, "DEAL_WON"), "DEAL_WON");
+  assert.equal(L.sequenceStopReason({ stopOn: ["DEAL_WON"] }, "REPLIED"), null);
+  assert.equal(L.sequenceStopReason({}, "REPLIED"), "REPLIED", "padrão: todos");
+});
+
+test("duplicados e mesclagem", () => {
+  const rs = [
+    { id: "1", name: "Ana Souza", email: "ANA@x.com", phone: "(44) 99999-1234", cpf: "529.982.247-25", companyId: "c1" },
+    { id: "2", name: "ana souza", email: "ana@x.com", phone: null, cpf: "52998224725", companyId: "c1" },
+    { id: "3", name: "Beto", email: "beto@x.com", phone: "44999991234", cpf: null },
+    { id: "4", name: "Carla", email: "carla@x.com", phone: null, cpf: "11111111111" },
+    { id: "5", name: "Carla", email: "c2@x.com", phone: null, cpf: "11111111111" },
+    { id: "6", name: "Ana Souza", email: "outra@x.com", phone: null, cpf: null, companyId: "c2" },
+  ];
+  const g = L.duplicateGroups(rs);
+  assert.deepEqual(g.map((x) => [x.by, x.ids]), [["cpf", ["1", "2"]], ["phone", ["1", "3"]], ["name", ["4", "5"]]], "e-mail e nome de 1/2 já saíram no CPF; CPF inválido não agrupa; mesmo nome em outra empresa não");
+  assert.deepEqual(L.duplicateGroups([]), []);
+  assert.deepEqual(L.duplicateGroups([{ id: "x", name: "X", email: "Ze@Mail.com " }, { id: "y", name: "Y", email: "ze@mail.com" }]).map((x) => [x.by, x.ids]), [["email", ["x", "y"]]], "e-mail sem caixa e espaço");
+  assert.deepEqual(L.duplicateGroups([{ id: "x", name: "X", phone: "+55 44 99999-1234" }, { id: "y", name: "Y", phone: "(44) 9999-1234" }]).map((x) => [x.by, x.ids]), [["phone", ["x", "y"]]], "telefone normalizado (com o nono dígito)");
+  const t = { id: "t", name: "Ana", email: "", phone: "5544999991234", jobTitle: "Gerente", tagIds: ["a"], customFields: { porte: "grande", origem: null }, createdAt: "x" };
+  const s = { id: "s", name: "Ana Souza", email: "ana@x.com", phone: "5544988887777", jobTitle: null, tagIds: ["a", "b"], customFields: { porte: "pequeno", origem: "site", nps: 9 }, createdAt: "y" };
+  const r = L.mergeRecords(t, s);
+  assert.equal(r.merged.id, "t"); assert.equal(r.merged.createdAt, "x");
+  assert.equal(r.merged.name, "Ana", "conflito: fica o destino");
+  assert.equal(r.merged.email, "ana@x.com", "vazio (texto vazio) preenchido");
+  assert.equal(r.merged.jobTitle, "Gerente");
+  assert.deepEqual(r.merged.tagIds, ["a", "b"]);
+  assert.deepEqual(r.merged.customFields, { porte: "grande", origem: "site", nps: 9 });
+  assert.deepEqual(r.conflicts.sort(), ["cf.porte", "name", "phone"]);
+  const c = L.mergeRecords(t, s, { name: "source", "cf.porte": "source" });
+  assert.equal(c.merged.name, "Ana Souza"); assert.equal(c.merged.phone, "5544999991234"); assert.equal(c.merged.customFields.porte, "pequeno");
+  assert.deepEqual(L.mergeRecords({ id: 1, tagIds: [] }, { id: 2 }).merged.tagIds, []);
+});
+
+test("modelos: variáveis, validação e preenchimento", () => {
+  assert.deepEqual(L.templateVariables("Oi {{contato.primeiro_nome}}, {{ negocio.valor }} e {{contato.primeiro_nome}}"), ["contato.primeiro_nome", "negocio.valor"]);
+  assert.deepEqual(L.validateTemplateVars({ subject: "Proposta {{negocio.titulo}}", body: "Oi {{contato.apelido}} {{hoje}}" }), [{ path: "body", message: "Variável desconhecida: {{contato.apelido}}" }]);
+  const ctx = { contact: { name: "Ana Souza", email: "ana@x.com", phone: "5544999991234" }, company: { name: "Mercado Bom" }, deal: { title: "Plano anual", value: 150000, stageName: "Proposta" }, owner: { name: "Rodrigo Lima", email: "r@x.com" }, today: "2026-10-16" };
+  const r = L.renderCrmTemplate("Oi {{contato.primeiro_nome}}! {{empresa.nome}} · {{negocio.titulo}} por {{negocio.valor}} ({{negocio.etapa}}). {{vendedor.primeiro_nome}} — {{hoje}} — {{contato.telefone}}", ctx);
+  assert.equal(r.text, `Oi Ana! Mercado Bom · Plano anual por ${L.formatMoneyBR(150000)} (Proposta). Rodrigo — 16/10/2026 — (44) 99999-1234`);
+  assert.deepEqual(r.missing, []);
+  const m = L.renderCrmTemplate("Oi {{contato.primeiro_nome}} da {{empresa.nome}} {{empresa.nome}}", { contact: { name: "Ana" } });
+  assert.equal(m.text, "Oi Ana da  "); assert.deepEqual(m.missing, ["empresa.nome"]);
+  assert.equal(L.renderCrmTemplate("{{negocio.valor}}", { deal: { value: 0 } }).text, L.formatMoneyBR(0), "zero é valor");
+  assert.deepEqual(L.renderCrmTemplate("{{hoje}} {{contato.telefone}}", {}).missing, ["hoje", "contato.telefone"]);
+  assert.equal(L.TEMPLATE_VARS.length, 12);
+});
+
+test("pontuação de lead e temperatura", () => {
+  const rules = [
+    { id: "r1", field: "sourceId", op: "eq", value: "indicacao", points: 30 },
+    { id: "r2", field: "hasPhone", op: "eq", value: true, points: 15 },
+    { id: "r3", field: "hasCnpj", op: "eq", value: true, points: 20 },
+    { id: "r4", field: "value", op: "gte", value: 100000, points: 25 },
+    { id: "r5", field: "utmSource", op: "eq", value: "concorrente", points: -40 },
+    { id: "r6", field: "cf.porte", op: "in", value: ["médio", "grande"], points: 10 },
+    { id: "r7", field: "hasEmail", op: "eq", value: false, points: -10 },
+    { id: "r8", field: "hasEmail", op: "eq", value: true, points: 5 },
+  ];
+  assert.deepEqual(L.validateScoring({ rules, warmAt: 30, hotAt: 70 }), []);
+  const paths = (o) => L.validateScoring(o).map((e) => e.path);
+  assert.deepEqual(paths({ rules: [], warmAt: 70, hotAt: 30 }), ["hotAt"]);
+  assert.deepEqual(paths({ rules: [], warmAt: 30, hotAt: 101 }), ["hotAt"]);
+  assert.deepEqual(paths({ rules: [{ field: "idade", op: "eq", points: 5 }, { field: "via", op: "~", points: 0 }, { field: "via", op: "eq", points: 60 }] }), ["rules.0.field", "rules.1.op", "rules.1.points", "rules.2.points"]);
+  assert.deepEqual(paths({ rules: Array(51).fill(rules[0]) }), ["rules"]);
+  assert.deepEqual(paths({ rules: [{ field: "cf.porte", op: "eq", points: 5 }] }), [], "campo personalizado");
+  const hot = L.leadScore({ sourceId: "indicacao", phone: "(44) 99999-1234", email: "a@x.com", cnpj: "11.222.333/0001-81", value: 150000, customFields: { porte: "grande" } }, rules);
+  assert.equal(hot.score, 100, "teto 100 (30+15+20+25+10+5 = 105)");
+  assert.deepEqual(hot.breakdown.map((b) => b.ruleId), ["r1", "r2", "r3", "r4", "r6", "r8"]);
+  assert.deepEqual(L.leadScore({ email: "nao-e-email" }, rules).breakdown.map((b) => b.ruleId), ["r7"], "e-mail inválido conta como sem e-mail");
+  const cold = L.leadScore({ utm: { source: "concorrente" }, phone: "123" }, rules);
+  assert.equal(cold.score, 0, "piso 0 (−40 −10)");
+  assert.deepEqual(cold.breakdown.map((b) => b.points), [-40, -10]);
+  assert.equal(L.leadScore({ phone: "44999991234", email: "a@x.com", cnpj: "11222333000182" }, rules).score, 20, "CNPJ inválido não conta (telefone 15 + e-mail 5)");
+  assert.equal(L.leadFacts({ companyName: " " }).hasCompany, false); assert.equal(L.leadFacts({ companyName: "Loja" }).hasCompany, true);
+  assert.equal(L.temperatureOf(70), "HOT"); assert.equal(L.temperatureOf(69), "WARM"); assert.equal(L.temperatureOf(30), "WARM"); assert.equal(L.temperatureOf(29), "COLD");
+  assert.equal(L.temperatureOf(50, { warmAt: 20, hotAt: 50 }), "HOT");
+});
+
+test("imobiliária: imóveis compatíveis com o interesse", () => {
+  const ps = [
+    { id: "a", status: "AVAILABLE", purpose: "SALE", type: "APARTMENT", neighborhood: "Zona 7", bedrooms: 2, priceCents: 40000000 },
+    { id: "b", status: "AVAILABLE", purpose: "SALE", type: "APARTMENT", neighborhood: "Centro", bedrooms: 3, priceCents: 38000000 },
+    { id: "c", status: "AVAILABLE", purpose: "SALE", type: "HOUSE", neighborhood: "Zona 7", bedrooms: 3, priceCents: 45000000 },
+    { id: "d", status: "SOLD", purpose: "SALE", type: "APARTMENT", neighborhood: "Zona 7", bedrooms: 2, priceCents: 30000000 },
+    { id: "e", status: "AVAILABLE", purpose: "RENT", type: "APARTMENT", neighborhood: "Zona 7", bedrooms: 2, priceCents: 200000 },
+    { id: "f", status: "AVAILABLE", purpose: "SALE", type: "APARTMENT", neighborhood: "Zona 7", bedrooms: 1, priceCents: 25000000 },
+    { id: "g", status: "AVAILABLE", purpose: "SALE", type: "APARTMENT", neighborhood: "zona 7", bedrooms: 2, priceCents: 50000001 },
+    { id: "h", status: "AVAILABLE", purpose: "SALE", type: "APARTMENT", neighborhood: "Novo Centro", bedrooms: 2, priceCents: 35000000 },
+  ];
+  const r = L.matchProperties({ purpose: "SALE", types: ["APARTMENT"], neighborhoods: ["Zona 7"], minBedrooms: 2, maxPriceCents: 50000000 }, ps);
+  assert.deepEqual(r.map((x) => x.property.id), ["a", "b", "h"], "bairro primeiro; depois mais quartos; depois o mais barato");
+  assert.deepEqual(r[0].reasons, ["bairro desejado"]); assert.deepEqual(r[1].reasons, ["mais quartos que o pedido"]);
+  assert.deepEqual(L.matchProperties({ purpose: "RENT" }, ps).map((x) => x.property.id), ["e"]);
+  assert.deepEqual(L.matchProperties({ purpose: "SALE", types: ["APARTMENT"] }, ps).map((x) => x.property.id), ["f", "h", "b", "a", "g"], "empate: o mais barato primeiro");
+  assert.deepEqual(L.matchProperties({ purpose: "SALE", minPriceCents: 40000000, maxPriceCents: 45000000 }, ps).map((x) => x.property.id), ["a", "c"]);
+  assert.deepEqual(L.matchProperties({ purpose: "SALE", neighborhoods: ["ZONA 7"], minBedrooms: 2 }, ps).slice(0, 3).map((x) => x.property.id), ["c", "a", "g"], "bairro sem caixa; mais quartos desempata");
+});
+
+test("perfis de segmento", () => {
+  assert.deepEqual(L.CRM_SEGMENTS.map((s) => s.id), ["GENERAL", "B2B", "REAL_ESTATE", "EDUCATION", "RETAIL"]);
+  assert.equal(L.crmSegment("REAL_ESTATE").vocabulary.deal[1], "negociações");
+  assert.equal(L.crmSegment("EDUCATION").vocabulary.deal[0], "matrícula");
+  assert.equal(L.crmSegment("nope").id, "GENERAL");
+  for (const s of L.CRM_SEGMENTS) {
+    for (const sn of s.snippets) assert.deepEqual(L.validateTemplateVars({ body: sn.body }), [], `${s.id}: ${sn.name}`);
+    if (s.sequence) assert.deepEqual(L.validateSequence(s.sequence), [], `${s.id}: sequência`);
+    if (s.pipeline) for (const [n, p, r] of s.pipeline.stages) assert.ok(n && p >= 0 && p <= 100 && r > 0, `${s.id}: etapa ${n}`);
+    for (const a of s.automations) {
+      const stageIds = s.pipeline ? s.pipeline.stages.map(([n]) => n) : [];
+      assert.deepEqual(L.validateAutomation({ ...a, trigger: { type: a.trigger.type, stageId: a.trigger.stage } }, { stageIds }), [], `${s.id}: ${a.name}`);
+    }
+  }
+});

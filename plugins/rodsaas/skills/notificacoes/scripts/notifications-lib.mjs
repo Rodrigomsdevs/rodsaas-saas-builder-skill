@@ -120,6 +120,10 @@ export const PRESET_TYPES = [
   { type: "crm.activity.digest", appId: "crm", label: "Atividades do dia", template: "Você tem {data.today} atividades hoje e {data.overdue} atrasadas", group: { by: "none" } },
   { type: "crm.deal.won", appId: "crm", label: "Negócio ganho", template: "{actor} ganhou o negócio {title} ({data.value})", group: { by: "none" } },
   { type: "crm.import.done", appId: "crm", label: "Importação concluída", template: "Importação concluída: {data.created} criados, {data.failed} com erro", group: { by: "none" } },
+  { type: "crm.goal.reached", appId: "crm", label: "Meta batida", template: "Meta batida: {data.goal} de {data.owner} ({data.pct}%)", group: { by: "none" } },
+  { type: "crm.lead.hot", appId: "crm", label: "Lead quente", template: "Lead quente: {title} chegou a {data.score} pontos", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  { type: "crm.automation.notice", appId: "crm", label: "Aviso de automação", template: "Automação {data.automation}: {title}", group: { by: "none" } },
+  { type: "crm.automation.failed", appId: "crm", label: "Automação com falha", template: "{count} execuções da automação {data.automation} falharam", group: { by: "entity", windowMinutes: 1440 } },
   // forms
   { type: "forms.response.new", appId: "forms", label: "Resposta nova", template: { one: "Nova resposta em {title}", many: "{count} novas respostas em {title}" }, group: { by: "entity", windowMinutes: 2, maxMinutes: 60 } },
   { type: "forms.response.digest", appId: "forms", label: "Resumo diário de respostas", template: "{data.total} respostas ontem em {data.forms} formulários", group: { by: "none" } },

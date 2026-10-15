@@ -1,6 +1,6 @@
 ---
 name: crm
-description: Preset que soma ao projeto rodsaas um CRM de vendas completo (estilo Pipedrive) — empresas com busca por CNPJ, contatos com WhatsApp, caixa de leads, vários funis com etapas e probabilidade, quadro kanban com totais em R$, negócios com produtos, ganho/perda com motivo, atividades (ligação, reunião, tarefa, WhatsApp, visita) com agenda, histórico com anotações e anexos, campos personalizados, etiquetas, captura de leads por API e formulário do site, importação de CSV/Excel sem duplicar, exportação, visibilidade por vendedor e relatórios (funil de conversão, ganhos e perdas, previsão, ranking, motivos de perda, tempo por etapa). Use depois do /rodsaas:backend e /rodsaas:frontend (com ou sem outros presets) quando o usuário pedir CRM, funil de vendas, pipeline, leads, gestão comercial, clone do Pipedrive/RD Station CRM/HubSpot, ou chamar /rodsaas:crm.
+description: Preset que soma ao projeto rodsaas um CRM de vendas completo (estilo Pipedrive) — empresas com busca por CNPJ, contatos com WhatsApp, caixa de leads, vários funis com etapas e probabilidade, quadro kanban com totais em R$, negócios com produtos, ganho/perda com motivo, atividades (ligação, reunião, tarefa, WhatsApp, visita) com agenda, histórico com anotações e anexos, campos personalizados, etiquetas, captura de leads por API e formulário do site, importação de CSV/Excel sem duplicar, exportação, visibilidade por vendedor e relatórios (funil de conversão, ganhos e perdas, previsão, ranking, motivos de perda, tempo por etapa); metas por vendedor com o ritmo do mês, automações por etapa, sequências de follow-up que param quando o cliente responde, mesclar duplicados, modelos de e-mail com variáveis, pontuação de lead (frio/morno/quente) e mensagens prontas de WhatsApp (pelo motor quando conectado); perfis de segmento (B2B, imobiliária com imóveis compatíveis, escola/curso, varejo). Use depois do /rodsaas:backend e /rodsaas:frontend (com ou sem outros presets) quando o usuário pedir CRM, funil de vendas, pipeline, leads, gestão comercial, clone do Pipedrive/RD Station CRM/HubSpot, ou chamar /rodsaas:crm.
 ---
 
 # rodsaas · crm
@@ -28,8 +28,8 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos
 
 Se `rodsaas.json → presets` já tem `crm` (ou existe `api/src/modules/crm`), rode em **modo revisão** em vez de instalar de novo:
 
-1. Leia todas as referências (`01` a `07`) inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 7 (é onde mais se simplifica: negócio sem pessoa/empresa/produtos, sem barra de etapas, sem histórico, conversão de lead sem vincular contato).
+1. Leia todas as referências (`01` a `09`) inteiras.
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 7 (é onde mais se simplifica: negócio sem pessoa/empresa/produtos, sem barra de etapas, sem histórico, conversão de lead sem vincular contato) e das fases 10 e 11 (metas, automações, sequências, mesclar, modelos, pontuação, WhatsApp e perfis — CRM instalado antes da versão 0.28 não tem nada disso).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/07-checklist.md` e `/rodsaas:verify` (`-g "CRM"`).
 
@@ -44,9 +44,13 @@ Se `rodsaas.json → presets` já tem `crm` (ou existe `api/src/modules/crm`), r
 | Campos personalizados | na v1, para empresa, contato e negócio (o lead usa os campos do negócio) |
 | Moeda | só R$, guardado em centavos |
 | Dados de exemplo | botão "Carregar dados de exemplo" no estado vazio (não entram sozinhos para não sujar contadores) |
-| Planos | Free: 1 funil, 1.000 contatos+empresas, 3 campos; Pro: 5 funis, 25.000, 30 campos, produtos, captura, relatórios; Business: ilimitado |
+| Planos | Free: 1 funil, 1.000 contatos+empresas, 3 campos; Pro: 5 funis, 25.000, 30 campos, produtos, captura, relatórios, metas, 10 automações, 5 sequências, pontuação; Business: ilimitado |
+| Perfil | o segmento do onboarding (`crmProfileFor`); sem workstation, pergunta "Como você vende?" na primeira abertura (`GENERAL` se pular) |
+| Automações e sequências do perfil | criadas **desligadas** (o dono liga) |
+| WhatsApp | pelo motor (`/rodsaas:whatsapp`) quando a empresa conectou; senão o link `wa.me` — os dois registram a atividade |
+| E-mail pelo CRM | pelo add-on `email` (Resend), com a resposta indo para o vendedor |
 
-Fora da v1 (registre no README do projeto como próximos passos): sincronizar e-mail, enviar e-mail pelo CRM, metas por vendedor, automações por etapa, integração oficial com WhatsApp e Meta Lead Ads direto, propostas em PDF, mesclar contatos duplicados, participantes extras no negócio, ordenação por campo personalizado, tempo real (a v1 atualiza ao focar a janela e a cada 30 s).
+Fora da v1 (registre no README do projeto como próximos passos): sincronizar a caixa de e-mail (IMAP/Gmail/Outlook) e rastrear abertura, Meta Lead Ads direto (vem pelas ferramentas de captura), automação com espera/ramificação (fluxo visual), participantes extras no negócio, ordenação por campo personalizado, tempo real (a v1 atualiza ao focar a janela e a cada 30 s), comissão de corretor e integração com portais imobiliários (XML de anúncios).
 
 ## Fases
 
@@ -65,7 +69,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(crm
 7. **Telas**: funil (quadro e lista), negócio, leads, contatos, empresas, atividades, produtos, relatórios, importação, configurações. → `references/04-telas.md`
    - *Pronto quando*: a página do negócio tem **as quatro partes** do `04` (cabeçalho com valor e ganhar/perder, barra de etapas, coluna de detalhes com Resumo · **Pessoa** · **Empresa** · **Produtos** · campos · lead de origem, e área com compositor, planejado e histórico); "+ Negócio" com pessoa e empresa; contato e empresa com a aba Negócios e "+ Negócio" já preenchido; card do quadro com empresa/contato; todos os testids da seção "Contrato testável".
 8. **Interações e estados**: arrastar e soltar, otimismo e desfazer, WhatsApp e ligação com registro, atalhos, todos os estados de carregamento/vazio/erro. → `references/05-interacoes-e-estados.md`
-9. **Fechamento**: `references/07-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (a bateria tem uma parte só do CRM), README do projeto.
+9. **Fechamento do núcleo**: `references/07-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (a bateria tem uma parte só do CRM), README do projeto.
+10. **Vendas avançadas**: metas, automações (fila, idempotência, limite de laço), sequências, mesclar duplicados, modelos de e-mail, pontuação de lead e mensagens prontas de WhatsApp, com as telas. → `references/08-vendas-avancadas.md`
+    - *Pronto quando*: meta com o ritmo do mês e o widget no Início; entrar na etapa cria a atividade sozinho e o histórico mostra a execução; concluir o passo da sequência cria o próximo e ganho/resposta param; mesclar move tudo e a origem some; e-mail com variáveis chega e vira atividade; lead com pontuação e temperatura; WhatsApp pelo motor (ou o link) registrando a atividade.
+11. **Perfis de segmento**: vocabulário, funil, campos, mensagens, sequência e automações do perfil; imóveis e compatíveis na imobiliária; ligações com Comercial (B2B, escola) e ERP (varejo). → `references/09-perfis-de-segmento.md`
+    - *Pronto quando*: escolher o perfil monta tudo uma vez só (sem duplicar ao trocar), as telas usam as palavras do perfil e a imobiliária mostra os imóveis compatíveis no negócio. Feche com `/rodsaas:verify -g "CRM"` (inclui `28-crm-vendas.spec.ts`).
 
 ## Princípios
 
@@ -78,7 +86,7 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(crm
 
 ## Relatório final
 
-O que foi adicionado (menu, telas, rotas), planos e limites novos, como testar em 5 minutos (carregar dados de exemplo → criar empresa pelo CNPJ → criar negócio → arrastar no quadro → agendar ligação → concluir pela agenda → ganhar → mandar um lead pela chave de API com `curl` → converter → ver o relatório), o resultado do `/rodsaas:verify`, o que ficou fora da v1 e desvios por versão de pacote.
+O que foi adicionado (menu, telas, rotas), planos e limites novos, perfil escolhido e o que ele montou, como testar em 5 minutos (carregar dados de exemplo → criar empresa pelo CNPJ → criar negócio → arrastar no quadro → agendar ligação → concluir pela agenda → ganhar → mandar um lead pela chave de API com `curl` → converter → ver o relatório → criar uma meta → ligar uma automação de etapa e mover um negócio → inscrever numa sequência → mesclar um duplicado), o resultado do `/rodsaas:verify`, o que ficou fora da v1 e desvios por versão de pacote.
 
 ## Mapa das referências
 
@@ -91,4 +99,6 @@ O que foi adicionado (menu, telas, rotas), planos e limites novos, como testar e
 | `references/05-interacoes-e-estados.md` | Fase 8: arrastar, otimismo, WhatsApp, atalhos, estados |
 | `references/06-captura-e-importacao.md` | Fase 5: captura por API/formulário, importação, exportação |
 | `references/07-checklist.md` | Fase 9 |
-| `scripts/crm-lib.mjs` | regras puras (telefone, dinheiro, CNPJ/CPF, mapeamento de colunas, dedupe, previsão, campos personalizados, captura): porte para TS com os testes de `crm-lib.test.mjs` |
+| `references/08-vendas-avancadas.md` | Fase 10: metas, automações, sequências, duplicados, modelos de e-mail, pontuação, WhatsApp |
+| `references/09-perfis-de-segmento.md` | Fase 11: perfis B2B, imobiliária (imóveis), escola, varejo |
+| `scripts/crm-lib.mjs` | regras puras (telefone, dinheiro, CNPJ/CPF, mapeamento de colunas, dedupe, previsão, campos personalizados, captura; dias úteis, metas, condições, automações, sequências, grupos de duplicados e mesclagem, modelos, pontuação, imóveis compatíveis, perfis): porte para TS com os testes de `crm-lib.test.mjs` |

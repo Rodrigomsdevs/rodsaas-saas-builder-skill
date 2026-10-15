@@ -50,6 +50,21 @@ Confira **usando o app** (API e front rodando), com um owner, um MEMBER e uma se
 - [ ] funil de conversão, ganhos × perdidos, previsão, vendedores, motivos, tempo por etapa batem com os dados de exemplo
 - [ ] no Free: `PlanGate` em vez de quebrar
 
+## Vendas avançadas (`08`)
+- [ ] meta do mês por vendedor e da equipe com o ritmo (atrás/no ritmo/à frente) e o widget no Início; ganho reaberto sai da conta
+- [ ] automação de etapa cria a atividade com prazo e dono; condição barra; desligada não roda; histórico de execuções com falhas explicadas; laço para em 3
+- [ ] sequência: inscrever, concluir o passo cria o próximo (dias úteis), último encerra, ganho/perda/resposta do cliente param e tiram a pendente
+- [ ] mesclar dois contatos (e duas empresas): negócios, atividades, anotações, anexos e leads vão para o destino; origem some com o aviso; grupos de duplicados
+- [ ] e-mail pelo CRM com modelo: variáveis preenchidas, dado faltando avisado antes de mandar, resposta vai para o vendedor, atividade registrada
+- [ ] pontuação de lead: regras, temperatura na caixa, ordenação, aviso de lead quente
+- [ ] WhatsApp: mensagem pronta da etapa; pelo motor quando conectado (janela de 24 h respeitada), senão o link; atividade nos dois
+
+## Perfis (`09`)
+- [ ] escolher cada perfil monta funil, campos, mensagens, sequência e automações (desligadas) uma vez só; trocar não apaga nada
+- [ ] telas, vazios e e-mails com as palavras do perfil
+- [ ] imobiliária: cadastro de imóveis, perfil de busca e imóveis compatíveis no negócio
+- [ ] B2B/escola com o Comercial e varejo com o ERP ligados quando instalados (ou pendência explicada)
+
 ## Estados e acabamento
 - [ ] cada linha das tabelas de estados de `05-interacoes-e-estados.md` conferida
 - [ ] atalhos e folha de atalhos (`?`)

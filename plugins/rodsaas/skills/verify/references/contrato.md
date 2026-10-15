@@ -130,7 +130,7 @@ Quando `rodsaas.json → presets` (ou `addons`) tem um item listado em `contract
 
 | Preset | Onde está o contrato | Testes |
 |---|---|---|
-| `crm` | `skills/crm/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `skills/crm/references/03-api.md` e `06-captura-e-importacao.md` | `suite/tests/09-crm.spec.ts` |
+| `crm` | `skills/crm/references/04-telas.md` (seção "Contrato testável") e os formatos ★ de `skills/crm/references/03-api.md`, `06-captura-e-importacao.md`, `08-vendas-avancadas.md` e `09-perfis-de-segmento.md` | `suite/tests/09-crm.spec.ts`, `28-crm-vendas.spec.ts` |
 | `forms` | `skills/forms/references/04-construtor.md` (seção "Contrato testável"), `05-formulario-publico.md` (acessibilidade e testids do público) e os formatos ★ de `03-api.md` | `suite/tests/11-forms.spec.ts` |
 | `agenda` | `skills/agenda/references/05-app-interno.md` (seção "Contrato testável", inclusive recepção, fila, clube, comissões e recursos), `04-pagina-publica.md` (rótulos e testids da página pública, combo, sinal, lista de espera, confirmação) e os formatos ★ de `03-api.md` | `suite/tests/12-agenda.spec.ts` e `25-agenda-operacao.spec.ts` |
 | `helpdesk` | `skills/helpdesk/references/05-app-interno.md` (seção "Contrato testável"), `04-portal-e-widget.md` (rótulos e testids do portal e do chamado do cliente) e os formatos ★ de `03-api.md` | `suite/tests/13-helpdesk.spec.ts` |
