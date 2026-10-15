@@ -237,3 +237,20 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | agência | sem arredondar; valor da pessoa ignorado; faturar duas vezes; não faturável cobrado; lançamento faturado editável |
 | obras | marcar sem foto; arquivo que não é imagem aceito; concluir com checklist aberto; projeto sem guardar "exigir checklist" |
 | telas | perfil sem salvar; caminho crítico sem destaque; botão aprovar pedindo ajustes; semana estourada sem marca |
+
+## Páginas · operação (`35-paginas-operacao.spec.ts`, preset `notion`)
+
+| Teste | Causas comuns |
+|---|---|
+| comentários | comentário em bloco que não existe; resposta virando conversa nova; menção sem aviso; resolver que não reabre; qualquer um edita; conversa órfã sem marca |
+| histórico | uma versão por tecla (sem juntar a edição contínua) ou nenhuma por outra pessoa; restaurar sobrescrevendo sem versão nova; restaurar sem conferir a versão |
+| arquivos | `fileId` de outra empresa ou não concluído aceito; lista sem os arquivos do conteúdo |
+| modelos | variáveis sem trocar; sub-páginas esquecidas; aplicado na raiz em vez do pai |
+| permissão | restrita aparecendo na árvore ou na busca; filha sem herdar; "ver" editando ou comentando; dono sem acesso; sem a feature liberado |
+| databases | calendário sem propriedade de data aceito; período só no primeiro dia; filtro e ordenação só no navegador; galeria sem capa |
+| relação e rollup | linha de outra database aceita; o outro lado não acompanha (ao tirar, principalmente); rollup gravável ou somando errado |
+| exportar | HTML sem escapar; PDF que é texto; Markdown sem to-do; outra empresa exporta |
+| processos | perfil que desliga o que havia; ciência antiga valendo depois da reverificação; prazo sem limite |
+| base pública | slug repetido; filha fora do site; não publicada aberta; campos internos expostos; voto duplicado |
+| atas | to-do marcado vira tarefa; responsável que não é membro; rodar de novo duplica; concluir a tarefa não marca o to-do |
+| telas | perfil sem salvar; comentário pela tela sem gravar; restaurar sem efeito; dia do calendário vazio; voto sem gravar |

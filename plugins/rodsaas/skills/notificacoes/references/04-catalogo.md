@@ -54,6 +54,14 @@ Ao instalar (ou revisar) um preset com este add-on presente, o preset chama `not
 
 `canSee`: projeto público da empresa ou membro do projeto privado. Sair do projeto privado → `retract({ entityType: "task", userIds: [quem saiu] })` das tarefas daquele projeto.
 
+### Páginas (`paginas`, preset `notion`)
+
+| Tipo | Evento | Destinatários | entity · groupKey | url |
+|---|---|---|---|---|
+| `page.commented` | comentário em página (conversas de que a pessoa participa ou página que criou) | quem criou a página e os participantes da conversa | page | `/paginas/<id>#comentario-<id>` |
+| `page.mentioned` | menção `@[Nome](id)` num comentário de página | mencionados que veem a página | page | `/paginas/<id>#comentario-<id>` |
+| `page.review_due` | página verificada venceu a revisão (job diário, perfil manual de processos) | quem verificou | page · `review` | `/paginas/<id>` |
+
 ### CRM (`crm`)
 
 | Tipo | Evento | Destinatários | entity · groupKey | url |

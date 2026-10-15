@@ -12,11 +12,13 @@
 | **Databases** | propriedades texto, número, seleção, múltipla seleção, data, checkbox, pessoa, URL; visões **tabela** e **quadro**; filtro, ordenação e agrupamento; cada linha é uma página que abre no side peek |
 | **Compartilhar** | link público somente leitura por página (feature `public_pages` do plano) |
 | **Início** | páginas recentes e favoritas, atalho para nova página |
+| **Operação avançada** (`06`) | comentários no bloco com menções, histórico de versões com restaurar, imagens e arquivos, modelos, permissão por página, databases em lista/calendário/galeria, relações com rollup, exportar PDF/HTML/Markdown |
+| **Perfis** (`07`) | manual de processos (verificação e ciência), base de conhecimento pública, atas → tarefas |
 | **Workspace novo** | já nasce com páginas de exemplo ("Comece aqui" e um database "Tarefas" com quadro) |
 
 ## Fora da v1
 
-Edição colaborativa em tempo real, comentários, histórico de versões, upload de arquivos, templates, permissões por página, integrações, exportar PDF/Markdown. Registre no README como próximos passos.
+Edição colaborativa em tempo real (cursores e presença), integrações com outros apps de nota, IA no editor, domínio próprio para a base pública. Registre no README como próximos passos. (Comentários, histórico, arquivos, modelos, permissões e exportar entraram com `06-operacao-avancada.md`.)
 
 ## Models (Prisma)
 

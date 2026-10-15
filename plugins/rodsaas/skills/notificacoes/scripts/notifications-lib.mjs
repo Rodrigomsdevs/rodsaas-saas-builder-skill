@@ -113,6 +113,10 @@ export const PRESET_TYPES = [
   { type: "sprint.completed", appId: "tarefas", label: "Sprint concluída", template: "{actor} concluiu a {title}", group: { by: "none" } },
   { type: "task.automation", appId: "tarefas", label: "Aviso de automação", template: "Automação {data.automation}: {title}", group: { by: "none" } },
   { type: "task.approval", appId: "tarefas", label: "Decisão do cliente", template: "Cliente respondeu em {title}: {data.decision}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
+  // páginas
+  { type: "page.commented", appId: "paginas", label: "Comentário em página", template: { one: "{actor} comentou em {title}", many: "{actors} {comentou|comentaram} {count} vezes em {title}" } },
+  { type: "page.mentioned", appId: "paginas", label: "Menção em comentário de página", template: "{actors} {mencionou|mencionaram} você em {title}" },
+  { type: "page.review_due", appId: "paginas", label: "Página para revisar", template: { one: "{title} venceu a revisão", many: "{count} páginas para revisar" }, group: { by: "key", windowMinutes: 1440 } },
   // crm
   { type: "crm.deal.assigned", appId: "crm", label: "Negócio atribuído a você", template: { one: "{actor} passou o negócio {title} para você", many: "{actors} {passou|passaram} {count} negócios para você" }, group: { by: "key" } },
   { type: "crm.lead.assigned", appId: "crm", label: "Lead atribuído a você", template: { one: "Novo lead para você: {title}", many: "{count} novos leads para você" }, group: { by: "key", windowMinutes: 10 } },

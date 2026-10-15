@@ -44,10 +44,26 @@ Confira cada item **usando o app** (API e front rodando), não só lendo o códi
 - [ ] ligado: link abre sem login, somente leitura, só aquela página
 - [ ] desligado ou página na lixeira: link dá 404
 
+## Operação avançada (`06`)
+- [ ] comentários: no bloco com trecho, na página, respostas, menções avisam, resolver/reabrir, editar só o autor, conversa órfã
+- [ ] histórico: versão por save com a regra dos 10 minutos, lista com autor e resumo, prévia, restaurar como versão nova, retenção do plano
+- [ ] arquivos: arrastar, colar e "/arquivo"; imagem com legenda, PDF embutido, card de arquivo; só da empresa e concluído
+- [ ] modelos: salvar página como modelo, modelos do perfil, aplicar com variáveis e sub-páginas, modelo de linha
+- [ ] permissão: níveis, restrita, herança, cadeado na árvore, some da árvore/busca/favoritos/recentes, 403 nas ações sem nível
+- [ ] databases: lista, calendário (arrastar de dia), galeria com capa; filtro e ordenação no servidor
+- [ ] relação de mão dupla e rollup calculado; excluir a relação avisa e limpa
+- [ ] exportar PDF (tema de impressão), HTML e Markdown, ZIP com sub-páginas
+
+## Perfis (`07`)
+- [ ] perfil aplicado sem desligar nada, vocabulário e modelos do perfil
+- [ ] manual de processos: verificar com prazo, selo, painel "Para revisar", aviso de vencida, "li e entendi" com pendentes
+- [ ] base pública: publicar com endereço único, filhas juntas, navegação, busca, voto, sitemap, despublicar
+- [ ] atas: to-dos viram tarefas (responsável, prazo, sem repetir), selo com o código, concluir a tarefa marca o to-do
+
 ## Celular
 - [ ] menu vira drawer; árvore, editor, busca e side peek usáveis em 360px
 
 ## Entrega
-- [ ] README do projeto: o que o app faz, como rodar, o que ficou fora da v1 (tempo real, comentários, histórico, upload, templates, permissões por página)
+- [ ] README do projeto: o que o app faz, como rodar, o que ficou fora da v1 (tempo real, integrações, IA, domínio próprio)
 - [ ] testes ponta a ponta: criar página → escrever → recarregar; arrastar na árvore; conflito em duas abas; database em quadro; link público
 - [ ] **conferência final**: tabela item a item de `03-editor.md` e `04-frontend.md` com ✅/❌; nenhum ❌ sem pendência registrada no relatório

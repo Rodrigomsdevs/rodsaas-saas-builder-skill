@@ -1,5 +1,5 @@
 {
-  "version": 27,
+  "version": 28,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -2243,7 +2243,9 @@
         "/paginas",
         "/paginas/[id]",
         "/pagina/[id]",
-        "/publico/[token]"
+        "/publico/[token]",
+        "/paginas/configuracoes",
+        "/docs/[siteKey]/[slug]"
       ],
       "testids": [
         "pages-home",
@@ -2276,7 +2278,43 @@
         "db-board",
         "db-board-column",
         "db-card",
-        "db-peek"
+        "db-peek",
+        "pages-segment",
+        "page-comments",
+        "page-comment-input",
+        "page-comment-submit",
+        "page-comment-resolve",
+        "page-comment-mark",
+        "data-thread-id",
+        "page-history",
+        "page-history-restore",
+        "page-file",
+        "pages-template-pick",
+        "data-template-id",
+        "page-access",
+        "page-access-restricted",
+        "page-access-grant",
+        "data-level",
+        "db-list-row",
+        "db-calendar",
+        "db-calendar-day",
+        "data-date",
+        "db-calendar-item",
+        "db-gallery",
+        "db-gallery-card",
+        "page-export",
+        "data-format",
+        "page-verified",
+        "page-ack",
+        "page-acks",
+        "page-site-toggle",
+        "kb-page",
+        "kb-nav-item",
+        "kb-search",
+        "kb-helpful-yes",
+        "kb-helpful-no",
+        "page-action-items",
+        "page-action-item"
       ],
       "api": [
         {
@@ -2391,6 +2429,164 @@
         {
           "method": "get",
           "path": "/v1/public/pages/{token}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/pages/settings",
+          "body": [
+            "segment"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/comments",
+          "body": [
+            "body",
+            "blockId",
+            "quote",
+            "parentId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/comments"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/page-comments/{id}",
+          "body": [
+            "body"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/page-comments/{id}/resolve"
+        },
+        {
+          "method": "post",
+          "path": "/v1/page-comments/{id}/reopen"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/versions"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/versions/{versionId}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/versions/{versionId}/restore",
+          "body": [
+            "version"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/files"
+        },
+        {
+          "method": "post",
+          "path": "/v1/page-templates",
+          "body": [
+            "name",
+            "pageId",
+            "title",
+            "content"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/page-templates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/page-templates/{id}/apply",
+          "body": [
+            "parentId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/access"
+        },
+        {
+          "method": "put",
+          "path": "/v1/pages/{id}/access",
+          "body": [
+            "restricted",
+            "workspaceLevel",
+            "grants"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/pages/{id}/access"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/export"
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/verify",
+          "body": [
+            "reviewEveryDays"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/verification"
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/ack"
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/acks"
+        },
+        {
+          "method": "put",
+          "path": "/v1/pages/{id}/site",
+          "body": [
+            "enabled",
+            "slug"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/site/{siteKey}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/site/{siteKey}/{slug}"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/site/{siteKey}/search"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/site/{siteKey}/{slug}/feedback",
+          "body": [
+            "helpful"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/pages/{id}/action-items",
+          "body": [
+            "projectId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/pages/{id}/action-items"
         }
       ]
     },

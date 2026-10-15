@@ -1,6 +1,6 @@
 ---
 name: notion
-description: Preset que soma a um projeto rodsaas o app Páginas, uma réplica do Notion — workspaces (as organizações do SaaS), árvore de páginas aninhadas com arrastar e soltar, editor de blocos com menu "/", autosave com controle de conflito, favoritos, recentes, lixeira, busca em todo o conteúdo (Ctrl+K), databases com visão de tabela e quadro (kanban) e páginas públicas por link. Use depois do /rodsaas:backend e do /rodsaas:frontend, quando o usuário pedir "réplica do Notion", "clone do Notion", "app de notas/documentos estilo Notion", ou chamar /rodsaas:notion.
+description: Preset que soma a um projeto rodsaas o app Páginas, uma réplica do Notion — workspaces (as organizações do SaaS), árvore de páginas aninhadas com arrastar e soltar, editor de blocos com menu "/", autosave com controle de conflito, favoritos, recentes, lixeira, busca em todo o conteúdo (Ctrl+K), databases com visão de tabela e quadro (kanban) e páginas públicas por link — e a operação avançada: comentários no bloco com menções, histórico de versões com restaurar, imagens e arquivos, modelos, permissão por página, databases em lista, calendário e galeria, relações com rollup e exportar em PDF/Markdown, com perfis de manual de processos (verificação e "li e entendi"), base de conhecimento pública e atas que viram tarefas. Use depois do /rodsaas:backend e do /rodsaas:frontend, quando o usuário pedir "réplica do Notion", "clone do Notion", "app de notas/documentos estilo Notion", ou chamar /rodsaas:notion.
 ---
 
 # rodsaas · notion
@@ -35,7 +35,7 @@ Acrescenta a um projeto rodsaas (API em `api/`, painel em `web/`) o app **Págin
 Se `rodsaas.json → presets` já tem `notion` (ou existe `api/src/modules/pages`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 2, 5 e 6 (é onde mais se simplifica: árvore sem mover/arrastar, editor de texto simples em vez de blocos, autosave sem versão, databases sem quadro, filtros ou side peek).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 9 e 10 se o Páginas foi instalado antes da versão 0.35 (comentários, histórico, arquivos, modelos, permissões, novas visões, relações, exportar e perfis não existiam) e depois pelas fases 2, 5 e 6 (é onde mais se simplifica: árvore sem mover/arrastar, editor de texto simples em vez de blocos, autosave sem versão, databases sem quadro, filtros ou side peek).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/05-checklist.md` e o `/rodsaas:verify` (`-g "Páginas"`).
 
@@ -43,6 +43,8 @@ Se `rodsaas.json → presets` já tem `notion` (ou existe `api/src/modules/pages
 
 - **Remover o módulo de exemplo `projects`?** Padrão: **sim**, se o projeto ainda só tiver o exemplo (API, tabela, telas, item no app Cadastros e limite de plano). Sem nenhum módulo, o app Cadastros sai do registro e o Páginas fica sendo o único app (menu clássico) até entrar outro.
 - **Planos:** padrão `free` com 3 membros e 100 páginas; `pro` com 10 membros, páginas ilimitadas e a feature `public_pages`; `business` com 50 membros, ilimitado, `public_pages` e `audit_log`.
+- **Perfil:** padrão `GENERAL`; a workstation escolhe pelo segmento (manual de processos, base pública, atas) — `references/07-perfis-de-segmento.md`.
+- **Histórico:** Free 7 dias, Pro 90, Business sem limite; edição contínua da mesma pessoa vira uma versão.
 - **Nome do tenant:** padrão **manter o atual**. Se o Páginas for o produto principal (único app), sugira **Workspace** (masculino: "Novo workspace"). Grave em `rodsaas.json`.
 
 ## Fases
@@ -83,8 +85,18 @@ Diálogo "Compartilhar" (link público liga/desliga, conforme o plano) e a pági
 → `references/02-api.md`, `references/04-frontend.md`
 *Pronto quando*: link público liga/desliga conforme o plano e a página pública somente leitura.
 
-### Fase 8 — Fechamento
+### Fase 8 — Fechamento do núcleo
 Checklist de `references/05-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Páginas: `-g "Páginas"`; ela exige os testids da seção "Contrato testável" de `04-frontend.md` e os formatos ★ de `02-api.md`), README do projeto atualizado.
+
+### Fase 9 — Operação avançada
+Comentários, histórico e restaurar, imagens e arquivos, modelos, permissão por página, databases em lista/calendário/galeria, relações e rollup, exportar.
+→ `references/06-operacao-avancada.md`
+*Pronto quando*: comentário no bloco com menção, resolver e conversa órfã; histórico que junta a edição contínua e restaura como versão nova; arquivo só da empresa e concluído; modelo com variáveis e sub-páginas; permissão que some para quem não pode (árvore e busca inclusive), herda para as filhas e bloqueia editar/comentar; calendário, galeria e lista com filtro no servidor; relação de mão dupla e rollup; exportar PDF/HTML/Markdown escapado.
+
+### Fase 10 — Perfis de segmento
+Manual de processos (verificação e ciência), base de conhecimento pública, atas → tarefas.
+→ `references/07-perfis-de-segmento.md`
+*Pronto quando*: perfil liga o que pede sem desligar nada; verificação com prazo, painel e ciência depois da verificação; site público com endereço único, filhas juntas, busca e voto; to-dos da ata viram tarefas sem repetir e concluir a tarefa marca o to-do. Feche com `/rodsaas:verify -g "Páginas"` (inclui `35-paginas-operacao.spec.ts`).
 
 ## Princípios
 
@@ -92,7 +104,7 @@ Checklist de `references/05-checklist.md`, testes ponta a ponta, `/rodsaas:verif
 - **Nunca perder o que o usuário escreveu.** Autosave com debounce, salvamento ao sair da página, indicador de estado visível, conflito detectado por versão (nada de "o último que salvar vence" em silêncio).
 - **Tudo é página.** Documento, linha de database e sub-página são o mesmo model. Isso mantém árvore, busca, lixeira, favoritos e compartilhamento funcionando para tudo, sem código duplicado.
 - **Rápido como o Notion.** Atualização otimista na árvore, nos favoritos, nos cards do quadro e nas células; a interface não espera a API para reagir.
-- **Fora do escopo da v1** (registre no README como próximos passos, não implemente pela metade): edição colaborativa em tempo real, comentários, histórico de versões, upload de arquivos, templates, integrações, permissões por página.
+- **Fora do escopo da v1** (registre no README como próximos passos, não implemente pela metade): edição colaborativa em tempo real (cursores e presença), integrações com outros apps de nota, IA no editor, domínio próprio para a base pública, sincronizar database com planilha externa.
 
 ## Relatório final
 
@@ -107,3 +119,6 @@ O que foi criado, o que foi removido (`projects`), os planos novos, como testar 
 | `references/03-editor.md` | Fase 5 — editor de blocos, autosave, conflito, segurança do conteúdo |
 | `references/04-frontend.md` | Fases 4, 6 e 7 — app Páginas na casca de apps, árvore, busca, lixeira, databases, página pública |
 | `references/05-checklist.md` | Fase 8 |
+| `references/06-operacao-avancada.md` | Fase 9 — comentários, histórico, arquivos, modelos, permissão, visões, relações, exportar |
+| `references/07-perfis-de-segmento.md` | Fase 10 — manual de processos, base pública, atas |
+| `scripts/paginas-lib.mjs` + `paginas-lib.test.mjs` | regras puras (comentários, versões, arquivos, modelos, permissão, filtro/ordenação, calendário, galeria, relação e rollup, exportar, verificação, endereço e voto, itens de ação, perfis): porte para TS com os testes |
