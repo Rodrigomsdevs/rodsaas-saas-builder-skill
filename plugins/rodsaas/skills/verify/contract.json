@@ -1,5 +1,5 @@
 {
-  "version": 22,
+  "version": 23,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -3273,7 +3273,9 @@
         "/erp/pdv",
         "/erp/compras",
         "/erp/relatorios",
-        "/erp/configuracoes"
+        "/erp/configuracoes",
+        "/erp/comissoes",
+        "/erp/producao"
       ],
       "testids": [
         "erp-home",
@@ -3365,7 +3367,17 @@
         "erp-receive-confirm",
         "erp-report-abc",
         "erp-abc-row",
-        "data-class"
+        "data-class",
+        "erp-commission-row",
+        "data-seller",
+        "erp-lot-row",
+        "data-expired",
+        "erp-expiring-row",
+        "erp-segment",
+        "erp-production-row",
+        "pdv-voucher-code",
+        "pdv-pay-voucher",
+        "pdv-receive"
       ],
       "api": [
         {
@@ -3431,7 +3443,11 @@
             "attributes",
             "components",
             "tiers",
-            "initialStock"
+            "initialStock",
+            "tracksLots",
+            "scaleCode",
+            "saleUnit",
+            "saleMultiple"
           ]
         },
         {
@@ -3467,7 +3483,8 @@
             "warehouseId",
             "qty",
             "unitCostCents",
-            "reason"
+            "reason",
+            "lot"
           ]
         },
         {
@@ -3606,7 +3623,8 @@
           "body": [
             "sessionId",
             "items",
-            "payments"
+            "payments",
+            "cpf"
           ]
         },
         {
@@ -3650,6 +3668,112 @@
         {
           "method": "get",
           "path": "/v1/erp/reports/abc"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/commission-rules"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/commission-rules",
+          "body": [
+            "kind",
+            "pct",
+            "fixedCents",
+            "productId",
+            "categoryId",
+            "sellerId"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/commissions"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/products/{id}/lots"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/lots/expiring"
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/promotions"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/promotions",
+          "body": [
+            "name",
+            "type",
+            "pct",
+            "priceCents",
+            "take",
+            "pay",
+            "productIds",
+            "categoryIds",
+            "from",
+            "to",
+            "weekdays",
+            "channels",
+            "minQty"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/vouchers/{code}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/vouchers",
+          "body": [
+            "amountCents",
+            "customerId",
+            "expiresOn"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/exchanges",
+          "body": [
+            "orderId",
+            "returns",
+            "items",
+            "payments"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/erp/parties/{id}/receivables"
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/parties/{id}/receivables/pay",
+          "body": [
+            "amountCents",
+            "method"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/erp/products/{id}/recipe",
+          "body": [
+            "yieldQty",
+            "components"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/production-orders",
+          "body": [
+            "productId",
+            "qty"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/erp/production-orders/{id}/complete"
         }
       ]
     },

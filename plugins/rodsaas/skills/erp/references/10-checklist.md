@@ -54,3 +54,14 @@ Confira **usando o app** (API e front rodando), com: o owner (`ERP_ADMIN`), uma 
 - [ ] RLS: a segunda empresa não vê nada (API e telas)
 - [ ] `/rodsaas:verify -g "ERP"` verde (e a bateria completa sem regressão)
 - [ ] README do projeto: o que o ERP faz, papéis, como configurar caixas e o leitor, o que ficou fora da v1 (documentos fiscais primeiro)
+
+## Operação avançada e perfis (`11` e `12`)
+- [ ] pedido → NF-e pelo motor; PDV → NFC-e com CPF quando `pdvIssueNfce` está ligado; produto sem NCM não trava a venda
+- [ ] comissão: regra mais específica, base líquida, devolução estorna, fechamento do período (contas a pagar no Financeiro)
+- [ ] lote obrigatório na entrada, FEFO na saída, vencido nunca sai, relatório "vencendo" e aviso diário
+- [ ] promoções (leve 3 pague 2, porcentagem, preço fixo, dia da semana) no pedido e no PDV, a melhor por linha, fora do limite do vendedor
+- [ ] devolução com vale-troca; PDV paga com o vale; troca com diferença a pagar e com crédito
+- [ ] carnê: parcelas, encargos de atraso, receber fiado no PDV com o caixa
+- [ ] receita e ordem de produção com baixa de insumos e custo do produzido
+- [ ] perfis: balança no PDV, unidade de venda, múltiplo e pedido mínimo; trocar não apaga nada
+

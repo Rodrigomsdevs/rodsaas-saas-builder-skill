@@ -379,3 +379,192 @@ export function daysOfStock({ onHand, soldQty, days }) {
   if (!soldQty || soldQty <= 0) return null;
   return Math.floor(onHand / (soldQty / days));
 }
+
+// ================================================================== operação avançada (references/11) e perfis (12)
+
+// ------------------------------------------------------------------ comissão de vendedor (mesma regra da Agenda)
+/**
+ * Regra mais específica para a linha: vendedor + produto > produto > categoria > vendedor > padrão do tipo (PRODUCT/SERVICE).
+ * rules: [{ sellerId?, productId?, categoryId?, kind: "PRODUCT" | "SERVICE", pct?, fixedCents? }]
+ */
+export function sellerCommissionRule(line, rules) {
+  const m = (rules ?? []).filter((r) => (r.kind ?? "PRODUCT") === (line.kind ?? "PRODUCT") && (!r.sellerId || r.sellerId === line.sellerId) && (!r.productId || r.productId === line.productId) && (!r.categoryId || r.categoryId === line.categoryId));
+  const score = (r) => (r.productId ? 4 : 0) + (r.categoryId ? 2 : 0) + (r.sellerId ? 1 : 0);
+  return m.sort((a, b) => score(b) - score(a))[0] ?? null;
+}
+/** Comissão da linha sobre o líquido (já com descontos); valor fixo é por unidade; devolução entra com qty/netCents negativos. */
+export function sellerCommission(line, rules) {
+  const r = sellerCommissionRule(line, rules);
+  if (!r) return 0;
+  if (r.fixedCents != null) return r.fixedCents * (line.qty ?? 1);
+  return Math.round((line.netCents * (r.pct ?? 0)) / 100);
+}
+/** Extrato: { bySeller: { [id]: { salesCents, commissionCents, lines } }, totalCommissionCents } (linhas sem vendedor ficam fora) */
+export function commissionStatementErp(lines, rules) {
+  const bySeller = {};
+  let total = 0;
+  for (const l of lines ?? []) {
+    if (!l.sellerId) continue;
+    const s = (bySeller[l.sellerId] ??= { salesCents: 0, commissionCents: 0, lines: 0 });
+    const c = sellerCommission(l, rules);
+    s.salesCents += l.netCents; s.commissionCents += c; s.lines += 1; total += c;
+  }
+  return { bySeller, totalCommissionCents: total };
+}
+
+// ------------------------------------------------------------------ lote e validade
+export function validateLot(lot, today) {
+  const e = [];
+  if (!String(lot?.code ?? "").trim()) err(e, "LOT_REQUIRED", "Informe o lote", "lot.code");
+  if (lot?.expiresOn != null && !isDate(lot.expiresOn)) err(e, "DATE_INVALID", "Validade AAAA-MM-DD", "lot.expiresOn");
+  else if (lot?.expiresOn && today && lot.expiresOn < today) err(e, "LOT_EXPIRED", "Lote já vencido", "lot.expiresOn");
+  return e;
+}
+/**
+ * Saída FEFO (vence primeiro, sai primeiro): lotes [{ id, expiresOn, available }] → { ok, picks: [{ lotId, qty }], shortQty }.
+ * Vencido não sai (a não ser allowExpired); sem validade vai por último.
+ */
+export function fefoPick(lots, qty, { today, allowExpired = false } = {}) {
+  const usable = lots.filter((l) => l.available > 0 && (allowExpired || !l.expiresOn || !today || l.expiresOn >= today))
+    .sort((a, b) => (a.expiresOn ?? "9999-12-31").localeCompare(b.expiresOn ?? "9999-12-31") || String(a.id).localeCompare(String(b.id)));
+  const picks = [];
+  let left = qty;
+  for (const l of usable) { if (left <= 0) break; const q = roundQty(Math.min(left, l.available)); picks.push({ lotId: l.id, qty: q }); left = roundQty(left - q); }
+  return { ok: left <= 0, picks, shortQty: Math.max(0, left) };
+}
+/** Lotes que vencem até `days` dias (e os já vencidos com saldo), mais perto primeiro. */
+export const expiringLots = (lots, today, days) => lots.filter((l) => l.available > 0 && l.expiresOn && l.expiresOn <= addDays(today, days)).sort((a, b) => a.expiresOn.localeCompare(b.expiresOn)).map((l) => ({ ...l, expired: l.expiresOn < today, daysLeft: Math.round((parse(l.expiresOn) - parse(today)) / 86_400_000) }));
+
+// ------------------------------------------------------------------ promoções
+export const PROMO_TYPES = ["PERCENT_OFF", "FIXED_PRICE", "TAKE_PAY"];
+export function validatePromotion(p) {
+  const e = [];
+  if (!String(p?.name ?? "").trim()) err(e, "NAME_REQUIRED", "Nome da promoção", "name");
+  if (!PROMO_TYPES.includes(p?.type)) err(e, "TYPE_INVALID", "Tipo", "type");
+  if (p?.type === "PERCENT_OFF" && !(p.pct > 0 && p.pct < 100)) err(e, "PCT_INVALID", "Desconto entre 0 e 100%", "pct");
+  if (p?.type === "FIXED_PRICE" && !(Number.isInteger(p.priceCents) && p.priceCents > 0)) err(e, "PRICE_INVALID", "Preço promocional", "priceCents");
+  if (p?.type === "TAKE_PAY" && !(Number.isInteger(p.take) && Number.isInteger(p.pay) && p.take > p.pay && p.pay >= 1)) err(e, "TAKE_PAY_INVALID", "Leve mais do que paga (ex.: leve 3, pague 2)", "take");
+  if (!(p?.productIds?.length || p?.categoryIds?.length)) err(e, "TARGET_REQUIRED", "Escolha produtos ou categorias", "productIds");
+  if (p?.from && !isDate(p.from)) err(e, "DATE_INVALID", "Data", "from");
+  if (p?.to && !isDate(p.to)) err(e, "DATE_INVALID", "Data", "to");
+  if (p?.from && p?.to && p.to < p.from) err(e, "RANGE_INVALID", "Fim antes do início", "to");
+  if ((p?.weekdays ?? []).some((d) => !(Number.isInteger(d) && d >= 0 && d <= 6))) err(e, "WEEKDAY_INVALID", "Dias da semana 0 (domingo) a 6", "weekdays");
+  return e;
+}
+const weekdayOf = (ymd) => new Date(parse(ymd)).getUTCDay();
+/** Promoção vale para a linha hoje? (ativa, período, dia da semana, canal, produto ou categoria, quantidade mínima) */
+export function promoApplies(p, line, { today, channel }) {
+  if (p.active === false) return false;
+  if (p.from && today < p.from) return false;
+  if (p.to && today > p.to) return false;
+  if ((p.weekdays ?? []).length && !p.weekdays.includes(weekdayOf(today))) return false;
+  if ((p.channels ?? []).length && !p.channels.includes(channel)) return false;
+  if (!((p.productIds ?? []).includes(line.productId) || (p.categoryIds ?? []).includes(line.categoryId))) return false;
+  if (p.minQty && line.qty < p.minQty) return false;
+  return true;
+}
+/** Desconto da promoção numa linha { qty, unitCents }. */
+export function promoDiscount(p, line) {
+  const gross = Math.round(line.qty * line.unitCents);
+  if (p.type === "PERCENT_OFF") return Math.round((gross * p.pct) / 100);
+  if (p.type === "FIXED_PRICE") return Math.max(0, gross - Math.round(line.qty * p.priceCents));
+  if (p.type === "TAKE_PAY") { const free = Math.floor(line.qty / p.take) * (p.take - p.pay); return Math.round(free * line.unitCents); }
+  return 0;
+}
+/** A melhor promoção para cada linha (não acumulam entre si). → [{ promoId, discountCents } | null] */
+export function applyPromotions(lines, promos, ctx) {
+  return lines.map((l) => {
+    let best = null;
+    for (const p of promos ?? []) { if (!promoApplies(p, l, ctx)) continue; const d = promoDiscount(p, l); if (d > 0 && (!best || d > best.discountCents)) best = { promoId: p.id, discountCents: d }; }
+    return best;
+  });
+}
+
+// ------------------------------------------------------------------ troca e vale-troca
+/** Código do vale: 10 caracteres sem 0/O/1/I + dígito de controle (soma ponderada mod 32). */
+const VC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const vcCheck = (body) => VC[[...body].reduce((s, ch, i) => s + VC.indexOf(ch) * (i + 1), 0) % 32];
+export const newVoucherCode = (rand = Math.random) => { const body = Array.from({ length: 10 }, () => VC[Math.floor(rand() * 32)]).join(""); return body + vcCheck(body); };
+export const isVoucherCode = (code) => { const c = String(code ?? "").toUpperCase().replace(/[\s-]/g, ""); return /^[A-HJ-NP-Z2-9]{11}$/.test(c) && vcCheck(c.slice(0, 10)) === c[10]; };
+/** Usar o vale: → { ok, code? } (VOUCHER_INVALID, VOUCHER_EXPIRED, VOUCHER_INSUFFICIENT, VOUCHER_CANCELED) */
+export function voucherUse(v, amountCents, today) {
+  if (!v) return { ok: false, code: "VOUCHER_INVALID" };
+  if (v.status === "CANCELED") return { ok: false, code: "VOUCHER_CANCELED" };
+  if (v.expiresOn && today > v.expiresOn) return { ok: false, code: "VOUCHER_EXPIRED" };
+  if (!(Number.isInteger(amountCents) && amountCents > 0) || amountCents > v.balanceCents) return { ok: false, code: "VOUCHER_INSUFFICIENT" };
+  return { ok: true, balanceAfterCents: v.balanceCents - amountCents };
+}
+/** Troca: crédito da devolução × valor dos itens novos → { toPayCents, voucherCents } */
+export const exchangeBalance = (returnCents, newCents) => ({ toPayCents: Math.max(0, newCents - returnCents), voucherCents: Math.max(0, returnCents - newCents) });
+
+// ------------------------------------------------------------------ carnê do fiado
+/** Multa (uma vez) + juros simples ao mês pro rata por dia de atraso. → { daysLate, fineCents, interestCents, totalCents } */
+export function lateCharges(amountCents, dueDate, payDate, { finePct = 2, monthlyInterestPct = 1 } = {}) {
+  const days = Math.max(0, Math.round((parse(payDate) - parse(dueDate)) / 86_400_000));
+  if (!days) return { daysLate: 0, fineCents: 0, interestCents: 0, totalCents: amountCents };
+  const fine = Math.round((amountCents * finePct) / 100), interest = Math.round((amountCents * monthlyInterestPct * days) / 3000);
+  return { daysLate: days, fineCents: fine, interestCents: interest, totalCents: amountCents + fine + interest };
+}
+/**
+ * Pagamento do fiado: abate das parcelas mais antigas primeiro, cada uma com a multa e os juros do dia.
+ * open: [{ id, dueDate, openCents }] → { applied: [{ id, paidCents, chargesCents, settled }], leftoverCents }
+ */
+export function allocateCarnePayment(open, amountCents, payDate, opts) {
+  let left = amountCents;
+  const applied = [];
+  for (const p of [...open].sort((a, b) => a.dueDate.localeCompare(b.dueDate) || String(a.id).localeCompare(String(b.id)))) {
+    if (left <= 0) break;
+    const ch = lateCharges(p.openCents, p.dueDate, payDate, opts);
+    const due = ch.totalCents, pay = Math.min(left, due);
+    applied.push({ id: p.id, paidCents: pay, chargesCents: due - p.openCents, settled: pay === due });
+    left -= pay;
+  }
+  return { applied, leftoverCents: left };
+}
+
+// ------------------------------------------------------------------ ordem de produção simples
+export function validateRecipe(r) {
+  const e = [];
+  if (!(r?.yieldQty > 0)) err(e, "YIELD_INVALID", "Rende quanto?", "yieldQty");
+  if (!(r?.components ?? []).length) err(e, "COMPONENTS_REQUIRED", "Inclua os insumos", "components");
+  (r?.components ?? []).forEach((c, i) => {
+    if (!c?.productId) err(e, "PRODUCT_REQUIRED", "Insumo", `components.${i}.productId`);
+    if (!(c?.qty > 0)) err(e, "QTY_INVALID", "Quantidade", `components.${i}.qty`);
+    if (c?.productId && c.productId === r.productId) err(e, "SELF_COMPONENT", "O produto não pode ser insumo dele mesmo", `components.${i}.productId`);
+  });
+  return e;
+}
+/** Insumos para produzir `qty` (proporcional ao rendimento da receita, 3 casas). */
+export const productionNeeds = (recipe, qty) => recipe.components.map((c) => ({ productId: c.productId, qty: roundQty((c.qty * qty) / recipe.yieldQty) }));
+/** Custo unitário do produzido = soma (insumo × custo médio) / quantidade produzida. */
+export const productionUnitCost = (needs, costOf, qty) => Math.round(needs.reduce((s, n) => s + n.qty * costOf(n.productId), 0) / qty);
+export const PRODUCTION_FLOW = { PLANNED: ["IN_PROGRESS", "DONE", "CANCELED"], IN_PROGRESS: ["DONE", "CANCELED"], DONE: [], CANCELED: [] };
+export const canMoveProduction = (from, to) => (PRODUCTION_FLOW[from] ?? []).includes(to);
+
+// ------------------------------------------------------------------ perfis: balança, unidade de venda, múltiplo e pedido mínimo
+/**
+ * Etiqueta de balança (EAN-13 começando com "2"): 2 CCCCCC VVVVV D — código do produto na balança (6) e valor (5):
+ * preço em centavos (mode PRICE, o comum) ou peso em gramas (mode WEIGHT); confira o formato configurado na balança.
+ * → { productCode, priceCents? , weightKg? } ou null
+ */
+export function parseScaleBarcode(code, { mode = "PRICE" } = {}) {
+  const c = String(code ?? "");
+  if (!/^2\d{12}$/.test(c) || !isValidGtin(c)) return null;
+  const productCode = c.slice(1, 7), v = Number(c.slice(7, 12));
+  return mode === "WEIGHT" ? { productCode, weightKg: v / 1000 } : { productCode, priceCents: v };
+}
+/** Unidade de venda × estoque (caixa de piso = 2,5 m²): quantidade no estoque. */
+export const toStockQty = (saleQty, factor = 1) => roundQty(saleQty * factor);
+/** Múltiplo de venda (caixa com 12): a quantidade precisa ser múltipla. */
+export const isMultipleOf = (qty, multiple) => !multiple || Math.abs(qty / multiple - Math.round(qty / multiple)) < 1e-9;
+/** Pedido mínimo (distribuidora): total do pedido sem frete ≥ mínimo. */
+export const meetsMinimumOrder = (subtotalCents, minimumCents) => !minimumCents || subtotalCents >= minimumCents;
+
+export const ERP_SEGMENTS = {
+  GENERAL: { label: "Comércio em geral", words: { sale: "venda", sales: "vendas", customer: "cliente", customers: "clientes" }, on: [] },
+  MARKET: { label: "Mercado ou padaria", words: { sale: "venda", sales: "vendas", customer: "cliente", customers: "clientes" }, on: ["scale", "lots", "promotions", "production", "pdv_nfce"] },
+  APPAREL: { label: "Loja de roupa e calçado", words: { sale: "venda", sales: "vendas", customer: "cliente", customers: "clientes" }, on: ["variants", "vouchers", "promotions", "commissions", "carne"] },
+  BUILDING: { label: "Material de construção", words: { sale: "venda", sales: "vendas", customer: "cliente", customers: "clientes" }, on: ["sale_units", "carne", "commissions", "delivery"] },
+  WHOLESALE: { label: "Distribuidora", words: { sale: "pedido", sales: "pedidos", customer: "cliente", customers: "clientes" }, on: ["price_tables", "sale_multiple", "minimum_order", "commissions", "lots"] },
+};
+export const erpSegment = (id) => (ERP_SEGMENTS[id] ? { id, ...ERP_SEGMENTS[id] } : { id: "GENERAL", ...ERP_SEGMENTS.GENERAL });

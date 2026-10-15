@@ -1,6 +1,6 @@
 ---
 name: erp
-description: Preset que soma ao projeto rodsaas o app ERP, um ERP simples no estilo Bling/Tiny/Omie para pequenas empresas — produtos simples, com grade de variações (cor × tamanho), kits e serviços, código de barras EAN e código interno, tabelas de preço (varejo/atacado) e faixas por quantidade, margem; estoque por depósito com movimentações, reservado × disponível, custo médio, transferências, inventário e estoque mínimo; clientes e fornecedores com CPF/CNPJ e limite de crédito; orçamentos que viram pedido, separação, entrega, devolução; PDV de balcão com leitor de código, pagamento misto com troco e caixa (abertura, sangria, fechamento); compras com recebimento parcial e frete no custo; curva ABC e sugestão de compra; integra com Financeiro, Comercial e CRM. Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir ERP, produtos, estoque, vendas, orçamento, PDV, frente de caixa, compras, ou chamar /rodsaas:erp.
+description: Preset que soma ao projeto rodsaas o app ERP, um ERP simples no estilo Bling/Tiny/Omie para pequenas empresas — produtos simples, com grade de variações (cor × tamanho), kits e serviços, código de barras EAN e código interno, tabelas de preço (varejo/atacado) e faixas por quantidade, margem; estoque por depósito com movimentações, reservado × disponível, custo médio, transferências, inventário e estoque mínimo; clientes e fornecedores com CPF/CNPJ e limite de crédito; orçamentos que viram pedido, separação, entrega, devolução; PDV de balcão com leitor de código, pagamento misto com troco e caixa (abertura, sangria, fechamento); compras com recebimento parcial e frete no custo; curva ABC e sugestão de compra; integra com Financeiro, Comercial e CRM; NF-e e NFC-e pelo motor fiscal, comissão de vendedor, lote e validade, promoções, troca e vale-troca, carnê do fiado e ordem de produção simples; perfis de mercado/padaria (balança), loja de roupa, material de construção (unidade de venda) e distribuidora (múltiplo e pedido mínimo). Use depois do /rodsaas:backend e /rodsaas:frontend quando o usuário pedir ERP, produtos, estoque, vendas, orçamento, PDV, frente de caixa, compras, comissão, validade, promoção, carnê, produção, ou chamar /rodsaas:erp.
 ---
 
 # rodsaas · erp (app ERP)
@@ -42,7 +42,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, acessos da pesso
 Se `rodsaas.json → presets` já tem `erp` (ou existe `api/src/modules/erp`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4, 6 e 7 (é onde mais se simplifica: saldo editável em vez de movimentações, sem reserva, custo médio errado, kit com estoque próprio, faixa de preço que só funciona na tela, PDV sem troco certo e sem fechamento de caixa).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 10 e 11 se o ERP foi instalado antes da versão 0.30 (nota, comissão, lote, promoção, vale-troca, carnê, produção e perfis não existiam) e depois pelas fases 3, 4, 6 e 7 (é onde mais se simplifica: saldo editável em vez de movimentações, sem reserva, custo médio errado, kit com estoque próprio, faixa de preço que só funciona na tela, PDV sem troco certo e sem fechamento de caixa).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas; saldo antigo vira movimentação de "saldo inicial").
 4. Feche com `references/10-checklist.md` e o `/rodsaas:verify` (`-g "ERP"`).
 
@@ -61,8 +61,11 @@ Se `rodsaas.json → presets` já tem `erp` (ou existe `api/src/modules/erp`), r
 | PDV | um caixa aberto por terminal e por pessoa; troco só em dinheiro; fechamento cego (a pessoa conta antes de ver o esperado); comprovante não fiscal de 80 mm |
 | Planos (modelo de planos) | Free: 50 produtos, 1 depósito, sem PDV; Pro: produtos ilimitados, 5 depósitos, PDV (2 caixas), compras, tabelas e faixas de preço, relatórios; Business: depósitos e caixas ilimitados |
 | Workstation | app **por empresa** (R$ 79), acesso pelo papel do app |
+| Nota fiscal | pelo add-on `fiscal` (driver falso até escolher o provedor): pedido → NF-e no botão; PDV → NFC-e só quando `pdvIssueNfce` está ligado |
+| Comissão | regra da Agenda (vendedor + produto > produto > categoria > vendedor > padrão) sobre o líquido; devolução estorna |
+| Perfil | o segmento do onboarding ou a pergunta na primeira abertura; `GENERAL` se pular |
 
-Fora da v1 (registre no README do projeto): **documentos fiscais** (NF-e, NFC-e, NFS-e, SAT — os dados fiscais do produto e do cliente já ficam guardados para isso), PDV offline, balança e etiqueta de peso, TEF/maquininha integrada (o PDV registra a forma; a maquininha é separada), produção/ordem de fabricação, lote e validade, número de série, múltiplas moedas, e-commerce e marketplaces, comissão de vendedor.
+Fora da v1 (registre no README do projeto): NFS-e e SAT (a NF-e e a NFC-e vêm pelo add-on `fiscal`), PDV offline, TEF/maquininha integrada (o PDV registra a forma; a maquininha é separada), número de série, pedido condicional ("mala" de roupa para provar em casa), MRP e roteiro de produção com várias etapas, múltiplas moedas, e-commerce e marketplaces.
 
 ## Fases
 
@@ -84,7 +87,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(erp
    - *Pronto quando*: `validateReceipt`/`purchaseStatus`/`landedUnitCosts`, custo médio depois do recebimento, `abcCurve`, `daysOfStock`, `reorderSuggestion`.
 8. **Telas** — Início, produtos, estoque, clientes, vendas, PDV, compras, relatórios, configurações. → `references/09-telas.md`
    - *Pronto quando*: todas as rotas e testids da seção "Contrato testável", PDV usável só com teclado e leitor, tudo no celular (menos o PDV, que exige tela ≥ 768 px ou mostra o modo compacto).
-9. **Fechamento** — `references/10-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do ERP: `-g "ERP"`; exige os formatos ★ de `03-api.md` e os testids de `09-telas.md`), README do projeto.
+9. **Fechamento do núcleo** — `references/10-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (parte do ERP: `-g "ERP"`; exige os formatos ★ de `03-api.md` e os testids de `09-telas.md`), README do projeto.
+10. **Operação avançada** — NF-e/NFC-e pelo motor fiscal, comissão de vendedor, lote e validade (FEFO), promoções, troca e vale-troca, carnê do fiado, ordem de produção. → `references/11-operacao-avancada.md`
+    - *Pronto quando*: pedido vira NF-e e o PDV emite NFC-e quando ligado; comissão do período por vendedor com estorno; lote obrigatório na entrada e vencido nunca sai; promoção aplicada no servidor; devolução emite vale e o PDV aceita; carnê com multa e juros; produção baixa insumos e entra com custo.
+11. **Perfis de segmento** — mercado/padaria (balança), loja de roupa, material de construção (unidade de venda), distribuidora (múltiplo e pedido mínimo). → `references/12-perfis-de-segmento.md`
+    - *Pronto quando*: escolher o perfil liga o que ele pede; etiqueta de balança vira a quantidade; caixa vira m²; múltiplo e mínimo recusados. Feche com `/rodsaas:verify -g "ERP"` (inclui `30-erp-operacao.spec.ts`).
 
 ## Princípios
 
@@ -115,4 +122,6 @@ O que foi adicionado (app, telas, PDV), papéis, planos ou workstation, como tes
 | `references/08-compras-e-relatorios.md` | Fase 7 |
 | `references/09-telas.md` | Fase 8: rotas do front, telas, estados, contrato de testids |
 | `references/10-checklist.md` | Fase 9 |
+| `references/11-operacao-avancada.md` | Fase 10: nota pelo motor, comissão, lote e validade, promoções, troca e vale-troca, carnê, produção |
+| `references/12-perfis-de-segmento.md` | Fase 11: mercado/padaria, loja de roupa, material de construção, distribuidora |
 | `scripts/erp-lib.mjs` + `erp-lib.test.mjs` | código de barras, produtos e grade, preços (tabela e faixas), margem, saldos, custo médio, kit, inventário, sugestão de compra, totais e rateio, fluxo do pedido, crédito, parcelas, devolução, PDV (leitura, pagamentos, caixa), compras (recebimento, frete no custo), curva ABC: porte para TS com os testes |

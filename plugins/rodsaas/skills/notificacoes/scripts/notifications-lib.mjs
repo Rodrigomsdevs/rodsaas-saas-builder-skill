@@ -204,6 +204,8 @@ export const PRESET_TYPES = [
   { type: "erp.cash.difference", appId: "erp", label: "Diferença no caixa", template: "{actor} fechou o {title} com diferença de {data.diff}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "erp.session.stale", appId: "erp", label: "Caixa esquecido aberto", template: "O {title} está aberto desde {data.since}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   { type: "erp.purchase.received", appId: "erp", label: "Compra recebida", template: "{actor} recebeu a compra {title} de {data.supplier}", group: { by: "none" } },
+  { type: "erp.lots.expiring", appId: "erp", label: "Lote vencendo", template: { one: "O lote {data.code} de {title} vence em {data.daysLeft} dias ({data.onHand} em estoque)", many: "{count} lotes vencem nos próximos dias" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
+  { type: "erp.receivables.overdue", appId: "erp", label: "Fiado em atraso", template: { one: "{title} está com {data.amount} do fiado em atraso", many: "{count} clientes com fiado em atraso" }, group: { by: "key", windowMinutes: 60 }, defaultEmail: "DAILY" },
 ].map(defineType);
 
 /** Catálogo ativo: tipos base + os dos apps instalados (+ add-ons exigidos). */

@@ -163,3 +163,17 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | perfis | funil e mensagens duplicados ao aplicar de novo; padrão trocado com negócios no funil antigo; automação do perfil já ligada ou com a etapa de outro funil; vocabulário fixo |
 | imóveis | código repetido aceito; vendido ou acima do preço nos compatíveis; bairro desejado sem prioridade |
 | telas | meta em reais lida como centavos; "Parar" sem chamar a API; mesclar invertendo destino e origem |
+
+## ERP · operação (`30-erp-operacao.spec.ts`, preset `erp`)
+
+| Teste | Causas comuns |
+|---|---|
+| comissão | regra pela ordem de cadastro em vez da mais específica; base bruta (sem o desconto do pedido); devolução sem estornar; vendedor vendo a de todos; período pelo dia UTC |
+| lote e validade | entrada aceita sem lote ou já vencida; saída pela ordem de entrada (FIFO) em vez da validade (FEFO); vencido contado como disponível; relatório com lote zerado |
+| promoções | promoções somadas na mesma linha; a primeira em vez da maior; período ignorado; "leve 3 pague 2" contando os pagos em vez dos grátis; preço sem a promoção |
+| vale-troca e troca | devolução em vale sem emitir o vale; validade fixa; código não conferido; saldo não baixa; troca com diferença sem cobrar; crédito perdido |
+| carnê | sem multa ou juros cheios do mês; pagamento na mais nova; encargos somados ao saldo em aberto |
+| produção | insumo pela receita inteira em vez de proporcional; custo pelo preço de venda; ordem concluída sem insumo |
+| NFC-e do PDV | flag ignorada; CPF da nota trocado pelo cliente do cadastro; nota sem `ref` |
+| perfis | balança sem conferir o dígito; quantidade da balança por R$ 1,00; unidade de venda sem converter; múltiplo e mínimo só no front; trocar de perfil desliga o anterior |
+| telas | comissão sem o valor; lotes fora da ordem de validade; perfil escolhido sem salvar |

@@ -186,6 +186,8 @@ O ator dos eventos feitos pelo cliente é **nulo** (o cliente não é membro). O
 | `erp.cash.difference` | caixa fechado com diferença ≠ 0 | `ERP_ADMIN` | cash_session | `/erp/relatorios?aba=caixas` |
 | `erp.session.stale` | job: caixa aberto há mais de 18 h | o operador e `ERP_ADMIN` | cash_session | `/erp/pdv` |
 | `erp.purchase.received` | recebimento de compra | quem criou a compra | purchase | `/erp/compras/<id>` |
+| `erp.lots.expiring` | job 7 h: lotes com saldo que vencem nos próximos 30 dias (`expiringLots`; um aviso por lote, agrupados) | `ERP_ADMIN` e `STOCK` | lot · `expiring_lots` (`groupUrl` `/erp/relatorios?aba=vencendo`) | `/erp/produtos/<id>` |
+| `erp.receivables.overdue` | job 9 h: clientes com parcela do carnê vencida (`lateCharges`) | `ERP_ADMIN` | party · `overdue` (`groupUrl` `/erp/clientes?fiado=atraso`) | `/erp/clientes/<id>` |
 
 `canSee`: ter papel no ERP; custo nunca vai no texto do aviso.
 

@@ -208,3 +208,156 @@ test("documentos", () => {
   assert.equal(E.documentType("11.222.333/0001-82"), null);
   assert.equal(E.isDate("2027-02-29"), false);
 });
+
+// ================================================================== operação avançada e perfis
+test("comissão de vendedor: regra mais específica, base líquida, fixo por unidade, devolução estorna", () => {
+  const rules = [
+    { kind: "PRODUCT", pct: 5 },
+    { kind: "SERVICE", pct: 20 },
+    { kind: "PRODUCT", sellerId: "ana", pct: 6 },
+    { kind: "PRODUCT", categoryId: "cal", pct: 8 },
+    { kind: "PRODUCT", productId: "tenis", pct: 10 },
+    { kind: "PRODUCT", productId: "tenis", sellerId: "ana", pct: 12 },
+    { kind: "PRODUCT", productId: "meia", fixedCents: 100 },
+  ];
+  const r = (l) => E.sellerCommissionRule(l, rules);
+  assert.equal(r({ sellerId: "ana", productId: "tenis", categoryId: "cal" }).pct, 12);
+  assert.equal(r({ sellerId: "bia", productId: "tenis", categoryId: "cal" }).pct, 10, "produto > categoria");
+  assert.equal(r({ sellerId: "ana", productId: "bota", categoryId: "cal" }).pct, 8, "categoria > vendedor");
+  assert.equal(r({ sellerId: "ana", productId: "bota" }).pct, 6);
+  assert.equal(r({ sellerId: "bia", productId: "bota" }).pct, 5);
+  assert.equal(r({ sellerId: "bia", kind: "SERVICE" }).pct, 20);
+  assert.equal(E.sellerCommissionRule({ sellerId: "x" }, []), null);
+  assert.equal(E.sellerCommission({ sellerId: "ana", productId: "tenis", netCents: 10005 }, rules), 1201, "12% do líquido, arredondado");
+  assert.equal(E.sellerCommission({ sellerId: "bia", productId: "meia", qty: 3, netCents: 3000 }, rules), 300, "fixo por unidade");
+  assert.equal(E.sellerCommission({ sellerId: "bia", productId: "tenis", qty: -1, netCents: -20000 }, rules), -2000, "devolução estorna");
+  assert.equal(E.sellerCommission({ productId: "x", netCents: 100 }, []), 0);
+  const st = E.commissionStatementErp([{ sellerId: "ana", productId: "tenis", netCents: 20000 }, { sellerId: "ana", productId: "bota", netCents: 10000 }, { sellerId: "bia", productId: "tenis", netCents: 20000 }, { sellerId: "bia", productId: "tenis", qty: -1, netCents: -20000 }, { productId: "tenis", netCents: 99999 }], rules);
+  assert.deepEqual(st, { bySeller: { ana: { salesCents: 30000, commissionCents: 3000, lines: 2 }, bia: { salesCents: 0, commissionCents: 0, lines: 2 } }, totalCommissionCents: 3000 });
+});
+
+test("lote e validade: validação, FEFO e vencendo", () => {
+  assert.deepEqual(E.validateLot({ code: "L1", expiresOn: "2026-12-01" }, "2026-10-14"), []);
+  assert.deepEqual(E.validateLot({ code: " " }).map((x) => x.path), ["lot.code"]);
+  assert.deepEqual(E.validateLot({ code: "L", expiresOn: "2026-13-01" }).map((x) => x.code), ["DATE_INVALID"]);
+  assert.deepEqual(E.validateLot({ code: "L", expiresOn: "2026-10-13" }, "2026-10-14").map((x) => x.code), ["LOT_EXPIRED"]);
+  assert.deepEqual(E.validateLot({ code: "L", expiresOn: "2026-10-14" }, "2026-10-14"), [], "vence hoje ainda entra");
+  const lots = [{ id: "b", expiresOn: "2026-12-01", available: 5 }, { id: "a", expiresOn: "2026-11-01", available: 5 }, { id: "z", expiresOn: null, available: 10 }, { id: "x", expiresOn: "2026-10-10", available: 3 }, { id: "e", expiresOn: "2026-11-01", available: 0 }];
+  assert.deepEqual(E.fefoPick(lots, 7, { today: "2026-10-14" }), { ok: true, picks: [{ lotId: "a", qty: 5 }, { lotId: "b", qty: 2 }], shortQty: 0 });
+  assert.deepEqual(E.fefoPick(lots, 12, { today: "2026-10-14" }).picks.map((p) => p.lotId), ["a", "b", "z"], "sem validade por último");
+  assert.deepEqual(E.fefoPick(lots, 21, { today: "2026-10-14" }), { ok: false, picks: [{ lotId: "a", qty: 5 }, { lotId: "b", qty: 5 }, { lotId: "z", qty: 10 }], shortQty: 1 }, "vencido não sai");
+  assert.deepEqual(E.fefoPick(lots, 2, { today: "2026-10-14", allowExpired: true }).picks, [{ lotId: "x", qty: 2 }]);
+  assert.deepEqual(E.fefoPick([{ id: "a", expiresOn: "2026-10-14", available: 1.5 }], 1.25, { today: "2026-10-14" }).picks, [{ lotId: "a", qty: 1.25 }], "vence hoje ainda sai; fracionado");
+  assert.deepEqual(E.fefoPick([{ id: "b", expiresOn: "2026-11-01", available: 1 }, { id: "a", expiresOn: "2026-11-01", available: 1 }], 1, { today: "2026-10-14" }).picks[0].lotId, "a", "empate pelo id");
+  const ex = E.expiringLots(lots, "2026-10-14", 20);
+  assert.deepEqual(ex.map((l) => [l.id, l.expired, l.daysLeft]), [["x", true, -4], ["a", false, 18]]);
+  assert.deepEqual(E.expiringLots(lots, "2026-10-14", 17).map((l) => l.id), ["x"]);
+  assert.deepEqual(E.expiringLots(lots, "2026-10-14", 18).map((l) => l.id), ["x", "a"], "vence exatamente no limite entra");
+  assert.deepEqual(E.expiringLots([{ id: "t", expiresOn: "2026-10-14", available: 1 }], "2026-10-14", 0).map((l) => [l.expired, l.daysLeft]), [[false, 0]], "vence hoje ainda não venceu");
+});
+
+test("promoções: validação, quando valem, desconto e a melhor por linha", () => {
+  const ok = { name: "Leve 3 pague 2", type: "TAKE_PAY", take: 3, pay: 2, productIds: ["p1"] };
+  assert.deepEqual(E.validatePromotion(ok), []);
+  const codes = (p) => E.validatePromotion(p).map((x) => x.code);
+  assert.deepEqual(codes({ ...ok, name: "", take: 2, pay: 2 }), ["NAME_REQUIRED", "TAKE_PAY_INVALID"]);
+  assert.deepEqual(codes({ ...ok, take: 3, pay: 0 }), ["TAKE_PAY_INVALID"]);
+  assert.deepEqual(codes({ name: "x", type: "PERCENT_OFF", pct: 100, categoryIds: ["c"] }), ["PCT_INVALID"]);
+  assert.deepEqual(codes({ name: "x", type: "PERCENT_OFF", pct: 0, categoryIds: ["c"] }), ["PCT_INVALID"]);
+  assert.deepEqual(codes({ name: "x", type: "FIXED_PRICE", priceCents: 0, productIds: [] }), ["PRICE_INVALID", "TARGET_REQUIRED"]);
+  assert.deepEqual(codes({ name: "x", type: "BOGO", productIds: ["p"] }), ["TYPE_INVALID"]);
+  assert.deepEqual(codes({ ...ok, from: "2026-10-20", to: "2026-10-10" }), ["RANGE_INVALID"]);
+  assert.deepEqual(codes({ ...ok, from: "20/10", weekdays: [7] }), ["DATE_INVALID", "WEEKDAY_INVALID"]);
+  const ctx = { today: "2026-10-13", channel: "PDV" }; // terça
+  const line = { productId: "p1", categoryId: "c1", qty: 7, unitCents: 1000 };
+  const ap = (p, l = line, c = ctx) => E.promoApplies(p, l, c);
+  assert.equal(ap(ok), true);
+  assert.equal(ap({ ...ok, active: false }), false);
+  assert.equal(ap({ ...ok, from: "2026-10-14" }), false); assert.equal(ap({ ...ok, to: "2026-10-12" }), false);
+  assert.equal(ap({ ...ok, from: "2026-10-13", to: "2026-10-13" }), true, "período inclusivo");
+  assert.equal(ap({ ...ok, weekdays: [2] }), true, "terça"); assert.equal(ap({ ...ok, weekdays: [3] }), false);
+  assert.equal(ap({ ...ok, channels: ["ORDER"] }), false); assert.equal(ap({ ...ok, channels: ["PDV"] }), true);
+  assert.equal(ap({ ...ok, productIds: [], categoryIds: ["c1"] }), true); assert.equal(ap({ ...ok, productIds: ["p2"] }), false);
+  assert.equal(ap({ ...ok, minQty: 8 }), false); assert.equal(ap({ ...ok, minQty: 7 }), true);
+  assert.equal(E.promoDiscount(ok, line), 2000, "7 un: 2 grátis");
+  assert.equal(E.promoDiscount(ok, { qty: 2, unitCents: 1000 }), 0);
+  assert.equal(E.promoDiscount({ type: "TAKE_PAY", take: 4, pay: 2 }, { qty: 9, unitCents: 1000 }), 4000, "leve 4 pague 2: 9 un = 2 grupos × 2 grátis");
+  assert.equal(E.promoDiscount({ type: "PERCENT_OFF", pct: 15 }, { qty: 3, unitCents: 999 }), 450);
+  assert.equal(E.promoDiscount({ type: "FIXED_PRICE", priceCents: 800 }, { qty: 2, unitCents: 1000 }), 400);
+  assert.equal(E.promoDiscount({ type: "FIXED_PRICE", priceCents: 1200 }, { qty: 2, unitCents: 1000 }), 0, "preço promocional maior não aumenta");
+  assert.equal(E.promoDiscount({ type: "X" }, line), 0);
+  const promos = [{ id: "a", ...ok }, { id: "b", name: "20%", type: "PERCENT_OFF", pct: 20, categoryIds: ["c1"] }, { id: "c", name: "fora", type: "PERCENT_OFF", pct: 90, productIds: ["p1"], to: "2026-01-01" }];
+  assert.deepEqual(E.applyPromotions([line, { productId: "p1", categoryId: "c9", qty: 3, unitCents: 1000 }, { productId: "p9", qty: 1, unitCents: 100 }], promos, ctx), [{ promoId: "a", discountCents: 2000 }, { promoId: "a", discountCents: 1000 }, null], "a maior ganha; sem promoção = null");
+  assert.deepEqual(E.applyPromotions([{ productId: "p1", categoryId: "c1", qty: 2, unitCents: 1000 }], promos, ctx), [{ promoId: "b", discountCents: 400 }]);
+  assert.deepEqual(E.applyPromotions([line], [promos[1], promos[0]], ctx), [{ promoId: "a", discountCents: 2000 }], "a maior ganha mesmo vindo depois");
+});
+
+test("vale-troca: código com dígito, uso e troca", () => {
+  let i = 0; const seq = [0.01, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99];
+  const code = E.newVoucherCode(() => seq[i++ % seq.length]);
+  assert.match(code, /^[A-HJ-NP-Z2-9]{11}$/);
+  assert.equal(E.isVoucherCode(code), true);
+  assert.equal(E.isVoucherCode(code.toLowerCase().slice(0, 5) + "-" + code.slice(5)), true, "sem caixa e com traço");
+  const wrong = code.slice(0, 10) + (code[10] === "A" ? "B" : "A");
+  assert.equal(E.isVoucherCode(wrong), false, "dígito errado");
+  assert.equal(E.isVoucherCode(code.slice(0, 9) + (code[9] === "A" ? "B" : "A") + code[10]), false, "troca de um caractere");
+  assert.equal(E.isVoucherCode("0000000000A"), false);
+  const sw = code[0] !== code[1] ? code[1] + code[0] + code.slice(2) : code[2] !== code[3] ? code.slice(0, 2) + code[3] + code[2] + code.slice(4) : null;
+  if (sw) assert.equal(E.isVoucherCode(sw), false, "troca de dois vizinhos de lugar");
+  const v = { balanceCents: 5000, expiresOn: "2026-12-31", status: "ACTIVE" };
+  assert.deepEqual(E.voucherUse(v, 3000, "2026-10-14"), { ok: true, balanceAfterCents: 2000 });
+  assert.deepEqual(E.voucherUse(v, 5000, "2026-12-31"), { ok: true, balanceAfterCents: 0 }, "último dia vale");
+  assert.equal(E.voucherUse(v, 5001, "2026-10-14").code, "VOUCHER_INSUFFICIENT");
+  assert.equal(E.voucherUse(v, 0, "2026-10-14").code, "VOUCHER_INSUFFICIENT");
+  assert.equal(E.voucherUse(v, 100, "2027-01-01").code, "VOUCHER_EXPIRED");
+  assert.equal(E.voucherUse({ ...v, status: "CANCELED" }, 100, "2026-10-14").code, "VOUCHER_CANCELED");
+  assert.equal(E.voucherUse(null, 100, "2026-10-14").code, "VOUCHER_INVALID");
+  assert.equal(E.voucherUse({ ...v, expiresOn: null }, 100, "2030-01-01").ok, true, "sem validade");
+  assert.deepEqual(E.exchangeBalance(8000, 10000), { toPayCents: 2000, voucherCents: 0 });
+  assert.deepEqual(E.exchangeBalance(10000, 8000), { toPayCents: 0, voucherCents: 2000 });
+  assert.deepEqual(E.exchangeBalance(5000, 5000), { toPayCents: 0, voucherCents: 0 });
+});
+
+test("carnê do fiado: multa, juros pro rata e pagamento das parcelas mais antigas", () => {
+  assert.deepEqual(E.lateCharges(10000, "2026-10-10", "2026-10-10"), { daysLate: 0, fineCents: 0, interestCents: 0, totalCents: 10000 });
+  assert.deepEqual(E.lateCharges(10000, "2026-10-10", "2026-10-05"), { daysLate: 0, fineCents: 0, interestCents: 0, totalCents: 10000 }, "antes do vencimento");
+  assert.deepEqual(E.lateCharges(10000, "2026-09-10", "2026-10-10"), { daysLate: 30, fineCents: 200, interestCents: 100, totalCents: 10300 });
+  assert.deepEqual(E.lateCharges(10000, "2026-10-01", "2026-10-16", { finePct: 0, monthlyInterestPct: 2 }), { daysLate: 15, fineCents: 0, interestCents: 100, totalCents: 10100 });
+  const open = [{ id: "p2", dueDate: "2026-11-10", openCents: 10000 }, { id: "p1", dueDate: "2026-09-10", openCents: 10000 }, { id: "p3", dueDate: "2026-12-10", openCents: 10000 }];
+  const r = E.allocateCarnePayment(open, 15000, "2026-10-10");
+  assert.deepEqual(r, { applied: [{ id: "p1", paidCents: 10300, chargesCents: 300, settled: true }, { id: "p2", paidCents: 4700, chargesCents: 0, settled: false }], leftoverCents: 0 });
+  assert.deepEqual(E.allocateCarnePayment(open, 40000, "2026-10-10").leftoverCents, 9700, "sobra (troco ou crédito)");
+  assert.deepEqual(E.allocateCarnePayment(open, 0, "2026-10-10").applied, []);
+  assert.deepEqual(E.allocateCarnePayment([{ id: "b", dueDate: "2026-11-10", openCents: 100 }, { id: "a", dueDate: "2026-11-10", openCents: 100 }], 100, "2026-10-10").applied.map((x) => x.id), ["a"], "mesmo vencimento: pelo id");
+});
+
+test("ordem de produção: receita, insumos, custo e fluxo", () => {
+  const recipe = { productId: "pao", yieldQty: 10, components: [{ productId: "farinha", qty: 0.5 }, { productId: "fermento", qty: 0.01 }] };
+  assert.deepEqual(E.validateRecipe(recipe), []);
+  assert.deepEqual(E.validateRecipe({ productId: "pao", yieldQty: 0, components: [] }).map((x) => x.path), ["yieldQty", "components"]);
+  assert.deepEqual(E.validateRecipe({ productId: "pao", yieldQty: 1, components: [{ qty: 0 }, { productId: "pao", qty: 1 }] }).map((x) => x.code), ["PRODUCT_REQUIRED", "QTY_INVALID", "SELF_COMPONENT"]);
+  assert.deepEqual(E.productionNeeds(recipe, 25), [{ productId: "farinha", qty: 1.25 }, { productId: "fermento", qty: 0.025 }]);
+  assert.deepEqual(E.productionNeeds(recipe, 3), [{ productId: "farinha", qty: 0.15 }, { productId: "fermento", qty: 0.003 }]);
+  const cost = { farinha: 500, fermento: 4000 };
+  assert.equal(E.productionUnitCost(E.productionNeeds(recipe, 20), (id) => cost[id], 20), 29, "(1 × 500 + 0,02 × 4000) / 20 = 29");
+  assert.equal(E.canMoveProduction("PLANNED", "DONE"), true); assert.equal(E.canMoveProduction("PLANNED", "IN_PROGRESS"), true);
+  assert.equal(E.canMoveProduction("DONE", "CANCELED"), false); assert.equal(E.canMoveProduction("CANCELED", "DONE"), false);
+  assert.equal(E.canMoveProduction("IN_PROGRESS", "PLANNED"), false);
+});
+
+test("perfis: balança, unidade de venda, múltiplo, pedido mínimo", () => {
+  const body = "200123401250";
+  const code = body + E.gtinCheckDigit(body);
+  assert.deepEqual(E.parseScaleBarcode(code), { productCode: "001234", priceCents: 1250 });
+  assert.deepEqual(E.parseScaleBarcode(code, { mode: "WEIGHT" }), { productCode: "001234", weightKg: 1.25 });
+  assert.equal(E.parseScaleBarcode(body + ((Number(code[12]) + 1) % 10)), null, "dígito errado");
+  const notScale = "789123401250"; assert.equal(E.parseScaleBarcode(notScale + E.gtinCheckDigit(notScale)), null, "não começa com 2");
+  assert.equal(E.parseScaleBarcode("2001234"), null);
+  assert.equal(E.toStockQty(3, 2.5), 7.5); assert.equal(E.toStockQty(2), 2); assert.equal(E.toStockQty(1, 1 / 3), 0.333);
+  assert.equal(E.isMultipleOf(24, 12), true); assert.equal(E.isMultipleOf(0.3, 0.1), true, "sem erro de ponto flutuante"); assert.equal(E.isMultipleOf(10, 12), false); assert.equal(E.isMultipleOf(1.5, 0.5), true); assert.equal(E.isMultipleOf(7, null), true);
+  assert.equal(E.meetsMinimumOrder(49999, 50000), false); assert.equal(E.meetsMinimumOrder(50000, 50000), true); assert.equal(E.meetsMinimumOrder(1, 0), true);
+  assert.equal(E.erpSegment("WHOLESALE").words.sale, "pedido");
+  assert.deepEqual(E.erpSegment("MARKET").on.includes("scale"), true);
+  assert.equal(E.erpSegment("nope").id, "GENERAL");
+  assert.deepEqual(Object.keys(E.ERP_SEGMENTS), ["GENERAL", "MARKET", "APPAREL", "BUILDING", "WHOLESALE"]);
+});

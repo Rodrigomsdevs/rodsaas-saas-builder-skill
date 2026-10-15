@@ -24,7 +24,7 @@ export const SEGMENTS = [
   { id: "pet", label: "Pet shop ou veterinária", icon: "PawPrint", apps: ["agenda", "financeiro", "erp", "crm"], agendaProfile: "PET" },
   { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk", "financeiro", "comercial"], agendaProfile: "CONSULTING", crmProfile: "B2B" },
   { id: "comercio", label: "Loja ou comércio", icon: "Store", apps: ["crm", "helpdesk", "forms", "tarefas", "financeiro", "erp"], crmProfile: "RETAIL" },
-  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas", "financeiro", "comercial", "erp"], crmProfile: "B2B" },
+  { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas", "financeiro", "comercial", "erp"], crmProfile: "B2B", erpProfile: "WHOLESALE" },
   { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro", "comercial"], crmProfile: "B2B" },
   { id: "imobiliaria", label: "Imobiliária ou corretor", icon: "Building", apps: ["crm", "agenda", "comercial", "financeiro", "paginas"], agendaProfile: "CONSULTING", crmProfile: "REAL_ESTATE" },
   { id: "educacao", label: "Escola ou curso", icon: "GraduationCap", apps: ["crm", "agenda", "forms", "financeiro", "comercial", "helpdesk"], crmProfile: "EDUCATION" },
@@ -38,6 +38,8 @@ export const agendaProfileFor = (segment) => SEGMENTS.find((s) => s.id === segme
 export const crmProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.crmProfile ?? "GENERAL";
 /** Perfil do Suporte (`skills/helpdesk/references/10-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
 export const helpdeskProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.helpdeskProfile ?? null;
+/** Perfil do ERP (`skills/erp/references/12-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
+export const erpProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.erpProfile ?? null;
 
 /**
  * Apps sugeridos: os que vieram da landing (?apps=) primeiro, depois os do segmento; só disponíveis.

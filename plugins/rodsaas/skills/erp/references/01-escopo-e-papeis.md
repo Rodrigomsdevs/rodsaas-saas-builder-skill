@@ -69,6 +69,10 @@ Escrita sem papel → 403 `FORBIDDEN`. Pedido de outro vendedor para `SELLER` �
 | feature `erp_purchases` (compras) | — | ✅ | ✅ |
 | feature `erp_pricing` (tabelas extras e faixas por quantidade) | — | ✅ | ✅ |
 | feature `erp_reports` (relatórios além do resumo do Início) | — | ✅ | ✅ |
+| feature `erp_commissions` (comissão de vendedor) | — | ✅ | ✅ |
+| feature `erp_promotions` (promoções) | — | ✅ | ✅ |
+| feature `erp_production` (receita e ordem de produção) | — | ✅ | ✅ |
+| lote e validade, vale-troca, troca, carnê, perfis | ✅ | ✅ | ✅ |
 
 Limite → 403 `PLAN_LIMIT_REACHED`; feature → 403 `FEATURE_NOT_IN_PLAN`. Rebaixar não apaga nada: tabelas extras param de ser aplicadas (vale o Varejo) e o PDV fica só leitura.
 
