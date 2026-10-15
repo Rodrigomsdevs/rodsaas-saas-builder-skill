@@ -22,13 +22,13 @@ export const SEGMENTS = [
   { id: "beleza", label: "Salão, estética ou academia", icon: "Sparkle", apps: ["agenda", "crm", "forms", "tarefas", "financeiro"], agendaProfile: "SALON", formsProfile: "HEALTH" },
   { id: "barbearia", label: "Barbearia", icon: "Scissors", apps: ["agenda", "financeiro", "erp", "crm"], agendaProfile: "BARBERSHOP" },
   { id: "pet", label: "Pet shop ou veterinária", icon: "PawPrint", apps: ["agenda", "financeiro", "erp", "crm"], agendaProfile: "PET", formsProfile: "HEALTH" },
-  { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk", "financeiro", "comercial"], agendaProfile: "CONSULTING", crmProfile: "B2B", finProfile: "SERVICES" },
+  { id: "agencia", label: "Agência ou prestação de serviços", icon: "Megaphone", apps: ["tarefas", "crm", "paginas", "forms", "helpdesk", "financeiro", "comercial"], agendaProfile: "CONSULTING", crmProfile: "B2B", finProfile: "SERVICES", taskProfile: "AGENCY" },
   { id: "comercio", label: "Loja ou comércio", icon: "Store", apps: ["crm", "helpdesk", "forms", "tarefas", "financeiro", "erp"], crmProfile: "RETAIL", finProfile: "RETAIL" },
   { id: "industria", label: "Distribuidora ou indústria", icon: "Factory", apps: ["crm", "helpdesk", "tarefas", "paginas", "pessoas", "financeiro", "comercial", "erp"], crmProfile: "B2B", erpProfile: "WHOLESALE" },
-  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro", "comercial"], crmProfile: "B2B", finProfile: "SERVICES" },
+  { id: "escritorio", label: "Escritório (contábil, advocacia)", icon: "Briefcase", apps: ["tarefas", "crm", "paginas", "agenda", "helpdesk", "pessoas", "financeiro", "comercial"], crmProfile: "B2B", finProfile: "SERVICES", taskProfile: "ACCOUNTING" },
   { id: "imobiliaria", label: "Imobiliária ou corretor", icon: "Building", apps: ["crm", "agenda", "comercial", "financeiro", "paginas"], agendaProfile: "CONSULTING", crmProfile: "REAL_ESTATE" },
   { id: "educacao", label: "Escola ou curso", icon: "GraduationCap", apps: ["crm", "agenda", "forms", "financeiro", "comercial", "helpdesk"], crmProfile: "EDUCATION", comProfile: "SCHOOL", formsProfile: "EVENTS" },
-  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro", "comercial"], crmProfile: "B2B", helpdeskProfile: "SOFTWARE", finProfile: "SERVICES" },
+  { id: "tecnologia", label: "Tecnologia e software", icon: "Code", apps: ["tarefas", "helpdesk", "paginas", "crm", "financeiro", "comercial"], crmProfile: "B2B", helpdeskProfile: "SOFTWARE", finProfile: "SERVICES", taskProfile: "AGENCY" },
   { id: "outro", label: "Outro", icon: "Sparkles", apps: ["tarefas", "crm", "paginas"] },
 ];
 export const TEAM_SIZES = ["1", "2-5", "6-15", "16-50", "51+"];
@@ -46,6 +46,8 @@ export const finProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)
 export const comProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.comProfile ?? null;
 /** Perfil do Forms (`skills/forms/references/10-perfis-de-segmento.md`); null = perguntar na primeira abertura. */
 export const formsProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.formsProfile ?? null;
+/** Perfil do Tarefas (`skills/tarefas/references/08-perfis-de-segmento.md`); null = perguntar na primeira abertura (obras escolhe lá). */
+export const taskProfileFor = (segment) => SEGMENTS.find((s) => s.id === segment)?.taskProfile ?? null;
 
 /**
  * Apps sugeridos: os que vieram da landing (?apps=) primeiro, depois os do segmento; só disponíveis.

@@ -47,6 +47,21 @@ Confira **usando o app** (API e front rodando), com dois usuários de papéis di
 - [ ] burndown e velocidade com dados reais; relatórios do projeto
 - [ ] no Free: tudo isso mostra o selo/upgrade em vez de quebrar
 
+## Operação avançada (`07`)
+- [ ] recorrência: editor com resumo em português, dia útil com feriados, próxima criada ao concluir (uma vez só), checklist desmarcado, fim por data ou contagem, ocorrências futuras esmaecidas no calendário
+- [ ] modelos: criar, salvar tarefa como modelo, aplicar com início e papéis; datas em dias úteis, vínculos, checklist e subtarefas
+- [ ] campos personalizados: 9 tipos, até 50, valores validados, filtro `cf.`, colunas e soma na lista, obrigatório cobrado ao concluir
+- [ ] Gantt: barras, setas, arrastar/esticar com cascata e desfazer, folga, ciclo recusado, caminho crítico, linha de hoje
+- [ ] automações: construtor quando/se/então, liga/desliga, histórico de execuções, erro registrado sem desfazer a ação, profundidade 3
+- [ ] carga: capacidade por pessoa, feriados, semanas estouradas, reatribuir arrastando, carga no seletor de responsável
+- [ ] convidado: convite por e-mail, portal com a marca, só o visível ao cliente, aprovar/pedir ajustes (com comentário), revogar
+
+## Perfis (`08`)
+- [ ] perfil aplicado sem desligar nada, vocabulário trocado, modelos sugeridos
+- [ ] contábil: catálogo (com a regra vigente conferida), carteira, gerar mês idempotente, prazo legal × interno, painel com atrasadas, job do dia 1
+- [ ] agência: conta com cliente, valores por hora, arredondamento, prévia, faturar no Financeiro uma vez só, lançamento faturado travado
+- [ ] obras: item com foto obrigatória (câmera no celular), checklist exigido para concluir, modelos do perfil
+
 ## Estados e acabamento
 - [ ] cada linha das tabelas de estados de `05-interacoes-e-estados.md` conferida
 - [ ] atalhos de teclado e folha de atalhos (`?`)

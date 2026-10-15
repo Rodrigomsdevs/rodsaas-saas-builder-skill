@@ -14,6 +14,8 @@
 | **Produtividade** | adição rápida com atalhos, atalhos de teclado, edição em massa, painel lateral (side peek), copiar link/código, duplicar, mover entre projetos, converter checklist ↔ subtarefa |
 | **Relatórios** | concluídas por semana, carga por pessoa, atrasadas, tempo de ciclo, burndown, velocidade, horas |
 | **Busca** | por código (`MKT-123`), título e descrição, dentro do Ctrl+K global |
+| **Operação avançada** (`07`) | recorrência com dia útil e feriados, modelos de projeto com datas e dependências, campos personalizados, Gantt com dependências e caminho crítico, automações, carga por pessoa com capacidade, cliente convidado que aprova |
+| **Perfis** (`08`) | escritório contábil (obrigações mensais com prazo legal), agência (horas faturadas no Financeiro), obras (checklist com foto obrigatória) |
 
 ## Contrato de preset (como "somar" ao projeto)
 
@@ -83,5 +85,9 @@ Acrescente em **todos** os planos de `config/plans.ts` (preservando o que existe
 | visões salvas **do projeto** (pessoais são livres) | — | ✅ | ✅ |
 | cronômetro, horas na tarefa e folha pessoal | ✅ | ✅ | ✅ |
 | anexos (limites do `uploads`) | ✅ | ✅ | ✅ |
+| recorrência, modelos e feriados (`07`) | ✅ | ✅ | ✅ |
+| feature `task_advanced` (campos personalizados, Gantt, automações, carga por pessoa — `07`) | — | ✅ | ✅ |
+| feature `task_guests` (cliente convidado que aprova — `07`) | — | ✅ | ✅ |
+| perfis de segmento (`08`: obrigações, horas → Financeiro, checklist com foto) | ✅ | ✅ | ✅ |
 
 Rebaixar de plano não apaga nada: sprints e relatórios ficam somente leitura/ocultos com convite para upgrade; projetos privados continuam privados.

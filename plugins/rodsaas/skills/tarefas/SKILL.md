@@ -1,6 +1,6 @@
 ---
 name: tarefas
-description: Preset que soma ao projeto rodsaas um gestor de tarefas completo (estilo Asana/Trello com sprints do Linear) — projetos com código de tarefa (MKT-123), fluxo de status personalizável, quadro kanban, lista, calendário, minhas tarefas, backlog e sprints com burndown, subtarefas, checklists, vínculos, comentários com menções e reações, histórico, seguidores, notificações (sino e e-mail), anexos, apontamento de horas com cronômetro, adição rápida com atalhos ("@ana !alta amanhã"), edição em massa, atalhos de teclado e relatórios. Use depois do /rodsaas:backend e /rodsaas:frontend (com ou sem o preset notion) quando o usuário pedir tarefas, to-do, kanban, gestão de projetos, sprints, clone do Trello/Asana/Linear/Jira, ou chamar /rodsaas:tarefas.
+description: Preset que soma ao projeto rodsaas um gestor de tarefas completo (estilo Asana/Trello com sprints do Linear) — projetos com código de tarefa (MKT-123), fluxo de status personalizável, quadro kanban, lista, calendário, minhas tarefas, backlog e sprints com burndown, subtarefas, checklists, vínculos, comentários com menções e reações, histórico, seguidores, notificações (sino e e-mail), anexos, apontamento de horas com cronômetro, adição rápida com atalhos ("@ana !alta amanhã"), edição em massa, atalhos de teclado e relatórios — e a operação avançada: recorrência com dia útil e feriados, modelos de projeto com datas e dependências, campos personalizados, Gantt com dependências e caminho crítico, automações, carga por pessoa e cliente convidado que aprova, com perfis de escritório contábil (obrigações mensais com prazo legal), agência (horas faturadas no Financeiro) e obras (checklist com foto). Use depois do /rodsaas:backend e /rodsaas:frontend (com ou sem o preset notion) quando o usuário pedir tarefas, to-do, kanban, gestão de projetos, sprints, clone do Trello/Asana/Linear/Jira, ou chamar /rodsaas:tarefas.
 ---
 
 # rodsaas · tarefas
@@ -29,7 +29,7 @@ Tudo da base continua valendo: auth, empresas com RLS, membros, convites, planos
 Se `rodsaas.json → presets` já tem `tarefas` (ou existe `api/src/modules/tasks`), rode em **modo revisão** em vez de instalar de novo:
 
 1. Leia todas as referências inteiras.
-2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 3, 4 e 7 (é onde mais se simplifica: painel da tarefa sem subtarefas/checklist/vínculos/horas/histórico, sem calendário ou backlog, adição rápida sem os atalhos).
+2. Compare item a item com o código (API, telas, testes) e monte a tabela de lacunas: item da referência · ✅/❌ · onde está ou o que falta. Comece pelo "Pronto quando" das fases 10 e 11 se o Tarefas foi instalado antes da versão 0.34 (recorrência, modelos, campos, Gantt, automações, carga, convidado e perfis não existiam) e depois pelas fases 3, 4 e 7 (é onde mais se simplifica: painel da tarefa sem subtarefas/checklist/vínculos/horas/histórico, sem calendário ou backlog, adição rápida sem os atalhos).
 3. Mostre a tabela ao usuário e complete o que falta **fase por fase**, sem reescrever o que já está certo e sem perder dados (migrations só aditivas).
 4. Feche com `references/06-checklist.md` e o `/rodsaas:verify` (`-g "Tarefas"`).
 
@@ -45,8 +45,11 @@ Se `rodsaas.json → presets` já tem `tarefas` (ou existe `api/src/modules/task
 | Notificações | pelo add-on `notificacoes` (sino, e-mail imediato ou resumo diário, preferências por tipo); este preset registra os tipos `task.*`/`sprint.*` e chama `notify()` |
 | Planos | Free: 3 projetos, horas e anexos; Pro: projetos ilimitados, sprints, relatórios, projetos privados; Business: igual ao Pro com mais limites |
 | Projeto inicial | workspaces novos ganham o projeto "Primeiros passos" com tarefas de exemplo |
+| Perfil | `GENERAL`; a workstation escolhe pelo segmento (contabilidade, agência/serviços, obras) — `references/08-perfis-de-segmento.md` |
+| Recorrência | pela agenda, prorroga para dia útil com os feriados da empresa; a próxima nasce ao concluir |
+| Gantt | dependência fim → início com folga; mover a barra empurra as sucessoras (nunca puxa para trás) |
 
-Fora da v1 (registre no README como próximos passos): recorrência, modelos de tarefa, campos personalizados, linha do tempo (Gantt), convidados externos, automações, tempo real (a v1 atualiza ao focar a janela e a cada 30 s nas telas abertas).
+Fora da v1 (registre no README como próximos passos): tempo real (a v1 atualiza ao focar a janela e a cada 30 s nas telas abertas), dependências início → início e fim → fim, nivelamento automático de recursos, convidado que comenta e envia arquivos, transmissão das obrigações ao governo (o Tarefas controla o prazo; quem entrega é o sistema fiscal), diário de obra em PDF.
 
 ## Fases
 
@@ -68,7 +71,11 @@ Cada fase termina com typecheck, lint, build, testes da fase e commit (`feat(tar
    - *Pronto quando*: todas as telas do `04` completas — quadro com arrastar, lista, calendário, backlog, minhas tarefas, horas e o **painel da tarefa** com descrição, subtarefas, checklist, vínculos, anexos, horas, comentários e histórico —, com todos os testids da seção "Contrato testável".
 8. **Interações e estados** — adição rápida com atalhos, atalhos de teclado, arrastar e soltar, edição em massa, otimismo e desfazer, todos os estados de carregamento/vazio/erro. → `references/05-interacoes-e-estados.md`
    - *Pronto quando*: adição rápida com os atalhos (`@pessoa`, `!prioridade`, datas, `#etiqueta`), atalhos de teclado, arrastar, massa, otimismo com desfazer e todos os estados do `05`.
-9. **Fechamento** — `references/06-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Tarefas: `-g "Tarefas"`; ela exige os testids da seção "Contrato testável" de `04-telas.md` e os formatos ★ de `03-api.md`), README do projeto.
+9. **Fechamento do núcleo** — `references/06-checklist.md`, testes ponta a ponta, `/rodsaas:verify` (tem uma parte só do Tarefas: `-g "Tarefas"`; ela exige os testids da seção "Contrato testável" de `04-telas.md` e os formatos ★ de `03-api.md`), README do projeto.
+10. **Operação avançada** — recorrência, modelos, campos personalizados, Gantt com dependências, automações, carga por pessoa, cliente convidado que aprova. → `references/07-operacao-avancada.md`
+   - *Pronto quando*: concluir a recorrente cria a próxima no dia útil certo uma vez só; modelo aplicado com datas, vínculos, checklist e subtarefas; campos validados e obrigatório cobrado ao concluir; Gantt com ciclo recusado, cascata com folga e caminho crítico; automações com histórico e profundidade 3; carga com capacidade e feriados; convidado vê só o que é dele, aprova ou pede ajustes.
+11. **Perfis de segmento** — escritório contábil (obrigações com prazo legal), agência (horas → Financeiro), obras (checklist com foto). → `references/08-perfis-de-segmento.md`
+   - *Pronto quando*: perfil liga o que pede sem desligar nada; obrigações do mês geradas com prazo legal e folga, idempotentes, painel com atrasadas; horas arredondadas faturadas no Financeiro uma vez só; item com foto obrigatória e conclusão que exige o checklist. Feche com `/rodsaas:verify -g "Tarefas"` (inclui `34-tarefas-operacao.spec.ts`).
 
 ## Princípios
 
@@ -93,4 +100,7 @@ O que foi adicionado (menu, telas, rotas), planos e limites novos, como testar e
 | `references/04-telas.md` | Fase 7 — cada tela e o que ela tem |
 | `references/05-interacoes-e-estados.md` | Fase 8 — adição rápida, teclado, arrastar, massa, otimismo, estados |
 | `references/06-checklist.md` | Fase 9 |
+| `references/07-operacao-avancada.md` | Fase 10 — recorrência, modelos, campos, Gantt, automações, carga, convidado |
+| `references/08-perfis-de-segmento.md` | Fase 11 — contábil, agência, obras |
 | `scripts/parsers.mjs` | adição rápida e duração de horas (porte para TS com os testes) |
+| `scripts/tarefas-lib.mjs` + `tarefas-lib.test.mjs` | regras puras (dia útil, recorrência, modelos, campos, ciclo/cascata/caminho crítico, automações, carga, aprovação, obrigações, horas faturáveis, checklist com foto, perfis): porte para TS com os testes |

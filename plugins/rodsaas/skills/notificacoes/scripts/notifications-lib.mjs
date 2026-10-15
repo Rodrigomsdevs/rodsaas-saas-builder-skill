@@ -111,6 +111,8 @@ export const PRESET_TYPES = [
   { type: "task.overdue", appId: "tarefas", label: "Tarefa atrasada", template: { one: "{title} está atrasada", many: "{count} tarefas atrasadas" }, group: { by: "key", windowMinutes: 60 } },
   { type: "sprint.started", appId: "tarefas", label: "Sprint iniciada", template: "{actor} iniciou a {title}", group: { by: "none" } },
   { type: "sprint.completed", appId: "tarefas", label: "Sprint concluída", template: "{actor} concluiu a {title}", group: { by: "none" } },
+  { type: "task.automation", appId: "tarefas", label: "Aviso de automação", template: "Automação {data.automation}: {title}", group: { by: "none" } },
+  { type: "task.approval", appId: "tarefas", label: "Decisão do cliente", template: "Cliente respondeu em {title}: {data.decision}", group: { by: "none" }, defaultEmail: "IMMEDIATE" },
   // crm
   { type: "crm.deal.assigned", appId: "crm", label: "Negócio atribuído a você", template: { one: "{actor} passou o negócio {title} para você", many: "{actors} {passou|passaram} {count} negócios para você" }, group: { by: "key" } },
   { type: "crm.lead.assigned", appId: "crm", label: "Lead atribuído a você", template: { one: "Novo lead para você: {title}", many: "{count} novos leads para você" }, group: { by: "key", windowMinutes: 10 } },

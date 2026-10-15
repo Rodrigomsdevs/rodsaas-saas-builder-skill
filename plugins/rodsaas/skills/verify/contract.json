@@ -1,5 +1,5 @@
 {
-  "version": 26,
+  "version": 27,
   "routes": [
     "/entrar",
     "/cadastro",
@@ -1811,7 +1811,13 @@
         "/tarefas/p/[key]/relatorios",
         "/tarefas/p/[key]/configuracoes",
         "/tarefas/t/[codigo]",
-        "/tarefas/horas"
+        "/tarefas/horas",
+        "/tarefas/configuracoes",
+        "/tarefas/carga",
+        "/tarefas/obrigacoes",
+        "/tarefas/faturamento",
+        "/tarefas/modelos",
+        "/convidado/[token]"
       ],
       "testids": [
         "tasks-project-card",
@@ -1846,7 +1852,24 @@
         "tasks-timeline-item",
         "tasks-timer-toggle",
         "tasks-timer-chip",
-        "tasks-timer-stop"
+        "tasks-timer-stop",
+        "tasks-segment",
+        "tasks-recurrence",
+        "tasks-gantt",
+        "tasks-gantt-bar",
+        "data-critical",
+        "tasks-workload",
+        "tasks-workload-cell",
+        "data-overloaded",
+        "task-guest-row",
+        "data-approval",
+        "task-guest-approve",
+        "task-guest-changes",
+        "task-guest-comment",
+        "tasks-obligation-row",
+        "data-late",
+        "tasks-billing-row",
+        "tasks-billing-invoice"
       ],
       "api": [
         {
@@ -2004,6 +2027,212 @@
           "path": "/v1/sprints/{id}/complete",
           "body": [
             "moveOpenTo"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/settings"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/tasks/settings",
+          "body": [
+            "segment"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/holidays"
+        },
+        {
+          "method": "put",
+          "path": "/v1/tasks/holidays",
+          "body": [
+            "dates"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/tasks/{id}/recurrence",
+          "body": [
+            "rule"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/tasks/{id}/recurrence"
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-templates",
+          "body": [
+            "name",
+            "tasks"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-templates"
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-templates/{id}/apply",
+          "body": [
+            "projectId",
+            "startDate",
+            "assignees"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/task-projects/{id}/fields",
+          "body": [
+            "fields"
+          ]
+        },
+        {
+          "method": "patch",
+          "path": "/v1/task-projects/{id}",
+          "body": [
+            "estimateType",
+            "autoSchedule",
+            "requireChecklist",
+            "client"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-projects/{id}/gantt"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/tasks/{id}/schedule",
+          "body": [
+            "startDate",
+            "dueDate"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-projects/{id}/automations",
+          "body": [
+            "name",
+            "trigger",
+            "conditions",
+            "actions"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-projects/{id}/automations"
+        },
+        {
+          "method": "patch",
+          "path": "/v1/task-automations/{id}",
+          "body": [
+            "active"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/task-automations/{id}/runs"
+        },
+        {
+          "method": "put",
+          "path": "/v1/task-capacity/{userId}",
+          "body": [
+            "hoursPerDay"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/workload"
+        },
+        {
+          "method": "post",
+          "path": "/v1/task-projects/{id}/guests",
+          "body": [
+            "name",
+            "email"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/task-guests/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/approval"
+        },
+        {
+          "method": "get",
+          "path": "/v1/public/task-guest/{token}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/public/task-guest/{token}/tasks/{taskId}/decision",
+          "body": [
+            "decision",
+            "comment"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/tasks/obligation-types",
+          "body": [
+            "types"
+          ]
+        },
+        {
+          "method": "put",
+          "path": "/v1/tasks/obligation-clients",
+          "body": [
+            "clients"
+          ]
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/obligations/generate",
+          "body": [
+            "projectId",
+            "competence"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/obligations"
+        },
+        {
+          "method": "put",
+          "path": "/v1/tasks/rates",
+          "body": [
+            "defaultRateCents",
+            "roundTo",
+            "users"
+          ]
+        },
+        {
+          "method": "get",
+          "path": "/v1/tasks/billing"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/billing/invoice",
+          "body": [
+            "projectId",
+            "from",
+            "to"
+          ]
+        },
+        {
+          "method": "delete",
+          "path": "/v1/time-entries/{id}"
+        },
+        {
+          "method": "post",
+          "path": "/v1/tasks/{id}/checklist/{itemId}/photos",
+          "body": [
+            "fileId"
           ]
         }
       ]

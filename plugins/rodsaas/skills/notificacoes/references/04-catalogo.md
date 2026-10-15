@@ -49,6 +49,8 @@ Ao instalar (ou revisar) um preset com este add-on presente, o preset chama `not
 | `task.due_soon` | job 8 h no fuso da empresa | responsável | task · `due:<data>` (`groupUrl` `/tarefas/minhas`) | idem |
 | `task.overdue` | job 8 h | responsável | task · `overdue:<data>` | idem |
 | `sprint.started` / `sprint.completed` | iniciar/concluir | membros com tarefa na sprint | sprint | `/tarefas/p/<id>/sprints/<id>` |
+| `task.automation` | ação "avisar" de uma automação do projeto | quem a regra manda (responsável, seguidores ou a pessoa escolhida) | task | `/tarefas/t/<código>` |
+| `task.approval` | cliente convidado aprovou ou pediu ajustes (`data.decision`) | seguidores da tarefa | task | `/tarefas/t/<código>` |
 
 `canSee`: projeto público da empresa ou membro do projeto privado. Sair do projeto privado → `retract({ entityType: "task", userIds: [quem saiu] })` das tarefas daquele projeto.
 

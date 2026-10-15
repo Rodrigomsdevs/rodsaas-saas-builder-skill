@@ -221,3 +221,19 @@ Cada teste prova um comportamento que o usuário percebe. Quando falhar, comece 
 | eventos | lote lotado aceito; ingresso para quem está na lista; check-in repetido; código sem conferir o dígito; cancelamento sem promover; lotado sem lista aceito |
 | saúde | sensível aberto para todos os admins; qualquer um dá o acesso; ficha sem alertas |
 | telas | perfil sem salvar; check-in mostrando "liberado" no erro; mês faltando no NPS |
+
+## Tarefas · operação (`34-tarefas-operacao.spec.ts`, preset `tarefas`)
+
+| Teste | Causas comuns |
+|---|---|
+| recorrência | regra sem validar; prorrogação sem os feriados; próxima criada a cada reabrir; checklist copiado marcado; contagem ignorada; ocorrência que não avança |
+| modelo | modelo sem validar; dias úteis contados do sábado; dependências esquecidas; papel sem virar responsável; duração ignorada; subtarefas faltando |
+| campos | definição sem validar; valor sem validar; filtro `cf.` ignorado; obrigatório cobrado na edição em vez de ao concluir (ou nunca); `null` gravado em vez de limpar |
+| Gantt | ciclo aceito; folga ignorada; cascata que puxa para trás ou para no primeiro nível; caminho crítico pela menor soma; início depois do prazo aceito |
+| automações | regra que desfaz o gatilho aceita; pingue-pongue sem limite; prazo em dias corridos; erro da regra que derruba a ação ou some do histórico; regra desligada rodando |
+| carga | concluída pesando; feriado sem tirar capacidade; capacidade sem validar ou sem gravar |
+| convidado | convidado vendo tarefa interna; ajustes sem comentário; decisão repetida; ajustes sem devolver para fazendo; link revogado abrindo; sem a feature liberado |
+| contábil | perfil que desliga o que havia; DAS antecipando; folga em dias corridos; gerar de novo duplica; concluída contada como atrasada; obrigação fora do catálogo aceita |
+| agência | sem arredondar; valor da pessoa ignorado; faturar duas vezes; não faturável cobrado; lançamento faturado editável |
+| obras | marcar sem foto; arquivo que não é imagem aceito; concluir com checklist aberto; projeto sem guardar "exigir checklist" |
+| telas | perfil sem salvar; caminho crítico sem destaque; botão aprovar pedindo ajustes; semana estourada sem marca |
